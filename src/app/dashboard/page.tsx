@@ -2,82 +2,68 @@
 
 import {
     FileText,
-    AlertCircle,
-    Users,
     Clock,
-    MoreHorizontal,
     FolderIcon,
     ArrowRight
 } from 'lucide-react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase-server'
 
 async function getDashboardData() {
     const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Fetch projects count
+    if (!user) {
+        return {
+            activeProjects: 0,
+            pendingContracts: 0,
+            recentProjects: [],
+            user: null
+        }
+    }
+
+    // Fetch active projects count
     const { count: activeProjects } = await supabase
         .from('projects')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'Active')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
 
-    // Fetch contracts count (mock for now as we don't have contracts table populated)
-    const pendingContracts = 0
+    // Fetch pending contracts count (Draft status)
+    const { count: pendingContracts } = await supabase
+        .from('contracts')
+        .select('project_id, projects!inner(user_id)', { count: 'exact', head: true })
+        .eq('status', 'Draft')
+        .eq('projects.user_id', user.id)
+
+    // Fetch recent projects for activity feed
+    const { data: recentProjects } = await supabase
+        .from('projects')
+        .select('id, name, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5)
 
     return {
         activeProjects: activeProjects || 0,
-        pendingContracts,
+        pendingContracts: pendingContracts || 0,
+        recentProjects: recentProjects || [],
         user
     }
 }
 
 
 
-const recentActivity = [
-    {
-        id: 1,
-        user: 'Sarah Jenkins',
-        action: 'uploaded a new contract',
-        target: 'Riverside Complex - Phase 2',
-        time: '2 hours ago',
-        icon: FileText,
-        iconBg: 'bg-blue-100',
-        iconColor: 'text-blue-600',
-    },
-    {
-        id: 2,
-        user: 'Mike Ross',
-        action: 'commented on',
-        target: 'Downtown Office Reno',
-        time: '4 hours ago',
-        icon: Users,
-        iconBg: 'bg-purple-100',
-        iconColor: 'text-purple-600',
-    },
-    {
-        id: 3,
-        user: 'System',
-        action: 'detected a risk in',
-        target: 'Harbor View Apartments',
-        time: '5 hours ago',
-        icon: AlertCircle,
-        iconBg: 'bg-rose-100',
-        iconColor: 'text-rose-600',
-    },
-]
+
 
 export default async function DashboardPage() {
-    const { activeProjects, pendingContracts, user } = await getDashboardData()
+    const { activeProjects, pendingContracts, recentProjects, user } = await getDashboardData()
 
     const stats = [
         {
             name: 'Active Projects',
             value: activeProjects.toString(),
-            change: '+2.5%',
-            trend: 'up',
             icon: FolderIcon,
             color: 'text-blue-600',
             bg: 'bg-blue-50',
@@ -85,29 +71,9 @@ export default async function DashboardPage() {
         {
             name: 'Pending Contracts',
             value: pendingContracts.toString(),
-            change: '-4.1%',
-            trend: 'down',
             icon: FileText,
             color: 'text-amber-600',
             bg: 'bg-amber-50',
-        },
-        {
-            name: 'Team Members',
-            value: '24',
-            change: '+12%',
-            trend: 'up',
-            icon: Users,
-            color: 'text-emerald-600',
-            bg: 'bg-emerald-50',
-        },
-        {
-            name: 'Risks Detected',
-            value: '3',
-            change: '0%',
-            trend: 'neutral',
-            icon: AlertCircle,
-            color: 'text-rose-600',
-            bg: 'bg-rose-50',
         },
     ]
 
@@ -146,16 +112,6 @@ export default async function DashboardPage() {
                             <div className={`p-2 rounded-lg ${stat.bg} ${stat.color}`}>
                                 <stat.icon className="w-6 h-6" />
                             </div>
-                            <span
-                                className={`text-xs font-medium px-2 py-1 rounded-full ${stat.trend === 'up'
-                                    ? 'bg-emerald-50 text-emerald-600'
-                                    : stat.trend === 'down'
-                                        ? 'bg-rose-50 text-rose-600'
-                                        : 'bg-slate-100 text-slate-600'
-                                    }`}
-                            >
-                                {stat.change}
-                            </span>
                         </div>
                         <h3 className="text-slate-500 text-sm font-medium">
                             {stat.name}
@@ -179,29 +135,37 @@ export default async function DashboardPage() {
                         </button>
                     </div>
                     <div className="divide-y divide-slate-100">
-                        {recentActivity.map((activity) => (
-                            <div key={activity.id} className="p-6 flex items-start space-x-4 hover:bg-slate-50 transition-colors">
-                                <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${activity.iconBg} ${activity.iconColor}`}>
-                                    <activity.icon className="w-5 h-5" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm text-slate-900">
-                                        <span className="font-medium">{activity.user}</span>{' '}
-                                        {activity.action}{' '}
-                                        <span className="font-medium text-slate-900">
-                                            {activity.target}
-                                        </span>
-                                    </p>
-                                    <div className="flex items-center mt-1 text-xs text-slate-500">
-                                        <Clock className="w-3 h-3 mr-1" />
-                                        {activity.time}
-                                    </div>
-                                </div>
-                                <button className="text-slate-400 hover:text-slate-600">
-                                    <MoreHorizontal className="w-5 h-5" />
-                                </button>
+                        {recentProjects.length === 0 ? (
+                            <div className="p-12 text-center">
+                                <p className="text-slate-500 text-sm">No recent activity yet. Create your first project to get started!</p>
                             </div>
-                        ))}
+                        ) : (
+                            recentProjects.map((project) => (
+                                <div key={project.id} className="p-6 flex items-start space-x-4 hover:bg-slate-50 transition-colors">
+                                    <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-blue-100 text-blue-600">
+                                        <FolderIcon className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm text-slate-900">
+                                            <span className="font-medium">You</span>{' '}
+                                            created project{' '}
+                                            <span className="font-medium text-slate-900">
+                                                {project.name}
+                                            </span>
+                                        </p>
+                                        <div className="flex items-center mt-1 text-xs text-slate-500">
+                                            <Clock className="w-3 h-3 mr-1" />
+                                            {new Date(project.created_at).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                    <Link href={`/dashboard/projects/${project.id}/contract`}>
+                                        <button className="text-slate-400 hover:text-slate-600">
+                                            <ArrowRight className="w-5 h-5" />
+                                        </button>
+                                    </Link>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 

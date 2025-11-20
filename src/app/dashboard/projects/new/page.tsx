@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase'
+import { createBrowserClient } from '@/lib/supabase'
 import { WizardSteps } from '@/components/contracts/WizardSteps'
 import { ProjectBasicsForm } from '@/components/contracts/forms/ProjectBasicsForm'
 import { JobDetailsForm } from '@/components/contracts/forms/JobDetailsForm'
@@ -54,7 +54,7 @@ export default function NewProjectPage() {
     const handleGenerate = async () => {
         setIsGenerating(true)
 
-        const supabase = createClient()
+        const supabase = createBrowserClient()
         const { data: { user } } = await supabase.auth.getUser()
 
         if (!user) {
@@ -63,7 +63,8 @@ export default function NewProjectPage() {
             return
         }
 
-        const { error } = await supabase.from('projects').insert({
+        // Get the project ID from the response (we need to modify the insert to return data)
+        const { data: newProject, error: insertError } = await supabase.from('projects').insert({
             user_id: user.id,
             name: formData.projectName,
             client_name: formData.clientName,
@@ -74,21 +75,55 @@ export default function NewProjectPage() {
             end_date: formData.endDate || null,
             status: 'Active',
             progress: 0
-        })
+        }).select().single()
 
-        if (error) {
-            console.error('Error saving project:', error)
+        if (insertError) {
+            console.error('Error saving project:', insertError)
             alert('Failed to save project. Please try again.')
             setIsGenerating(false)
             return
         }
 
-        // Simulate AI generation delay
-        await new Promise((resolve) => setTimeout(resolve, 2000))
+        // Call AI to generate contract
+        setIsGenerating(true)
 
-        setIsGenerating(false)
-        router.push('/dashboard/projects')
-        router.refresh()
+        try {
+            const response = await fetch('/api/generate-contract', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    projectName: formData.projectName,
+                    clientName: formData.clientName,
+                    siteAddress: formData.siteAddress,
+                    jobType: formData.jobType,
+                    scopeOfWork: formData.scopeOfWork,
+                    contractValue: formData.contractValue,
+                    startDate: formData.startDate,
+                    endDate: formData.endDate
+                })
+            })
+
+            if (!response.ok) {
+                throw new Error('Failed to generate contract')
+            }
+
+            const { contract } = await response.json()
+
+            // Create contract in database
+            await supabase.from('contracts').insert({
+                project_id: newProject.id,
+                content: { text: contract },
+                status: 'Draft'
+            })
+
+            setIsGenerating(false)
+            router.push(`/dashboard/projects/${newProject.id}/contract`)
+            router.refresh()
+        } catch (error) {
+            console.error('Error generating contract:', error)
+            alert('Failed to generate contract. Please try again.')
+            setIsGenerating(false)
+        }
     }
 
     return (
