@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Save, Send, AlertTriangle, CheckCircle2, Loader2, X, Download } from 'lucide-react'
+import { Save, Send, AlertTriangle, CheckCircle2, Loader2, X, Download, Mail } from 'lucide-react'
 import { createBrowserClient } from '@/lib/supabase'
 import { RiskPanel } from './RiskPanel'
+import EmailModal from './EmailModal'
 import jsPDF from 'jspdf'
 
 interface ContractEditorProps {
@@ -32,6 +33,10 @@ export function ContractEditor({ projectId, initialContent }: ContractEditorProp
     const [showFinalizeModal, setShowFinalizeModal] = useState(false)
     const [isFinalized, setIsFinalized] = useState(false)
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
+    const [isGeneratingVariation, setIsGeneratingVariation] = useState(false)
+    const [variationText, setVariationText] = useState('')
+    const [showVariationModal, setShowVariationModal] = useState(false)
+    const [showEmailModal, setShowEmailModal] = useState(false)
 
     const handleSave = async () => {
         setIsSaving(true)
@@ -380,8 +385,18 @@ export function ContractEditor({ projectId, initialContent }: ContractEditorProp
                             )}
                         </button>
                     )}
+                    {isFinalized && (
+                        <button
+                            onClick={() => setShowEmailModal(true)}
+                            className="flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm transition-colors shadow-sm"
+                        >
+                            <Mail className="w-4 h-4 mr-2" />
+                            Email Contract
+                        </button>
+                    )}
                 </div>
             </div>
+
 
             {/* Editor Area */}
             <div className="flex-1 p-6 overflow-hidden flex flex-col">
@@ -454,6 +469,13 @@ export function ContractEditor({ projectId, initialContent }: ContractEditorProp
                     </div>
                 </div>
             )}
+            {/* Email Modal */}
+            <EmailModal
+                isOpen={showEmailModal}
+                onClose={() => setShowEmailModal(false)}
+                contractId={projectId}
+                contractTitle="Construction Contract"
+            />
         </div>
     )
 }

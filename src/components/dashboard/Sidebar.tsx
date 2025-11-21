@@ -10,6 +10,9 @@ import {
     LogOut,
     PlusCircle
 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { createBrowserClient } from '@/lib/supabase'
 
 const navigation = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
@@ -20,6 +23,24 @@ const navigation = [
 
 export function Sidebar() {
     const pathname = usePathname()
+    const [user, setUser] = useState<{ email?: string, user_metadata?: { full_name?: string } } | null>(null)
+    const router = useRouter()
+
+    useEffect(() => {
+        const getUser = async () => {
+            const supabase = createBrowserClient()
+            const { data: { user } } = await supabase.auth.getUser()
+            setUser(user)
+        }
+        getUser()
+    }, [])
+
+    const handleLogout = async () => {
+        const supabase = createBrowserClient()
+        await supabase.auth.signOut()
+        router.push('/login')
+        router.refresh()
+    }
 
     return (
         <aside className="w-64 bg-slate-900 border-r border-slate-800 flex-col hidden md:flex h-screen fixed left-0 top-0 z-30">
@@ -44,8 +65,8 @@ export function Sidebar() {
                             key={item.name}
                             href={item.href}
                             className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${isActive
-                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-900/20'
-                                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                                ? 'bg-blue-600 text-white shadow-md shadow-blue-900/20'
+                                : 'text-slate-400 hover:text-white hover:bg-slate-800'
                                 }`}
                         >
                             <item.icon
@@ -58,10 +79,10 @@ export function Sidebar() {
                 })}
 
                 <div className="pt-6 mt-6 border-t border-slate-800">
-                    <button className="w-full flex items-center px-3 py-2.5 text-sm font-medium text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded-lg transition-colors group">
+                    <Link href="/dashboard/projects/new" className="w-full flex items-center px-3 py-2.5 text-sm font-medium text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded-lg transition-colors group">
                         <PlusCircle className="mr-3 h-5 w-5" />
                         New Project
-                    </button>
+                    </Link>
                 </div>
             </nav>
 
@@ -69,13 +90,17 @@ export function Sidebar() {
             <div className="p-4 border-t border-slate-800">
                 <div className="flex items-center w-full p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer group">
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg">
-                        JD
+                        {user?.user_metadata?.full_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
                     </div>
                     <div className="ml-3 flex-1 overflow-hidden">
-                        <p className="text-sm font-medium text-white truncate">John Doe</p>
-                        <p className="text-xs text-slate-500 truncate">john@example.com</p>
+                        <p className="text-sm font-medium text-white truncate">
+                            {user?.user_metadata?.full_name || 'User'}
+                        </p>
+                        <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                     </div>
-                    <LogOut className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors" />
+                    <button onClick={handleLogout} className="p-1 hover:bg-slate-700 rounded-full transition-colors">
+                        <LogOut className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors" />
+                    </button>
                 </div>
             </div>
         </aside>

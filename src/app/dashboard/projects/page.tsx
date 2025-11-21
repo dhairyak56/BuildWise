@@ -1,77 +1,122 @@
+'use client'
 
-
+import { useState, useEffect } from 'react'
 import {
     Search,
     Filter,
-    MoreVertical,
     Plus,
     Calendar,
-    Building2
+    Building2,
+    ArrowRight,
+    MoreHorizontal,
+    DollarSign,
+    Clock
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase-server'
-
+import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
 
-async function getProjects() {
-    const supabase = createClient()
-
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-
-    // Middleware will handle redirect if no user
-    if (!user || userError) {
-        return []
-    }
-
-    const { data: projects, error } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-    if (error) {
-        console.error('Error fetching projects:', error)
-        return []
-    }
-
-    return projects || []
+interface Project {
+    id: string
+    name: string
+    client_name: string
+    status: string
+    progress: number
+    end_date: string
+    contract_value: number
+    job_type: string
 }
 
-export default async function ProjectsPage() {
-    const projects = await getProjects()
+export default function ProjectsPage() {
+    const [projects, setProjects] = useState<Project[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [searchQuery, setSearchQuery] = useState('')
+    const [statusFilter, setStatusFilter] = useState('All Statuses')
+
+    const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+
+    useEffect(() => {
+        const fetchProjects = async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) return
+
+                const { data, error } = await supabase
+                    .from('projects')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false })
+
+                if (error) throw error
+                setProjects(data || [])
+            } catch (error) {
+                console.error('Error fetching projects:', error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchProjects()
+    }, [])
+
+    const filteredProjects = projects.filter(project => {
+        const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            project.client_name.toLowerCase().includes(searchQuery.toLowerCase())
+        const matchesStatus = statusFilter === 'All Statuses' || project.status === statusFilter
+        return matchesSearch && matchesStatus
+    })
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'Active': return 'bg-emerald-100 text-emerald-700 border-emerald-200'
+            case 'On Hold': return 'bg-amber-100 text-amber-700 border-amber-200'
+            case 'Completed': return 'bg-blue-100 text-blue-700 border-blue-200'
+            default: return 'bg-slate-100 text-slate-700 border-slate-200'
+        }
+    }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
+            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
                         Projects
                     </h1>
-                    <p className="text-slate-500">
-                        Manage and monitor all your ongoing construction projects
+                    <p className="text-slate-500 mt-1">
+                        Manage your ongoing construction jobs and contracts
                     </p>
                 </div>
-                <button className="inline-flex items-center justify-center px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium text-sm transition-colors shadow-lg shadow-slate-900/20">
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Project
-                </button>
+                <Link href="/dashboard/projects/new">
+                    <button className="inline-flex items-center justify-center px-5 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 font-medium transition-all shadow-lg shadow-slate-900/20 hover:shadow-slate-900/30 transform hover:-translate-y-0.5">
+                        <Plus className="w-5 h-5 mr-2" />
+                        New Project
+                    </button>
+                </Link>
             </div>
 
             {/* Filters & Search */}
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-4">
+            <div className="bg-white p-1 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input
                         type="text"
-                        placeholder="Search projects..."
-                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all bg-slate-50 focus:bg-white"
+                        placeholder="Search by project or client..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 rounded-xl border-none focus:ring-0 bg-transparent text-slate-900 placeholder-slate-400"
                     />
                 </div>
-                <div className="flex gap-3">
-                    <button className="inline-flex items-center px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 font-medium text-sm transition-colors">
-                        <Filter className="w-4 h-4 mr-2 text-slate-500" />
-                        Filter
-                    </button>
-                    <select className="px-4 py-2 border border-slate-200 rounded-lg text-slate-700 bg-white hover:bg-slate-50 font-medium text-sm transition-colors outline-none focus:border-blue-500">
+                <div className="h-px sm:h-auto sm:w-px bg-slate-200 mx-2" />
+                <div className="relative min-w-[200px]">
+                    <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="w-full pl-10 pr-8 py-3 rounded-xl border-none focus:ring-0 bg-transparent text-slate-700 font-medium cursor-pointer hover:bg-slate-50 transition-colors appearance-none"
+                    >
                         <option>All Statuses</option>
                         <option>Active</option>
                         <option>On Hold</option>
@@ -80,141 +125,107 @@ export default async function ProjectsPage() {
                 </div>
             </div>
 
-            {/* Projects Table */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-slate-50 border-b border-slate-200">
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                    Project Name
-                                </th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                    Status
-                                </th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                    Progress
-                                </th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                    Due Date
-                                </th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                    Budget
-                                </th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {projects.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="px-6 py-16 text-center">
-                                        <div className="flex flex-col items-center justify-center">
-                                            <Building2 className="w-12 h-12 text-slate-300 mb-4" />
-                                            <h3 className="text-lg font-semibold text-slate-900 mb-2">No projects yet</h3>
-                                            <p className="text-slate-500 mb-6">Get started by creating your first project</p>
-                                            <Link href="/dashboard/projects/new">
-                                                <button className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium text-sm transition-colors shadow-lg shadow-slate-900/20 flex items-center">
-                                                    <Plus className="w-4 h-4 mr-2" />
-                                                    New Project
-                                                </button>
-                                            </Link>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : (
-                                projects.map((project) => (
-                                    <tr key={project.id} className="hover:bg-slate-50 transition-colors group">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center">
-                                                <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mr-3">
-                                                    <Building2 className="w-5 h-5" />
-                                                </div>
-                                                <div>
-                                                    <Link href={`/dashboard/projects/${project.id}`}>
-                                                        <div className="font-medium text-slate-900 hover:text-blue-600 transition-colors cursor-pointer">
-                                                            {project.name}
-                                                        </div>
-                                                    </Link>
-                                                    <div className="text-xs text-slate-500">
-                                                        {project.client_name}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span
-                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${project.status === 'Active'
-                                                    ? 'bg-emerald-50 text-emerald-700'
-                                                    : project.status === 'On Hold'
-                                                        ? 'bg-amber-50 text-amber-700'
-                                                        : 'bg-slate-100 text-slate-700'
-                                                    }`}
-                                            >
-                                                {project.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="w-full max-w-xs">
-                                                <div className="flex items-center justify-between mb-1">
-                                                    <span className="text-xs font-medium text-slate-700">
-                                                        {project.progress}%
-                                                    </span>
-                                                </div>
-                                                <div className="w-full bg-slate-100 rounded-full h-2">
-                                                    <div
-                                                        className={`h-2 rounded-full ${project.progress === 100
-                                                            ? 'bg-emerald-500'
-                                                            : 'bg-blue-600'
-                                                            }`}
-                                                        style={{ width: `${project.progress}%` }}
-                                                    ></div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center text-sm text-slate-600">
-                                                <Calendar className="w-4 h-4 mr-2 text-slate-400" />
-                                                {project.end_date || '-'}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-sm font-medium text-slate-900">
-                                                ${project.contract_value}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <Link href={`/dashboard/projects/${project.id}/contract`}>
-                                                <button className="px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors">
-                                                    View Contract
-                                                </button>
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+            {/* Projects Grid */}
+            {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm h-64 animate-pulse">
+                            <div className="h-6 bg-slate-100 rounded w-3/4 mb-4"></div>
+                            <div className="h-4 bg-slate-100 rounded w-1/2 mb-8"></div>
+                            <div className="space-y-3">
+                                <div className="h-2 bg-slate-100 rounded w-full"></div>
+                                <div className="h-2 bg-slate-100 rounded w-5/6"></div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
+            ) : filteredProjects.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-slate-200 p-16 text-center">
+                    <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Building2 className="w-10 h-10 text-slate-300" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">No projects found</h3>
+                    <p className="text-slate-500 max-w-md mx-auto mb-8">
+                        {projects.length === 0
+                            ? "Get started by creating your first project to track contracts, risks, and progress."
+                            : "We couldn't find any projects matching your search. Try adjusting your filters."}
+                    </p>
+                    {projects.length === 0 && (
+                        <Link href="/dashboard/projects/new">
+                            <button className="inline-flex items-center px-6 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 font-medium transition-all shadow-lg shadow-slate-900/20">
+                                <Plus className="w-5 h-5 mr-2" />
+                                Create Project
+                            </button>
+                        </Link>
+                    )}
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredProjects.map((project) => (
+                        <div
+                            key={project.id}
+                            className="group bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 flex flex-col"
+                        >
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                                    <Building2 className="w-6 h-6" />
+                                </div>
+                                <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(project.status)}`}>
+                                    {project.status}
+                                </span>
+                            </div>
 
-                {/* Pagination (Simple) */}
-                <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-                    <div className="text-sm text-slate-500">
-                        Showing <span className="font-medium text-slate-900">1</span> to{' '}
-                        <span className="font-medium text-slate-900">5</span> of{' '}
-                        <span className="font-medium text-slate-900">12</span> results
-                    </div>
-                    <div className="flex space-x-2">
-                        <button className="px-3 py-1 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50" disabled>
-                            Previous
-                        </button>
-                        <button className="px-3 py-1 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">
-                            Next
-                        </button>
-                    </div>
+                            <div className="mb-6">
+                                <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">
+                                    {project.name}
+                                </h3>
+                                <p className="text-slate-500 text-sm font-medium">
+                                    {project.client_name}
+                                </p>
+                            </div>
+
+                            <div className="space-y-4 mb-6 flex-1">
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-xs font-medium text-slate-500">
+                                        <span>Progress</span>
+                                        <span>{project.progress}%</span>
+                                    </div>
+                                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                        <div
+                                            className={`h-full rounded-full transition-all duration-500 ${project.progress === 100 ? 'bg-emerald-500' : 'bg-blue-600'
+                                                }`}
+                                            style={{ width: `${project.progress}%` }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 pt-2">
+                                    <div className="flex items-center text-sm text-slate-600">
+                                        <Calendar className="w-4 h-4 mr-2 text-slate-400" />
+                                        <span className="truncate">{project.end_date ? new Date(project.end_date).toLocaleDateString() : 'No date'}</span>
+                                    </div>
+                                    <div className="flex items-center text-sm text-slate-600">
+                                        <DollarSign className="w-4 h-4 mr-2 text-slate-400" />
+                                        <span className="truncate">{project.contract_value ? `$${project.contract_value.toLocaleString()}` : '-'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                                <span className="text-xs text-slate-400 font-medium">
+                                    {project.job_type || 'Construction'}
+                                </span>
+                                <Link href={`/dashboard/projects/${project.id}`}>
+                                    <button className="text-sm font-semibold text-slate-900 hover:text-blue-600 flex items-center transition-colors">
+                                        Manage Project
+                                        <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                                    </button>
+                                </Link>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            </div>
+            )}
         </div>
     )
 }

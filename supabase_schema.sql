@@ -97,3 +97,92 @@ $$;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- Create documents table
+create table public.documents (
+  id uuid default gen_random_uuid() primary key,
+  project_id uuid references public.projects on delete cascade, -- Optional: link to a project
+  user_id uuid references auth.users not null,
+  name text not null,
+  file_path text not null, -- Path in Supabase Storage
+  file_type text,
+  size integer,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.documents enable row level security;
+
+create policy "Users can view their own documents."
+  on documents for select
+  using ( auth.uid() = user_id );
+
+create policy "Users can insert their own documents."
+  on documents for insert
+  with check ( auth.uid() = user_id );
+
+create policy "Users can delete their own documents."
+  on documents for delete
+  using ( auth.uid() = user_id );
+
+-- Create storage bucket for documents
+insert into storage.buckets (id, name, public)
+values ('documents', 'documents', false)
+on conflict (id) do nothing;
+
+-- Storage policies
+create policy "Authenticated users can upload documents"
+  on storage.objects for insert
+  with check ( bucket_id = 'documents' and auth.role() = 'authenticated' );
+
+create policy "Users can view their own documents"
+  on storage.objects for select
+  using ( bucket_id = 'documents' and auth.uid()::text = (storage.foldername(name))[1] );
+
+create policy "Users can delete their own documents"
+  on storage.objects for delete
+  using ( bucket_id = 'documents' and auth.uid()::text = (storage.foldername(name))[1] );
+
+-- Create payments table
+create table public.payments (
+  id uuid default gen_random_uuid() primary key,
+  project_id uuid references public.projects on delete cascade not null,
+  amount numeric not null,
+  payment_date date not null,
+  status text default 'Scheduled', -- Scheduled, Paid, Overdue
+  description text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.payments enable row level security;
+
+create policy "Users can view payments for their projects."
+  on payments for select
+  using ( exists (
+    select 1 from projects
+    where projects.id = payments.project_id
+    and projects.user_id = auth.uid()
+  ));
+
+create policy "Users can insert payments for their projects."
+  on payments for insert
+  with check ( exists (
+    select 1 from projects
+    where projects.id = payments.project_id
+    and projects.user_id = auth.uid()
+  ));
+
+create policy "Users can update payments for their projects."
+  on payments for update
+  using ( exists (
+    select 1 from projects
+    where projects.id = payments.project_id
+    and projects.user_id = auth.uid()
+  ));
+
+create policy "Users can delete payments for their projects."
+  on payments for delete
+  using ( exists (
+    select 1 from projects
+    where projects.id = payments.project_id
+    and projects.user_id = auth.uid()
+  ));

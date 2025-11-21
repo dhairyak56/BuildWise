@@ -25,13 +25,20 @@ export function Header() {
             </div>
 
             <div className="flex items-center space-x-4">
-                <button className="relative p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors">
-                    <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
-                    <Bell className="w-5 h-5" />
-                </button>
+                <div className="relative group">
+                    <button className="relative p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors">
+                        <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+                        <Bell className="w-5 h-5" />
+                    </button>
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-slate-100 py-2 hidden group-hover:block z-50">
+                        <div className="px-4 py-2 text-sm text-slate-500 text-center">
+                            No new notifications
+                        </div>
+                    </div>
+                </div>
                 <div className="h-8 w-px bg-slate-200 mx-2"></div>
                 <span className="text-sm font-medium text-slate-600 hidden sm:block">
-                    Apex Construction
+                    BuildWise
                 </span>
             </div>
         </header>

@@ -68,18 +68,18 @@ export default function Features() {
             <div className="section-container">
                 {/* Section Header */}
                 <div className="text-center mb-20 max-w-3xl mx-auto">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 font-semibold text-xs mb-6 uppercase tracking-wide">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 font-semibold text-xs mb-6 uppercase tracking-wide animate-fade-in-up">
                         <Sparkles size={14} />
                         Powerful Features
                     </div>
-                    <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
+                    <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6 tracking-tight animate-fade-in-up delay-100">
                         Everything You Need to
                         <br />
                         <span className="text-blue-600">
                             Manage Contracts
                         </span>
                     </h2>
-                    <p className="text-xl text-slate-600 leading-relaxed">
+                    <p className="text-xl text-slate-600 leading-relaxed animate-fade-in-up delay-200">
                         Stop wasting time on paperwork. BuildWise handles the documentation so you can focus on what you do best—building.
                     </p>
                 </div>
@@ -91,7 +91,8 @@ export default function Features() {
                         return (
                             <div
                                 key={index}
-                                className="group relative bg-white rounded-2xl p-8 border border-slate-200 hover:border-blue-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                                className="group relative bg-white rounded-2xl p-8 border border-slate-200 hover:border-blue-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 animate-fade-in-up"
+                                style={{ animationDelay: `${300 + (index * 50)}ms` }}
                             >
                                 {/* Icon */}
                                 <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${feature.bg} ${feature.color} mb-6 group-hover:scale-110 transition-transform duration-300`}>

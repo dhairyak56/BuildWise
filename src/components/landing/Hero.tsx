@@ -29,7 +29,7 @@ export default function Hero() {
                     </div>
 
                     {/* Main Heading */}
-                    <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 leading-[1.1] mb-6 tracking-tight animate-slide-up">
+                    <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 leading-[1.1] mb-6 tracking-tight animate-fade-in-up">
                         Generate Legal Contracts in{' '}
                         <span className="relative inline-block text-blue-600">
                             Minutes
@@ -42,12 +42,12 @@ export default function Hero() {
                     </h1>
 
                     {/* Subheading */}
-                    <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                    <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up delay-100">
                         AI-powered contract generation for Australian builders. Create professional construction contracts, variations, and scopes—without lawyers or delays.
                     </p>
 
                     {/* CTA Buttons */}
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-fade-in-up delay-200">
                         <Link href="/signup">
                             <button className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white rounded-xl bg-slate-900 hover:bg-slate-800 shadow-xl shadow-slate-900/20 transition-all duration-300 hover:-translate-y-1">
                                 <span className="relative flex items-center gap-2">
@@ -63,7 +63,7 @@ export default function Hero() {
                     </div>
 
                     {/* Dashboard Mockup */}
-                    <div className="relative max-w-6xl mx-auto animate-slide-up" style={{ animationDelay: '0.3s' }}>
+                    <div className="relative max-w-6xl mx-auto animate-fade-in-up delay-300 animate-float">
                         {/* Glow effect */}
                         <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl blur opacity-20"></div>
 
@@ -112,19 +112,48 @@ export default function Hero() {
                                         <button className="text-sm text-blue-600 font-medium hover:text-blue-700">View All</button>
                                     </div>
                                     <div className="divide-y divide-slate-100">
-                                        {[1, 2, 3].map((i) => (
-                                            <div key={i} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
+                                        {[
+                                            {
+                                                title: 'Residential Build Contract',
+                                                client: 'Smith Residence',
+                                                date: '2 hours ago',
+                                                status: 'Signed',
+                                                statusColor: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+                                                icon: FileText
+                                            },
+                                            {
+                                                title: 'Electrical Subcontract',
+                                                client: 'Apex Towers L3',
+                                                date: '5 hours ago',
+                                                status: 'Pending',
+                                                statusColor: 'bg-amber-50 text-amber-700 border-amber-100',
+                                                icon: Zap
+                                            },
+                                            {
+                                                title: 'Variation Order #04',
+                                                client: 'Miller Renovation',
+                                                date: '1 day ago',
+                                                status: 'Draft',
+                                                statusColor: 'bg-slate-100 text-slate-600 border-slate-200',
+                                                icon: FileText
+                                            }
+                                        ].map((contract, i) => (
+                                            <div key={i} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors group cursor-pointer">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 font-bold">
-                                                        {i}
+                                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${i === 0 ? 'bg-blue-50 text-blue-600' : i === 1 ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-500'}`}>
+                                                        <contract.icon size={20} />
                                                     </div>
                                                     <div>
-                                                        <div className="font-medium text-slate-900">Electrical Installation Contract</div>
-                                                        <div className="text-xs text-slate-500">Generated 2 hours ago</div>
+                                                        <div className="font-medium text-slate-900">{contract.title}</div>
+                                                        <div className="text-xs text-slate-500 flex items-center gap-2">
+                                                            <span>{contract.client}</span>
+                                                            <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                                                            <span>{contract.date}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-100">
-                                                    Completed
+                                                <div className={`px-3 py-1 rounded-full text-xs font-semibold border ${contract.statusColor}`}>
+                                                    {contract.status}
                                                 </div>
                                             </div>
                                         ))}
