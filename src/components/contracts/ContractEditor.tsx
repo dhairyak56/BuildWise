@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
-import { Save, Send, AlertTriangle, CheckCircle2, Loader2, X, Download, Mail } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Save, Send, AlertTriangle, CheckCircle2, Loader2, X, Download, Mail, FileText } from 'lucide-react'
 import { createBrowserClient } from '@/lib/supabase'
 import { RiskPanel } from './RiskPanel'
 import EmailModal from './EmailModal'
+import { TemplateLibraryModal } from './TemplateLibraryModal'
 import jsPDF from 'jspdf'
 
 interface ContractEditorProps {
@@ -37,6 +38,34 @@ export function ContractEditor({ projectId, initialContent }: ContractEditorProp
     const [variationText, setVariationText] = useState('')
     const [showVariationModal, setShowVariationModal] = useState(false)
     const [showEmailModal, setShowEmailModal] = useState(false)
+    const [showTemplateLibrary, setShowTemplateLibrary] = useState(false)
+    const [projectData, setProjectData] = useState<any>(null)
+
+    // Fetch project data for template population
+    useEffect(() => {
+        const fetchProjectData = async () => {
+            const supabase = createBrowserClient()
+            const { data } = await supabase
+                .from('projects')
+                .select('*')
+                .eq('id', projectId)
+                .single()
+
+            if (data) {
+                setProjectData({
+                    project_name: data.name,
+                    client_name: data.client_name,
+                    project_address: data.address,
+                    job_type: data.job_type,
+                    contract_value: data.contract_value?.toLocaleString(),
+                    start_date: data.start_date ? new Date(data.start_date).toLocaleDateString() : '',
+                    end_date: data.end_date ? new Date(data.end_date).toLocaleDateString() : '',
+                    contract_date: new Date().toLocaleDateString(),
+                })
+            }
+        }
+        fetchProjectData()
+    }, [projectId])
 
     const handleSave = async () => {
         setIsSaving(true)
@@ -341,6 +370,15 @@ export function ContractEditor({ projectId, initialContent }: ContractEditorProp
                             </>
                         )}
                     </button>
+                    {!isFinalized && (
+                        <button
+                            onClick={() => setShowTemplateLibrary(true)}
+                            className="flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm transition-colors shadow-sm"
+                        >
+                            <FileText className="w-4 h-4 mr-2" />
+                            Use Template
+                        </button>
+                    )}
                     <button
                         onClick={handleSave}
                         disabled={isSaving || isFinalized}
@@ -475,6 +513,16 @@ export function ContractEditor({ projectId, initialContent }: ContractEditorProp
                 onClose={() => setShowEmailModal(false)}
                 contractId={projectId}
                 contractTitle="Construction Contract"
+            />
+            {/* Template Library Modal */}
+            <TemplateLibraryModal
+                isOpen={showTemplateLibrary}
+                onClose={() => setShowTemplateLibrary(false)}
+                onSelectTemplate={(templateContent) => {
+                    setContent(templateContent)
+                    setShowTemplateLibrary(false)
+                }}
+                projectData={projectData}
             />
         </div>
     )

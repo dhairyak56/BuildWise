@@ -186,3 +186,33 @@ create policy "Users can delete payments for their projects."
     where projects.id = payments.project_id
     and projects.user_id = auth.uid()
   ));
+-- Create contract_templates table
+create table public.contract_templates (
+  id uuid default gen_random_uuid() primary key,
+  name text not null,
+  description text,
+  category text, -- 'Residential', 'Commercial', 'Renovation', 'Subcontractor', etc.
+  template_content text not null,
+  is_default boolean default false,
+  user_id uuid references auth.users, -- NULL for system templates
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.contract_templates enable row level security;
+
+create policy "Users can view all templates (system + their own)."
+  on contract_templates for select
+  using ( is_default = true OR auth.uid() = user_id );
+
+create policy "Users can insert their own templates."
+  on contract_templates for insert
+  with check ( auth.uid() = user_id );
+
+create policy "Users can update their own templates."
+  on contract_templates for update
+  using ( auth.uid() = user_id );
+
+create policy "Users can delete their own templates."
+  on contract_templates for delete
+  using ( auth.uid() = user_id );
