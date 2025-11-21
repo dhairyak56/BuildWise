@@ -139,10 +139,10 @@ export default async function DashboardPage() {
                                 <p className="text-3xl font-semibold text-slate-900 mb-1">
                                     {stat.value}
                                 </p>
-                                <div className="flex items-center space-x-1.5 text-emerald-600">
+                                {/* <div className="flex items-center space-x-1.5 text-emerald-600">
                                     <TrendingUp className="w-3.5 h-3.5" />
                                     <span className="text-xs font-medium">+12% from last month</span>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>
@@ -178,8 +178,8 @@ export default async function DashboardPage() {
                             recentActivity.map((item: any) => (
                                 <div key={item.id} className="p-5 flex items-start space-x-4 hover:bg-slate-50/50 transition-colors group">
                                     <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${item.type === 'project'
-                                            ? 'bg-blue-50'
-                                            : 'bg-purple-50'
+                                        ? 'bg-blue-50'
+                                        : 'bg-purple-50'
                                         }`}>
                                         {item.type === 'project' ? (
                                             <FolderIcon className="w-5 h-5 text-blue-600" />
