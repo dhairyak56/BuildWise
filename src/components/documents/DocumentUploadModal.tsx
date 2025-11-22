@@ -2,7 +2,8 @@
 
 import { useState, useRef } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
-import { X, Upload, File, AlertCircle, Loader2 } from 'lucide-react'
+import { X, Upload, File, CheckCircle2, AlertCircle } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface DocumentUploadModalProps {
     isOpen: boolean
@@ -11,41 +12,65 @@ interface DocumentUploadModalProps {
 }
 
 export default function DocumentUploadModal({ isOpen, onClose, onUploadComplete }: DocumentUploadModalProps) {
-    const [isUploading, setIsUploading] = useState(false)
+    const [isDragging, setIsDragging] = useState(false)
+    const [file, setFile] = useState<File | null>(null)
+    const [uploading, setUploading] = useState(false)
+    const [uploadProgress, setUploadProgress] = useState(0)
     const [error, setError] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
+    if (!isOpen) return null
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault()
+        setIsDragging(true)
+    }
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault()
+        setIsDragging(false)
+    }
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault()
+        setIsDragging(false)
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            setFile(e.dataTransfer.files[0])
+            setError(null)
+        }
+    }
+
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            setSelectedFile(e.target.files[0])
+            setFile(e.target.files[0])
             setError(null)
         }
     }
 
     const handleUpload = async () => {
-        if (!selectedFile) return
+        if (!file) return
 
-        setIsUploading(true)
+        setUploading(true)
+        setUploadProgress(0)
         setError(null)
 
         try {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) throw new Error('User not authenticated')
 
-            const fileExt = selectedFile.name.split('.').pop()
+            // 1. Upload to Storage
+            const fileExt = file.name.split('.').pop()
             const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`
             const filePath = `${user.id}/${fileName}`
 
-            // 1. Upload to Storage
             const { error: uploadError } = await supabase.storage
                 .from('documents')
-                .upload(filePath, selectedFile)
+                .upload(filePath, file)
 
             if (uploadError) throw uploadError
 
@@ -54,111 +79,106 @@ export default function DocumentUploadModal({ isOpen, onClose, onUploadComplete 
                 .from('documents')
                 .insert({
                     user_id: user.id,
-                    name: selectedFile.name,
+                    name: file.name,
                     file_path: filePath,
-                    file_type: selectedFile.type,
-                    size: selectedFile.size
+                    file_type: file.type,
+                    size: file.size
                 })
 
             if (dbError) throw dbError
 
-            onUploadComplete()
-            onClose()
-            setSelectedFile(null)
-        } catch (err: any) {
-            console.error('Upload error:', err)
-            setError(err.message || 'Failed to upload document')
+            setUploadProgress(100)
+            setTimeout(() => {
+                onUploadComplete()
+                onClose()
+                setFile(null)
+                setUploading(false)
+            }, 500)
+
+        } catch (error: unknown) {
+            console.error('Error uploading document:', error)
+            alert('Failed to upload document')
         } finally {
-            setIsUploading(false)
+            setUploading(false)
         }
     }
 
-    if (!isOpen) return null
-
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 m-4 animate-in zoom-in-95 duration-200">
+            <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
                 <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold text-slate-900">Upload Document</h3>
-                    <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
-                        <X size={24} />
+                    <h2 className="text-xl font-bold text-slate-900">Upload Document</h2>
+                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                        <X className="w-5 h-5 text-slate-500" />
                     </button>
                 </div>
 
-                {error && (
-                    <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg flex items-center">
-                        <AlertCircle size={16} className="mr-2 flex-shrink-0" />
-                        {error}
-                    </div>
-                )}
-
-                <div className="space-y-4">
+                {!file ? (
                     <div
-                        className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${selectedFile ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                            }`}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
                         onClick={() => fileInputRef.current?.click()}
+                        className={cn(
+                            "border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200",
+                            isDragging
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-slate-300 hover:border-blue-400 hover:bg-slate-50"
+                        )}
                     >
                         <input
                             type="file"
                             ref={fileInputRef}
-                            className="hidden"
                             onChange={handleFileSelect}
+                            className="hidden"
                         />
-
-                        {selectedFile ? (
-                            <div className="flex flex-col items-center">
-                                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-3">
-                                    <File size={24} />
-                                </div>
-                                <p className="font-medium text-slate-900">{selectedFile.name}</p>
-                                <p className="text-xs text-slate-500 mt-1">
-                                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                                </p>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        setSelectedFile(null)
-                                    }}
-                                    className="mt-3 text-xs text-red-500 hover:text-red-700 font-medium"
-                                >
-                                    Remove
-                                </button>
+                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Upload className="w-8 h-8" />
+                        </div>
+                        <p className="text-slate-900 font-medium mb-1">Click to upload or drag and drop</p>
+                        <p className="text-slate-500 text-sm">PDF, DOCX, Images (max 10MB)</p>
+                    </div>
+                ) : (
+                    <div className="space-y-6">
+                        <div className="flex items-center p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <div className="p-3 bg-white rounded-lg border border-slate-200 mr-4">
+                                <File className="w-6 h-6 text-blue-600" />
                             </div>
-                        ) : (
-                            <div className="flex flex-col items-center cursor-pointer">
-                                <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mb-3">
-                                    <Upload size={24} />
-                                </div>
-                                <p className="font-medium text-slate-900">Click to upload</p>
-                                <p className="text-xs text-slate-500 mt-1">PDF, DOCX, or Images</p>
+                            <div className="flex-1 min-w-0">
+                                <p className="font-medium text-slate-900 truncate">{file.name}</p>
+                                <p className="text-sm text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                            </div>
+                            <button
+                                onClick={() => setFile(null)}
+                                className="p-2 hover:bg-slate-200 rounded-full text-slate-500 transition-colors"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        {error && (
+                            <div className="flex items-center p-4 bg-red-50 text-red-700 rounded-xl text-sm">
+                                <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+                                {error}
                             </div>
                         )}
-                    </div>
 
-                    <div className="flex justify-end space-x-3 pt-2">
-                        <button
-                            onClick={onClose}
-                            className="px-4 py-2 text-slate-600 font-medium hover:bg-slate-50 rounded-lg transition-colors"
-                            disabled={isUploading}
-                        >
-                            Cancel
-                        </button>
                         <button
                             onClick={handleUpload}
-                            disabled={!selectedFile || isUploading}
-                            className="px-4 py-2 bg-slate-900 text-white font-medium rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                            disabled={uploading}
+                            className="w-full py-3 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                         >
-                            {isUploading ? (
+                            {uploading ? (
                                 <>
-                                    <Loader2 size={16} className="mr-2 animate-spin" />
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
                                     Uploading...
                                 </>
                             ) : (
-                                'Upload'
+                                'Upload File'
                             )}
                         </button>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     )

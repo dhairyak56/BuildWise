@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Menu, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
+import { Logo } from '@/components/ui/Logo'
+
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
     const [scrolled, setScrolled] = useState(false)
@@ -25,15 +27,8 @@ export default function Navbar() {
             <div className="section-container">
                 <div className="flex items-center justify-between h-20">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center space-x-3 group">
-                        <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-slate-900 text-white shadow-lg shadow-slate-900/20 group-hover:scale-105 transition-transform duration-300">
-                            <span className="font-bold text-xl">B</span>
-                        </div>
-                        <div>
-                            <span className="text-xl font-bold text-slate-900 tracking-tight">
-                                BuildWise
-                            </span>
-                        </div>
+                    <Link href="/" className="group">
+                        <Logo />
                     </Link>
 
                     {/* Desktop Navigation */}

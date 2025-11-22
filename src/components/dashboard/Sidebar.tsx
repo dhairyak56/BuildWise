@@ -14,6 +14,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase'
 
+import { Logo } from '@/components/ui/Logo'
+
 const navigation = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Projects', href: '/dashboard/projects', icon: FolderKanban },
@@ -46,13 +48,8 @@ export function Sidebar() {
         <aside className="w-64 bg-slate-900 border-r border-slate-800 flex-col hidden md:flex h-screen fixed left-0 top-0 z-30">
             {/* Logo */}
             <div className="h-16 flex items-center px-6 border-b border-slate-800">
-                <Link href="/dashboard" className="flex items-center space-x-2 group">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-600 text-white shadow-lg shadow-blue-900/20 group-hover:bg-blue-500 transition-colors">
-                        <span className="font-bold text-lg">B</span>
-                    </div>
-                    <span className="text-lg font-bold text-white tracking-tight">
-                        BuildWise
-                    </span>
+                <Link href="/dashboard" className="group">
+                    <Logo variant="dark" />
                 </Link>
             </div>
 

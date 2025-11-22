@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase'
 import { CheckCircle2, Rocket, AlertCircle, Loader2 } from 'lucide-react'
 
+import { Logo } from '@/components/ui/Logo'
+
 export default function SignupPage() {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
@@ -53,13 +55,8 @@ export default function SignupPage() {
             <div className="flex-1 flex items-center justify-center p-8 sm:p-12 lg:p-16">
                 <div className="w-full max-w-md space-y-8">
                     <div className="space-y-2">
-                        <Link href="/" className="inline-flex items-center space-x-2 mb-8 group">
-                            <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-slate-900 text-white shadow-md group-hover:scale-105 transition-transform duration-300">
-                                <span className="font-bold text-lg">B</span>
-                            </div>
-                            <span className="text-lg font-bold text-slate-900 tracking-tight">
-                                BuildWise
-                            </span>
+                        <Link href="/" className="mb-8 block">
+                            <Logo />
                         </Link>
                         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
                             Create an account

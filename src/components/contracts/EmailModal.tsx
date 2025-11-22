@@ -50,9 +50,9 @@ export default function EmailModal({ isOpen, onClose, contractId, contractTitle,
                 onClose()
                 setStatus('idle')
             }, 2000)
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error sending email:', error)
-            setErrorMessage(error.message || 'Failed to send email. Please try again.')
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to send email. Please try again.')
             setStatus('error')
         } finally {
             setIsSending(false)

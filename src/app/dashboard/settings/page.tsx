@@ -3,12 +3,19 @@
 import { useState, useEffect } from 'react'
 import { User, Building, Mail, Save, Loader2 } from 'lucide-react'
 import { createBrowserClient } from '@/lib/supabase'
+import { User as SupabaseUser } from '@supabase/supabase-js'
+
+interface FormData {
+    fullName: string;
+    companyName: string;
+    email: string;
+}
 
 export default function SettingsPage() {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
-    const [user, setUser] = useState<any>(null)
-    const [formData, setFormData] = useState({
+    const [user, setUser] = useState<SupabaseUser | null>(null)
+    const [formData, setFormData] = useState<FormData>({
         fullName: '',
         companyName: '',
         email: ''

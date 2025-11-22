@@ -11,7 +11,7 @@ interface TemplateLibraryModalProps {
     projectData?: Record<string, any>
 }
 
-export function TemplateLibraryModal({ isOpen, onClose, onSelectTemplate, projectData }: TemplateLibraryModalProps) {
+export function TemplateLibraryModal({ isOpen, onClose, onSelect, projectData }: { isOpen: boolean; onClose: () => void; onSelect: (template: any) => void; projectData?: any }) {
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedCategory, setSelectedCategory] = useState<string>('All')
     const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null)
@@ -34,7 +34,7 @@ export function TemplateLibraryModal({ isOpen, onClose, onSelectTemplate, projec
             const populatedContent = projectData
                 ? populateTemplate(template.template_content, projectData)
                 : template.template_content
-            onSelectTemplate(populatedContent)
+            onSelect(populatedContent)
             onClose()
         }
     }
@@ -106,8 +106,8 @@ export function TemplateLibraryModal({ isOpen, onClose, onSelectTemplate, projec
                                                 setShowPreview(true)
                                             }}
                                             className={`w-full text-left p-4 rounded-lg border-2 transition-all ${isSelected
-                                                    ? 'border-blue-500 bg-blue-50'
-                                                    : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                                                ? 'border-blue-500 bg-blue-50'
+                                                : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                                                 }`}
                                         >
                                             <div className="flex items-start justify-between">
@@ -120,8 +120,8 @@ export function TemplateLibraryModal({ isOpen, onClose, onSelectTemplate, projec
                                                     </div>
                                                     <p className="text-sm text-slate-600 mb-2">{template.description}</p>
                                                     <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${isSelected
-                                                            ? 'bg-blue-100 text-blue-700'
-                                                            : 'bg-slate-100 text-slate-600'
+                                                        ? 'bg-blue-100 text-blue-700'
+                                                        : 'bg-slate-100 text-slate-600'
                                                         }`}>
                                                         {template.category}
                                                     </span>

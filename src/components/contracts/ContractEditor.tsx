@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, Send, AlertTriangle, CheckCircle2, Loader2, X, Download, Mail, FileText } from 'lucide-react'
+import { Save, AlertTriangle, Loader2, Download, Mail, CheckCircle2, FileText, Send, X } from 'lucide-react'
 import { createBrowserClient } from '@/lib/supabase'
 import { RiskPanel } from './RiskPanel'
 import EmailModal from './EmailModal'
@@ -34,9 +34,6 @@ export function ContractEditor({ projectId, initialContent }: ContractEditorProp
     const [showFinalizeModal, setShowFinalizeModal] = useState(false)
     const [isFinalized, setIsFinalized] = useState(false)
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
-    const [isGeneratingVariation, setIsGeneratingVariation] = useState(false)
-    const [variationText, setVariationText] = useState('')
-    const [showVariationModal, setShowVariationModal] = useState(false)
     const [showEmailModal, setShowEmailModal] = useState(false)
     const [showTemplateLibrary, setShowTemplateLibrary] = useState(false)
     const [projectData, setProjectData] = useState<any>(null)
@@ -518,7 +515,7 @@ export function ContractEditor({ projectId, initialContent }: ContractEditorProp
             <TemplateLibraryModal
                 isOpen={showTemplateLibrary}
                 onClose={() => setShowTemplateLibrary(false)}
-                onSelectTemplate={(templateContent) => {
+                onSelect={(templateContent) => {
                     setContent(templateContent)
                     setShowTemplateLibrary(false)
                 }}

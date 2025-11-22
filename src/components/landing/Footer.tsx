@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Logo } from '@/components/ui/Logo'
 
 export default function Footer() {
     return (
@@ -6,9 +7,8 @@ export default function Footer() {
             <div className="section-container">
                 <div className="grid md:grid-cols-4 gap-8">
                     <div>
-                        <div className="flex items-center space-x-2 mb-4">
-                            <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg" />
-                            <span className="text-xl font-bold text-white">BuildWise</span>
+                        <div className="mb-4">
+                            <Logo variant="dark" />
                         </div>
                         <p className="text-sm">
                             AI-powered contract generation for Australian builders and contractors.

@@ -18,7 +18,7 @@ export function createClient() {
                     try {
                         const store = await cookieStore
                         store.set({ name, value, ...options })
-                    } catch (error) {
+                    } catch {
                         // Handle cookie setting errors in server components
                     }
                 },
@@ -26,7 +26,7 @@ export function createClient() {
                     try {
                         const store = await cookieStore
                         store.set({ name, value: '', ...options })
-                    } catch (error) {
+                    } catch {
                         // Handle cookie removal errors in server components
                     }
                 },
@@ -34,3 +34,4 @@ export function createClient() {
         }
     )
 }
+

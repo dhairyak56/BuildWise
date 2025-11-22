@@ -46,7 +46,7 @@ export default function DocumentsPage() {
 
     useEffect(() => {
         fetchDocuments()
-    }, [])
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleDownload = async (doc: Document) => {
         try {

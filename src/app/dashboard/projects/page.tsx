@@ -8,9 +8,7 @@ import {
     Calendar,
     Building2,
     ArrowRight,
-    MoreHorizontal,
-    DollarSign,
-    Clock
+    DollarSign
 } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
@@ -37,29 +35,29 @@ export default function ProjectsPage() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
-    useEffect(() => {
-        const fetchProjects = async () => {
-            try {
-                const { data: { user } } = await supabase.auth.getUser()
-                if (!user) return
+    const fetchProjects = async () => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
 
-                const { data, error } = await supabase
-                    .from('projects')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .order('created_at', { ascending: false })
+            const { data, error } = await supabase
+                .from('projects')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
 
-                if (error) throw error
-                setProjects(data || [])
-            } catch (error) {
-                console.error('Error fetching projects:', error)
-            } finally {
-                setIsLoading(false)
-            }
+            if (error) throw error
+            setProjects(data || [])
+        } catch (error) {
+            console.error('Error fetching projects:', error)
+        } finally {
+            setIsLoading(false)
         }
+    }
 
+    useEffect(() => {
         fetchProjects()
-    }, [])
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     const filteredProjects = projects.filter(project => {
         const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
