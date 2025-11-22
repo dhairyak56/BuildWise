@@ -1,4 +1,9 @@
-import { TrendingUp, Users, Clock, Award } from 'lucide-react'
+'use client'
+
+import { Users, Clock, TrendingUp, Award } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { useInView } from 'framer-motion'
+import { useRef } from 'react'
 
 const stats = [
     {
@@ -6,42 +11,69 @@ const stats = [
         value: '500+',
         label: 'Active Builders',
         description: 'Trust BuildWise daily',
+        color: 'bg-blue-600',
     },
     {
         icon: Clock,
         value: '15k+',
         label: 'Hours Saved',
         description: 'By our customers',
+        color: 'bg-blue-600',
     },
     {
         icon: TrendingUp,
         value: '40%',
         label: 'Growth Rate',
         description: 'Average capacity increase',
+        color: 'bg-blue-600',
     },
     {
         icon: Award,
         value: '99.8%',
         label: 'Satisfaction',
         description: 'Customer approval rating',
+        color: 'bg-orange-500',
     },
 ]
 
 export default function Stats() {
+    const ref = useRef(null)
+    const isInView = useInView(ref, { once: true })
+
     return (
-        <section className="py-16 bg-slate-900 border-y border-slate-800">
-            <div className="section-container">
+        <section ref={ref} className="py-20 bg-slate-900 relative overflow-hidden">
+            <div className="section-container relative z-10">
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
                     {stats.map((stat, index) => {
                         const Icon = stat.icon
                         return (
-                            <div key={index} className="flex flex-col items-center text-center group">
-                                <div className="mb-4 p-3 rounded-full bg-slate-800/50 text-blue-400 group-hover:bg-blue-500/10 group-hover:text-blue-300 transition-colors duration-300">
-                                    <Icon size={24} strokeWidth={2} />
+                            <motion.div
+                                key={index}
+                                className="flex flex-col items-center text-center"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                                transition={{ duration: 0.5, delay: index * 0.1 }}
+                            >
+                                {/* Icon with rounded square background */}
+                                <div className={`${stat.color} p-4 rounded-2xl mb-4 shadow-lg`}>
+                                    <Icon className="h-7 w-7 text-white" strokeWidth={2} />
                                 </div>
-                                <div className="text-4xl font-bold text-white mb-1 tracking-tight">{stat.value}</div>
-                                <div className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">{stat.label}</div>
-                            </div>
+
+                                {/* Value */}
+                                <div className="text-4xl sm:text-5xl font-bold text-white mb-2">
+                                    {stat.value}
+                                </div>
+
+                                {/* Label */}
+                                <div className="text-sm font-semibold text-emerald-400 uppercase tracking-wide mb-1">
+                                    {stat.label}
+                                </div>
+
+                                {/* Description */}
+                                <div className="text-xs text-slate-400">
+                                    {stat.description}
+                                </div>
+                            </motion.div>
                         )
                     })}
                 </div>

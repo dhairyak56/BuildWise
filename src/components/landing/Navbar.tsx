@@ -49,13 +49,13 @@ export default function Navbar() {
 
                     <div className="hidden lg:flex items-center space-x-3">
                         <Link href="/login">
-                            <Button variant="ghost" size="sm" className="font-semibold text-slate-600 hover:text-slate-900">
-                                Sign In
-                            </Button>
+                            <button className="px-4 py-2 text-slate-700 hover:text-slate-900 font-medium text-sm transition-colors">
+                                Log In
+                            </button>
                         </Link>
                         <Link href="/signup">
-                            <button className="relative inline-flex items-center justify-center px-6 py-2.5 overflow-hidden font-semibold text-white rounded-lg group bg-slate-900 hover:bg-slate-800 shadow-lg shadow-slate-900/20 transition-all duration-300 hover:-translate-y-0.5">
-                                <span className="relative text-sm">Start Free Trial</span>
+                            <button className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm shadow-lg shadow-blue-600/30 transition-all duration-300 hover:-translate-y-0.5">
+                                Start Free Trial
                             </button>
                         </Link>
                     </div>

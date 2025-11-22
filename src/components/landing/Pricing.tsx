@@ -1,32 +1,39 @@
 'use client'
 
-import { Check } from 'lucide-react'
+import Link from 'next/link'
+import { Check, Sparkles } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { useInView } from 'framer-motion'
+import { useRef } from 'react'
 
-const tiers = [
+const plans = [
     {
         name: 'Starter',
-        price: 'Free',
-        description: 'Perfect for small contractors just getting started.',
+        price: '49',
+        description: 'Perfect for small builders and solo contractors',
         features: [
-            'Up to 3 projects',
-            'Basic contract templates',
-            'Standard risk analysis',
-            'PDF export',
+            '10 contracts per month',
+            'AI contract generation',
+            'Basic risk analysis',
+            'Email support',
+            'Australian law compliance',
         ],
-        cta: 'Start for Free',
+        cta: 'Start Free Trial',
         popular: false,
     },
     {
-        name: 'Pro',
-        price: '$49',
-        period: '/month',
-        description: 'For growing construction businesses needing more power.',
+        name: 'Professional',
+        price: '99',
+        description: 'For growing construction businesses',
         features: [
-            'Unlimited projects',
-            'Advanced AI contract generation',
-            'Deep risk analysis & mitigation',
-            'Priority email support',
-            'Custom branding',
+            'Unlimited contracts',
+            'Advanced AI generation',
+            'Smart risk analysis',
+            'E-signature integration',
+            'Document OCR & auto-import',
+            'Priority support',
+            'Custom clause library',
+            'Analytics dashboard',
         ],
         cta: 'Start Free Trial',
         popular: true,
@@ -34,13 +41,15 @@ const tiers = [
     {
         name: 'Enterprise',
         price: 'Custom',
-        description: 'Tailored solutions for large construction firms.',
+        description: 'For large construction firms',
         features: [
+            'Everything in Professional',
             'Unlimited team members',
-            'API access',
+            'Custom integrations',
             'Dedicated account manager',
-            'Custom legal frameworks',
-            'SLA & uptime guarantees',
+            'Advanced analytics',
+            'SLA guarantee',
+            'Custom training',
         ],
         cta: 'Contact Sales',
         popular: false,
@@ -48,66 +57,124 @@ const tiers = [
 ]
 
 export default function Pricing() {
+    const ref = useRef(null)
+    const isInView = useInView(ref, { once: true, margin: "-100px" })
+
     return (
-        <section id="pricing" className="py-24 bg-slate-50 relative overflow-hidden">
-            <div className="absolute inset-0 grid-bg opacity-50 pointer-events-none" />
+        <section id="pricing" className="py-24 bg-white relative overflow-hidden">
+            {/* Subtle background */}
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-50 to-white"></div>
 
             <div className="section-container relative z-10">
-                <div className="text-center max-w-3xl mx-auto mb-16">
-                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                        Simple, Transparent Pricing
+                {/* Section Header */}
+                <motion.div
+                    ref={ref}
+                    className="text-center max-w-3xl mx-auto mb-16"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                    transition={{ duration: 0.6 }}
+                >
+                    <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4">
+                        Simple, Transparent{' '}
+                        <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                            Pricing
+                        </span>
                     </h2>
-                    <p className="text-lg text-slate-600">
-                        Choose the plan that fits your business size and needs. No hidden fees.
+                    <p className="text-xl text-slate-600">
+                        Choose the perfect plan for your business. All plans include a 14-day free trial.
                     </p>
-                </div>
+                </motion.div>
 
-                <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                    {tiers.map((tier) => (
-                        <div
-                            key={tier.name}
-                            className={`relative rounded-2xl p-8 transition-all duration-300 ${tier.popular
-                                    ? 'bg-white shadow-xl border-2 border-blue-600 scale-105 z-10'
+                {/* Pricing Cards */}
+                <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                    {plans.map((plan, index) => (
+                        <motion.div
+                            key={index}
+                            className={`relative rounded-2xl p-8 transition-all duration-300 ${plan.popular
+                                    ? 'bg-white border-2 border-blue-600 shadow-xl shadow-blue-600/10 scale-105'
                                     : 'bg-white border border-slate-200 hover:border-blue-200 hover:shadow-lg'
                                 }`}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                            transition={{ duration: 0.6, delay: index * 0.1 }}
+                            whileHover={{ y: -4 }}
                         >
-                            {tier.popular && (
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">
-                                    Most Popular
+                            {/* Popular Badge */}
+                            {plan.popular && (
+                                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                                    <div className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-blue-600 text-white text-sm font-semibold shadow-lg">
+                                        <Sparkles className="h-4 w-4" />
+                                        Most Popular
+                                    </div>
                                 </div>
                             )}
 
-                            <div className="mb-8">
-                                <h3 className="text-xl font-bold text-slate-900 mb-2">{tier.name}</h3>
-                                <p className="text-slate-500 text-sm mb-6">{tier.description}</p>
-                                <div className="flex items-baseline">
-                                    <span className="text-4xl font-bold text-slate-900">{tier.price}</span>
-                                    {tier.period && (
-                                        <span className="text-slate-500 ml-1">{tier.period}</span>
-                                    )}
-                                </div>
+                            {/* Plan Name */}
+                            <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                                {plan.name}
+                            </h3>
+
+                            {/* Description */}
+                            <p className="text-slate-600 mb-6">
+                                {plan.description}
+                            </p>
+
+                            {/* Price */}
+                            <div className="mb-6">
+                                {plan.price === 'Custom' ? (
+                                    <div className="text-4xl font-bold text-slate-900">
+                                        Custom
+                                    </div>
+                                ) : (
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-5xl font-bold text-slate-900">
+                                            ${plan.price}
+                                        </span>
+                                        <span className="text-lg text-slate-600">
+                                            /month
+                                        </span>
+                                    </div>
+                                )}
                             </div>
 
-                            <ul className="space-y-4 mb-8">
-                                {tier.features.map((feature) => (
-                                    <li key={feature} className="flex items-start text-sm text-slate-600">
-                                        <Check className="w-5 h-5 text-blue-600 mr-3 shrink-0" />
-                                        {feature}
+                            {/* CTA Button */}
+                            <Link href={plan.cta === 'Contact Sales' ? '/contact' : '/signup'}>
+                                <button
+                                    className={`w-full py-3 px-6 rounded-lg font-semibold transition-all duration-200 mb-8 ${plan.popular
+                                            ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/50'
+                                            : 'bg-slate-900 text-white hover:bg-slate-800'
+                                        }`}
+                                >
+                                    {plan.cta}
+                                </button>
+                            </Link>
+
+                            {/* Features */}
+                            <ul className="space-y-4">
+                                {plan.features.map((feature, i) => (
+                                    <li key={i} className="flex items-start gap-3">
+                                        <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                                        <span className="text-slate-600">
+                                            {feature}
+                                        </span>
                                     </li>
                                 ))}
                             </ul>
-
-                            <button
-                                className={`w-full py-3 rounded-lg font-semibold transition-colors ${tier.popular
-                                        ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/20'
-                                        : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
-                                    }`}
-                            >
-                                {tier.cta}
-                            </button>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
+
+                {/* Trust Badge */}
+                <motion.div
+                    className="text-center mt-12"
+                    initial={{ opacity: 0 }}
+                    animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                >
+                    <p className="text-slate-600">
+                        All plans include a 14-day free trial. No credit card required.
+                    </p>
+                </motion.div>
             </div>
         </section>
     )

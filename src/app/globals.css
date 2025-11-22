@@ -113,6 +113,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
+    /* Clean, professional blue theme - matching reference */
     --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
 
@@ -122,8 +123,8 @@
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 221.2 83.2% 53.3%;
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -180,10 +181,14 @@
 /* Custom utility classes */
 @layer utilities {
   .gradient-text {
-    background: linear-gradient(135deg, #0f172a 0%, #2563eb 100%);
+    background: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  .gradient-bg-blue {
+    background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
   }
 
   .section-container {
@@ -195,17 +200,17 @@
   }
 
   .glass-panel {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   }
 
   .glass-effect {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 
   .grid-bg {
@@ -215,7 +220,7 @@
   }
 
   .text-glow {
-    text-shadow: 0 0 20px rgba(37, 99, 235, 0.5);
+    text-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
   }
 }
 
