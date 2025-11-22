@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, AlertTriangle, Loader2, Download, Mail, CheckCircle2, FileText, Send, X } from 'lucide-react'
+import { Save, AlertTriangle, Loader2, Download, Mail, CheckCircle2, FileText, Send, X, Sparkles } from 'lucide-react'
 import { createBrowserClient } from '@/lib/supabase'
 import { RiskPanel } from './RiskPanel'
+import { ContractAssistant } from './ContractAssistant'
 import EmailModal from './EmailModal'
 import { TemplateLibraryModal } from './TemplateLibraryModal'
+import { RichTextEditor } from '@/components/ui/RichTextEditor'
 import jsPDF from 'jspdf'
 
 interface ContractEditorProps {
@@ -37,6 +39,7 @@ export function ContractEditor({ projectId, contractId, initialContent }: Contra
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
     const [showEmailModal, setShowEmailModal] = useState(false)
     const [showTemplateLibrary, setShowTemplateLibrary] = useState(false)
+    const [showAssistant, setShowAssistant] = useState(false)
     const [projectData, setProjectData] = useState<Record<string, unknown> | null>(null)
 
     // Fetch project data for template population
@@ -392,6 +395,16 @@ export function ContractEditor({ projectId, contractId, initialContent }: Contra
                         </button>
                     )}
                     <button
+                        onClick={() => setShowAssistant(!showAssistant)}
+                        className={`flex items-center px-4 py-2 border rounded-lg font-medium text-sm transition-colors shadow-sm ${showAssistant
+                            ? 'bg-purple-50 border-purple-200 text-purple-700'
+                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                            }`}
+                    >
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        AI Assistant
+                    </button>
+                    <button
                         onClick={handleSave}
                         disabled={isSaving || isFinalized}
                         className="flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
@@ -449,25 +462,34 @@ export function ContractEditor({ projectId, contractId, initialContent }: Contra
 
 
             {/* Editor Area */}
-            <div className="flex-1 p-6 overflow-hidden flex flex-col">
-                <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-slate-900">Contract Terms</h2>
-                    {risks.length > 0 && (
-                        <button
-                            onClick={() => setShowRiskPanel(true)}
-                            className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center"
-                        >
-                            <AlertTriangle className="w-4 h-4 mr-1" />
-                            View {risks.length} Risk{risks.length !== 1 ? 's' : ''}
-                        </button>
-                    )}
+            <div className="flex-1 flex overflow-hidden relative">
+                <div className="flex-1 p-6 overflow-hidden flex flex-col">
+                    <div className="mb-4 flex items-center justify-between">
+                        <h2 className="text-lg font-semibold text-slate-900">Contract Terms</h2>
+                        {risks.length > 0 && (
+                            <button
+                                onClick={() => setShowRiskPanel(true)}
+                                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center"
+                            >
+                                <AlertTriangle className="w-4 h-4 mr-1" />
+                                View {risks.length} Risk{risks.length !== 1 ? 's' : ''}
+                            </button>
+                        )}
+                    </div>
+                    <div className="flex-1 h-full">
+                        <RichTextEditor
+                            content={content}
+                            onChange={setContent}
+                            disabled={isFinalized}
+                        />
+                    </div>
                 </div>
-                <textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    disabled={isFinalized}
-                    className="flex-1 w-full p-6 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all resize-none font-mono text-sm leading-relaxed text-slate-700 bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed"
-                    placeholder="Contract content goes here..."
+
+                <ContractAssistant
+                    isOpen={showAssistant}
+                    onClose={() => setShowAssistant(false)}
+                    currentContent={content}
+                    onUpdateContent={setContent}
                 />
             </div>
 

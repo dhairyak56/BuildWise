@@ -13,12 +13,14 @@ import {
     AlertCircle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import RecordPaymentModal from '@/components/payments/RecordPaymentModal'
 
 export default function PaymentsPage() {
     const [payments, setPayments] = useState<Record<string, unknown>[]>([])
     const [loading, setLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
     const [statusFilter, setStatusFilter] = useState('All')
+    const [isRecordModalOpen, setIsRecordModalOpen] = useState(false)
 
     const supabase = createBrowserClient()
 
@@ -72,7 +74,10 @@ export default function PaymentsPage() {
                         Track project finances and payment schedules
                     </p>
                 </div>
-                <button className="inline-flex items-center justify-center px-5 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 font-medium transition-all shadow-lg shadow-slate-900/20 hover:shadow-slate-900/30 transform hover:-translate-y-0.5">
+                <button
+                    onClick={() => setIsRecordModalOpen(true)}
+                    className="inline-flex items-center justify-center px-5 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 font-medium transition-all shadow-lg shadow-slate-900/20 hover:shadow-slate-900/30 transform hover:-translate-y-0.5"
+                >
                     <Plus className="w-5 h-5 mr-2" />
                     Record Payment
                 </button>
@@ -156,7 +161,10 @@ export default function PaymentsPage() {
                     <p className="text-slate-500 max-w-md mx-auto mb-8">
                         Start tracking your project income by recording your first payment.
                     </p>
-                    <button className="inline-flex items-center px-6 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 font-medium transition-all shadow-lg shadow-slate-900/20">
+                    <button
+                        onClick={() => setIsRecordModalOpen(true)}
+                        className="inline-flex items-center px-6 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 font-medium transition-all shadow-lg shadow-slate-900/20"
+                    >
                         <Plus className="w-5 h-5 mr-2" />
                         Record Payment
                     </button>
@@ -211,6 +219,12 @@ export default function PaymentsPage() {
                     </table>
                 </div>
             )}
+
+            <RecordPaymentModal
+                isOpen={isRecordModalOpen}
+                onClose={() => setIsRecordModalOpen(false)}
+                onPaymentRecorded={fetchPayments}
+            />
         </div>
     )
 }
