@@ -1,19 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, AlertTriangle, Loader2, Download, Mail, CheckCircle2, FileText, Send, X, Sparkles } from 'lucide-react'
+import { Save, AlertTriangle, Loader2, Download, Mail, CheckCircle2, FileText, Send, X, Sparkles, BookOpen } from 'lucide-react'
 import { createBrowserClient } from '@/lib/supabase'
 import { RiskPanel } from './RiskPanel'
 import { ContractAssistant } from './ContractAssistant'
 import EmailModal from './EmailModal'
 import { TemplateLibraryModal } from './TemplateLibraryModal'
+import { ClauseLibrary } from '@/components/clauses/ClauseLibrary'
 import { RichTextEditor } from '@/components/ui/RichTextEditor'
+import { SignatureModal } from '@/components/signatures/SignatureModal'
+import { SignaturePad } from '@/components/signatures/SignaturePad'
 import jsPDF from 'jspdf'
+import { PenTool, UserCheck } from 'lucide-react'
 
 interface ContractEditorProps {
     projectId: string
     contractId?: string
     initialContent: string
+    initialStatus?: string
 }
 
 interface Risk {
@@ -26,7 +31,10 @@ interface Risk {
     clauseReference?: string
 }
 
-export function ContractEditor({ projectId, contractId, initialContent }: ContractEditorProps) {
+import { useRouter } from 'next/navigation'
+
+export function ContractEditor({ projectId, contractId, initialContent, initialStatus }: ContractEditorProps) {
+    const router = useRouter()
     const [content, setContent] = useState(initialContent)
     const [isSaving, setIsSaving] = useState(false)
     const [lastSaved, setLastSaved] = useState<Date | null>(null)
@@ -35,38 +43,62 @@ export function ContractEditor({ projectId, contractId, initialContent }: Contra
     const [showRiskPanel, setShowRiskPanel] = useState(false)
     const [isFinalizing, setIsFinalizing] = useState(false)
     const [showFinalizeModal, setShowFinalizeModal] = useState(false)
-    const [isFinalized, setIsFinalized] = useState(false)
+    const [isFinalized, setIsFinalized] = useState(initialStatus === 'Finalized' || initialStatus === 'Signed')
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
     const [showEmailModal, setShowEmailModal] = useState(false)
     const [showTemplateLibrary, setShowTemplateLibrary] = useState(false)
+    const [showClauseLibrary, setShowClauseLibrary] = useState(false)
     const [showAssistant, setShowAssistant] = useState(false)
+    const [showSignatureModal, setShowSignatureModal] = useState(false)
+    const [showSenderSignModal, setShowSenderSignModal] = useState(false)
+    const [senderSignature, setSenderSignature] = useState<string | null>(null)
     const [projectData, setProjectData] = useState<Record<string, unknown> | null>(null)
 
-    // Fetch project data for template population
+    useEffect(() => {
+        if (initialStatus) {
+            setIsFinalized(initialStatus === 'Finalized' || initialStatus === 'Signed')
+        }
+    }, [initialStatus])
+
     useEffect(() => {
         const fetchProjectData = async () => {
             const supabase = createBrowserClient()
-            const { data } = await supabase
+
+            // Fetch project data
+            const { data: project } = await supabase
                 .from('projects')
                 .select('*')
                 .eq('id', projectId)
                 .single()
 
-            if (data) {
+            if (project) {
                 setProjectData({
-                    project_name: data.name,
-                    client_name: data.client_name,
-                    project_address: data.address,
-                    job_type: data.job_type,
-                    contract_value: data.contract_value?.toLocaleString(),
-                    start_date: data.start_date ? new Date(data.start_date).toLocaleDateString() : '',
-                    end_date: data.end_date ? new Date(data.end_date).toLocaleDateString() : '',
+                    project_name: project.name,
+                    client_name: project.client_name,
+                    project_address: project.address,
+                    job_type: project.job_type,
+                    contract_value: project.contract_value?.toLocaleString(),
+                    start_date: project.start_date ? new Date(project.start_date).toLocaleDateString() : '',
+                    end_date: project.end_date ? new Date(project.end_date).toLocaleDateString() : '',
                     contract_date: new Date().toLocaleDateString(),
                 })
             }
+
+            // Fetch contract data (including sender signature)
+            if (contractId) {
+                const { data: contract } = await supabase
+                    .from('contracts')
+                    .select('sender_signature')
+                    .eq('id', contractId)
+                    .single()
+
+                if (contract?.sender_signature) {
+                    setSenderSignature(contract.sender_signature)
+                }
+            }
         }
         fetchProjectData()
-    }, [projectId])
+    }, [projectId, contractId])
 
     const handleSave = async () => {
         setIsSaving(true)
@@ -137,12 +169,16 @@ export function ContractEditor({ projectId, contractId, initialContent }: Contra
         const supabase = createBrowserClient()
 
         // Update contract status to Finalized
-        const { error } = await supabase
+        const query = supabase
             .from('contracts')
             .update({
                 status: 'Finalized'
             })
-            .eq('project_id', projectId)
+
+        // Use contractId if available, otherwise fallback to project_id
+        const { error } = await (contractId
+            ? query.eq('id', contractId)
+            : query.eq('project_id', projectId))
 
         setIsFinalizing(false)
 
@@ -154,6 +190,34 @@ export function ContractEditor({ projectId, contractId, initialContent }: Contra
             setIsFinalized(true)
             setShowFinalizeModal(false)
             alert('Contract finalized successfully!')
+            router.refresh()
+        }
+    }
+
+    const handleSenderSign = async (signatureData: string) => {
+        try {
+            const supabase = createBrowserClient()
+
+            // Update contract with sender signature
+            const query = supabase
+                .from('contracts')
+                .update({
+                    sender_signature: signatureData,
+                    sender_signed_at: new Date().toISOString()
+                })
+
+            const { error } = await (contractId
+                ? query.eq('id', contractId)
+                : query.eq('project_id', projectId))
+
+            if (error) throw error
+
+            setSenderSignature(signatureData)
+            setShowSenderSignModal(false)
+            alert('Signed successfully!')
+        } catch (error: any) {
+            console.error('Error saving signature:', error)
+            alert(`Failed to save signature: ${error.message || 'Unknown error'}`)
         }
     }
 
@@ -334,6 +398,28 @@ export function ContractEditor({ projectId, contractId, initialContent }: Contra
                 )
             }
 
+            // Add Sender Signature if exists
+            if (senderSignature) {
+                if (yPos > pageHeight - 60) {
+                    doc.addPage()
+                    yPos = margin
+                }
+
+                yPos += 10
+                doc.setFont('helvetica', 'bold')
+                doc.setFontSize(10)
+                doc.text('Signed by Contractor:', margin, yPos)
+                yPos += 5
+
+                // Add signature image
+                doc.addImage(senderSignature, 'PNG', margin, yPos, 60, 30)
+                yPos += 35
+
+                doc.setFont('helvetica', 'normal')
+                doc.setFontSize(8)
+                doc.text(`Date: ${new Date().toLocaleDateString()}`, margin, yPos)
+            }
+
             // Download the PDF
             const fileName = `${project?.name || 'Contract'}_${new Date().toISOString().split('T')[0]}.pdf`
             doc.save(fileName)
@@ -394,6 +480,15 @@ export function ContractEditor({ projectId, contractId, initialContent }: Contra
                             Use Template
                         </button>
                     )}
+                    {!isFinalized && (
+                        <button
+                            onClick={() => setShowClauseLibrary(true)}
+                            className="flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm transition-colors shadow-sm"
+                        >
+                            <BookOpen className="w-4 h-4 mr-2" />
+                            Clause Library
+                        </button>
+                    )}
                     <button
                         onClick={() => setShowAssistant(!showAssistant)}
                         className={`flex items-center px-4 py-2 border rounded-lg font-medium text-sm transition-colors shadow-sm ${showAssistant
@@ -430,32 +525,48 @@ export function ContractEditor({ projectId, contractId, initialContent }: Contra
                         )}
                     </button>
                     {isFinalized && (
-                        <button
-                            onClick={handleDownloadPDF}
-                            disabled={isGeneratingPDF}
-                            className="flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isGeneratingPDF ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Generating...
-                                </>
-                            ) : (
-                                <>
-                                    <Download className="w-4 h-4 mr-2" />
-                                    Download PDF
-                                </>
+                        <>
+                            <button
+                                onClick={handleDownloadPDF}
+                                disabled={isGeneratingPDF}
+                                className="flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isGeneratingPDF ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        Generating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Download className="w-4 h-4 mr-2" />
+                                        Download PDF
+                                    </>
+                                )}
+                            </button>
+                            <button
+                                onClick={() => setShowSignatureModal(true)}
+                                className="flex items-center px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium transition-colors shadow-sm"
+                            >
+                                <PenTool className="w-4 h-4 mr-2" />
+                                Send for Signature
+                            </button>
+                            {!senderSignature && (
+                                <button
+                                    onClick={() => setShowSenderSignModal(true)}
+                                    className="flex items-center px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium transition-colors shadow-sm"
+                                >
+                                    <UserCheck className="w-4 h-4 mr-2" />
+                                    Sign Myself
+                                </button>
                             )}
-                        </button>
-                    )}
-                    {isFinalized && (
-                        <button
-                            onClick={() => setShowEmailModal(true)}
-                            className="flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm transition-colors shadow-sm"
-                        >
-                            <Mail className="w-4 h-4 mr-2" />
-                            Email Contract
-                        </button>
+                            <button
+                                onClick={() => setShowEmailModal(true)}
+                                className="flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm transition-colors shadow-sm"
+                            >
+                                <Mail className="w-4 h-4 mr-2" />
+                                Email
+                            </button>
+                        </>
                     )}
                 </div>
             </div>
@@ -483,6 +594,17 @@ export function ContractEditor({ projectId, contractId, initialContent }: Contra
                             disabled={isFinalized}
                         />
                     </div>
+
+                    {/* Sender Signature Display */}
+                    {senderSignature && (
+                        <div className="mt-6 pt-6 border-t border-slate-200">
+                            <p className="text-sm font-medium text-slate-500 mb-2">Signed by Contractor</p>
+                            <img src={senderSignature} alt="Contractor Signature" className="h-16 object-contain" />
+                            <p className="text-xs text-slate-400 mt-1">
+                                {new Date().toLocaleDateString()}
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 <ContractAssistant
@@ -501,46 +623,48 @@ export function ContractEditor({ projectId, contractId, initialContent }: Contra
             />
 
             {/* Finalize Confirmation Modal */}
-            {showFinalizeModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-semibold text-slate-900">Finalize Contract?</h3>
-                            <button
-                                onClick={() => setShowFinalizeModal(false)}
-                                className="p-1 hover:bg-slate-100 rounded transition-colors"
-                            >
-                                <X className="w-5 h-5 text-slate-500" />
-                            </button>
-                        </div>
-                        <p className="text-slate-600 mb-6">
-                            Once finalized, this contract cannot be edited. Are you sure you want to proceed?
-                        </p>
-                        <div className="flex space-x-3">
-                            <button
-                                onClick={() => setShowFinalizeModal(false)}
-                                className="flex-1 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleFinalize}
-                                disabled={isFinalizing}
-                                className="flex-1 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium transition-colors disabled:opacity-50 flex items-center justify-center"
-                            >
-                                {isFinalizing ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Finalizing...
-                                    </>
-                                ) : (
-                                    'Finalize'
-                                )}
-                            </button>
+            {
+                showFinalizeModal && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-slate-900">Finalize Contract?</h3>
+                                <button
+                                    onClick={() => setShowFinalizeModal(false)}
+                                    className="p-1 hover:bg-slate-100 rounded transition-colors"
+                                >
+                                    <X className="w-5 h-5 text-slate-500" />
+                                </button>
+                            </div>
+                            <p className="text-slate-600 mb-6">
+                                Once finalized, this contract cannot be edited. Are you sure you want to proceed?
+                            </p>
+                            <div className="flex space-x-3">
+                                <button
+                                    onClick={() => setShowFinalizeModal(false)}
+                                    className="flex-1 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleFinalize}
+                                    disabled={isFinalizing}
+                                    className="flex-1 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium transition-colors disabled:opacity-50 flex items-center justify-center"
+                                >
+                                    {isFinalizing ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Finalizing...
+                                        </>
+                                    ) : (
+                                        'Finalize'
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
             {/* Email Modal */}
             <EmailModal
                 isOpen={showEmailModal}
@@ -558,6 +682,84 @@ export function ContractEditor({ projectId, contractId, initialContent }: Contra
                 }}
                 projectData={projectData || undefined}
             />
-        </div>
+
+            {/* Signature Modal */}
+            <SignatureModal
+                isOpen={showSignatureModal}
+                onClose={() => setShowSignatureModal(false)}
+                contractId={contractId || ''}
+                contractTitle={projectData?.project_name ? `${projectData.project_name} Contract` : 'Contract'}
+            />
+
+            {/* Sender Signature Modal */}
+            {
+                showSenderSignModal && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-slate-900">Sign as Contractor</h3>
+                                <button
+                                    onClick={() => setShowSenderSignModal(false)}
+                                    className="p-1 hover:bg-slate-100 rounded transition-colors"
+                                >
+                                    <X className="w-5 h-5 text-slate-500" />
+                                </button>
+                            </div>
+                            <p className="text-slate-600 mb-6 text-sm">
+                                Draw your signature below to sign this contract. This will be visible to the client.
+                            </p>
+
+                            <SignaturePad onSave={handleSenderSign} />
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Clause Library */}
+            <ClauseLibrary
+                isOpen={showClauseLibrary}
+                onClose={() => setShowClauseLibrary(false)}
+                onInsertClause={async (clauseContent, clauseTitle, useSmartInsert) => {
+                    if (useSmartInsert) {
+                        // Smart Insert: Use AI to find the best location
+                        setIsSaving(true)
+                        try {
+                            const response = await fetch('/api/insert-clause', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    currentContent: content,
+                                    clauseContent,
+                                    clauseTitle
+                                })
+                            })
+
+                            if (!response.ok) {
+                                throw new Error('AI insertion failed')
+                            }
+
+                            const { updatedContent } = await response.json()
+                            setContent(updatedContent)
+                        } catch (error) {
+                            console.error('Error with smart insert:', error)
+                            // Fallback to quick insert
+                            const separator = '\n\n---\n\n'
+                            const header = `## ${clauseTitle}\n\n`
+                            const newContent = content + separator + header + clauseContent
+                            setContent(newContent)
+                        } finally {
+                            setIsSaving(false)
+                        }
+                    } else {
+                        // Quick Insert: Append at the end with formatting
+                        const separator = '\n\n---\n\n'
+                        const header = `## ${clauseTitle}\n\n`
+                        const newContent = content + separator + header + clauseContent
+                        setContent(newContent)
+                    }
+                    setShowClauseLibrary(false)
+                }}
+            />
+        </div >
     )
 }

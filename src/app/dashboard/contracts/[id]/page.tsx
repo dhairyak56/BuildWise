@@ -86,6 +86,7 @@ export default async function ContractDetailsPage({ params }: PageProps) {
                 projectId={contract.project_id}
                 contractId={contract.id}
                 initialContent={initialContent}
+                initialStatus={contract.status}
             />
         </div>
     )

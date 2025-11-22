@@ -15,6 +15,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { DocumentUpload } from '@/components/documents/DocumentUpload'
+import { DocumentReviewModal } from '@/components/documents/DocumentReviewModal'
 
 interface Project {
     id: string
@@ -39,6 +41,9 @@ export default function ProjectDetailsPage() {
     const [activeTab, setActiveTab] = useState('overview')
     const [project, setProject] = useState<Project | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [reviewModalOpen, setReviewModalOpen] = useState(false)
+    const [selectedFile, setSelectedFile] = useState<File | null>(null)
+    const [extractedData, setExtractedData] = useState<any>(null)
 
     const supabase = createBrowserClient()
 
@@ -62,6 +67,16 @@ export default function ProjectDetailsPage() {
         } finally {
             setIsLoading(false)
         }
+    }
+
+    const handleAnalysisComplete = (data: any, file: File) => {
+        setExtractedData(data)
+        setSelectedFile(file)
+        setReviewModalOpen(true)
+    }
+
+    const handleDocumentSuccess = () => {
+        fetchProject() // Refresh project data to show new document and payment
     }
 
     useEffect(() => {
@@ -149,16 +164,46 @@ export default function ProjectDetailsPage() {
                         <div className="md:col-span-2 space-y-6">
                             <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
                                 <h3 className="text-lg font-semibold text-slate-900 mb-4">Project Progress</h3>
-                                <div className="space-y-4">
-                                    <div className="flex justify-between text-sm font-medium text-slate-600">
-                                        <span>Completion</span>
-                                        <span>{project.progress}%</span>
+                                <div className="space-y-6">
+                                    {/* Completion Progress */}
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between text-sm font-medium text-slate-600">
+                                            <span>Completion</span>
+                                            <span>{project.progress}%</span>
+                                        </div>
+                                        <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                                            <div
+                                                className="h-full bg-blue-600 rounded-full transition-all duration-1000"
+                                                style={{ width: `${project.progress}%` }}
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                                        <div
-                                            className="h-full bg-blue-600 rounded-full transition-all duration-1000"
-                                            style={{ width: `${project.progress}%` }}
-                                        />
+
+                                    {/* Financial Progress */}
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between text-sm font-medium text-slate-600">
+                                            <span>Budget Used</span>
+                                            <span>
+                                                {Math.round((project.payments?.reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0) / (project.contract_value || 1) * 100)}%
+                                            </span>
+                                        </div>
+                                        <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                                            <div
+                                                className={cn(
+                                                    "h-full rounded-full transition-all duration-1000",
+                                                    (project.payments?.reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0) > (project.contract_value || 0)
+                                                        ? "bg-red-500"
+                                                        : "bg-emerald-500"
+                                                )}
+                                                style={{
+                                                    width: `${Math.min(100, ((project.payments?.reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0) / (project.contract_value || 1) * 100))}%`
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="flex justify-between text-xs text-slate-500 mt-1">
+                                            <span>Paid: ${project.payments?.reduce((sum, p) => sum + Number(p.amount || 0), 0).toLocaleString()}</span>
+                                            <span>Total: ${project.contract_value?.toLocaleString()}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -274,40 +319,56 @@ export default function ProjectDetailsPage() {
                 )}
 
                 {activeTab === 'documents' && (
-                    <div className="space-y-4">
-                        {project.documents && project.documents.length > 0 ? (
-                            <div className="grid gap-4">
-                                {project.documents.map((doc) => (
-                                    <div key={String(doc.id)} className="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between hover:shadow-sm transition-all">
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
-                                                <Upload className="w-5 h-5" />
+                    <div className="space-y-6">
+                        {/* Upload Section */}
+                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                            <h3 className="text-lg font-semibold text-slate-900 mb-4">Upload New Document</h3>
+                            <DocumentUpload
+                                projectId={id}
+                                onAnalysisComplete={handleAnalysisComplete}
+                            />
+                        </div>
+
+                        {/* Documents List */}
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-semibold text-slate-900">Uploaded Documents</h3>
+                            {project.documents && project.documents.length > 0 ? (
+                                <div className="grid gap-4">
+                                    {project.documents.map((doc) => (
+                                        <div key={String(doc.id)} className="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between hover:shadow-sm transition-all">
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                                                    <Upload className="w-5 h-5" />
+                                                </div>
+                                                <div>
+                                                    <div className="font-medium text-slate-900">
+                                                        {String(doc.name || 'Untitled Document')}
+                                                    </div>
+                                                    <div className="text-xs text-slate-500 capitalize">
+                                                        {String(doc.status || 'completed')}
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="font-medium text-slate-900">
-                                                {String(doc.name || 'Untitled Document')}
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-sm text-slate-500">
+                                                    {(Number(doc.size || 0) / 1024).toFixed(1)} KB
+                                                </span>
+                                                <span className="text-sm text-slate-500">
+                                                    {new Date(String(doc.created_at)).toLocaleDateString()}
+                                                </span>
+                                                <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
+                                                    <ExternalLink className="w-4 h-4" />
+                                                </button>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-4">
-                                            <span className="text-sm text-slate-500">
-                                                {(Number(doc.size || 0) / 1024).toFixed(1)} KB
-                                            </span>
-                                            <span className="text-sm text-slate-500">
-                                                {new Date(String(doc.created_at)).toLocaleDateString()}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                                <Upload className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                                <h3 className="text-lg font-medium text-slate-900">No documents uploaded</h3>
-                                <p className="text-slate-500 mb-6">Upload plans, permits, or other files.</p>
-                                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors">
-                                    Upload File
-                                </button>
-                            </div>
-                        )}
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                                    <p className="text-slate-500">No documents uploaded yet.</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
 
@@ -342,6 +403,15 @@ export default function ProjectDetailsPage() {
                     </div>
                 )}
             </div>
+
+            <DocumentReviewModal
+                isOpen={reviewModalOpen}
+                onClose={() => setReviewModalOpen(false)}
+                projectId={id}
+                file={selectedFile}
+                extractedData={extractedData}
+                onSuccess={handleDocumentSuccess}
+            />
         </div>
     )
 }

@@ -54,27 +54,29 @@ export async function middleware(request: NextRequest) {
         }
     )
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
+    // Check if accessing admin routes
+    if (request.nextUrl.pathname.startsWith('/admin')) {
+        const {
+            data: { user },
+        } = await supabase.auth.getUser()
 
-    // Protect dashboard routes
-    if (request.nextUrl.pathname.startsWith('/dashboard') && !user) {
-        return NextResponse.redirect(new URL('/login', request.url))
-    }
+        // Check if user is logged in
+        if (!user) {
+            return NextResponse.redirect(new URL('/login', request.url))
+        }
 
-    // Redirect logged-in users from auth pages
-    if ((request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup') && user) {
-        return NextResponse.redirect(new URL('/dashboard', request.url))
+        // Check if user is admin
+        const isAdmin = user.user_metadata?.is_admin === true
+
+        if (!isAdmin) {
+            // Redirect non-admin users to dashboard
+            return NextResponse.redirect(new URL('/dashboard', request.url))
+        }
     }
 
     return response
 }
 
 export const config = {
-    matcher: [
-        '/dashboard/:path*',
-        '/login',
-        '/signup',
-    ],
+    matcher: ['/admin/:path*'],
 }

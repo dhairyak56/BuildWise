@@ -43,7 +43,7 @@ export default function Hero() {
 
                     {/* Subheading */}
                     <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up delay-100">
-                        AI-powered contract generation for Australian builders. Create professional construction contracts, variations, and scopes—without lawyers or delays.
+                        AI-powered contract generation for Australian builders. Create professional construction contracts, variations, and scopes without lawyers or delays.
                     </p>
 
                     {/* CTA Buttons */}
