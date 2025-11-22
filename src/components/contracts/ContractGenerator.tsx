@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, ChevronsUpDown, FileText, Sparkles } from 'lucide-react'
+import { Check, FileText, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const templates = [

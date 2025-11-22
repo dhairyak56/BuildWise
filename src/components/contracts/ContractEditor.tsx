@@ -10,6 +10,7 @@ import jsPDF from 'jspdf'
 
 interface ContractEditorProps {
     projectId: string
+    contractId?: string
     initialContent: string
 }
 
@@ -23,7 +24,7 @@ interface Risk {
     clauseReference?: string
 }
 
-export function ContractEditor({ projectId, initialContent }: ContractEditorProps) {
+export function ContractEditor({ projectId, contractId, initialContent }: ContractEditorProps) {
     const [content, setContent] = useState(initialContent)
     const [isSaving, setIsSaving] = useState(false)
     const [lastSaved, setLastSaved] = useState<Date | null>(null)
@@ -36,7 +37,7 @@ export function ContractEditor({ projectId, initialContent }: ContractEditorProp
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
     const [showEmailModal, setShowEmailModal] = useState(false)
     const [showTemplateLibrary, setShowTemplateLibrary] = useState(false)
-    const [projectData, setProjectData] = useState<any>(null)
+    const [projectData, setProjectData] = useState<Record<string, unknown> | null>(null)
 
     // Fetch project data for template population
     useEffect(() => {
@@ -68,17 +69,31 @@ export function ContractEditor({ projectId, initialContent }: ContractEditorProp
         setIsSaving(true)
         const supabase = createBrowserClient()
 
-        // If we have a contractId, update it. Otherwise, insert new.
-        // For this MVP flow, we usually expect a contract to be created or upserted.
+        // If we have a contractId, update it specifically.
+        // Otherwise, fall back to upserting by project_id (legacy behavior for new contracts)
 
-        const { error } = await supabase
-            .from('contracts')
-            .upsert({
-                project_id: projectId,
-                content: { text: content }, // Storing as JSONB
-                status: 'Draft',
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'project_id' })
+        let error;
+
+        if (contractId) {
+            const result = await supabase
+                .from('contracts')
+                .update({
+                    content: { text: content }, // Storing as JSONB
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', contractId)
+            error = result.error
+        } else {
+            const result = await supabase
+                .from('contracts')
+                .upsert({
+                    project_id: projectId,
+                    content: { text: content }, // Storing as JSONB
+                    status: 'Draft',
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'project_id' })
+            error = result.error
+        }
 
         setIsSaving(false)
 
@@ -519,7 +534,7 @@ export function ContractEditor({ projectId, initialContent }: ContractEditorProp
                     setContent(templateContent)
                     setShowTemplateLibrary(false)
                 }}
-                projectData={projectData}
+                projectData={projectData || undefined}
             />
         </div>
     )

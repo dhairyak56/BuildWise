@@ -10,7 +10,7 @@ interface PageProps {
     }>
 }
 
-async function getProjectAndContract(id: string) {
+async function getContract(id: string) {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -18,77 +18,33 @@ async function getProjectAndContract(id: string) {
         redirect('/login')
     }
 
-    // Fetch project
-    const { data: project, error: projectError } = await supabase
-        .from('projects')
-        .select('*')
+    // Fetch contract
+    const { data: contract, error: contractError } = await supabase
+        .from('contracts')
+        .select('*, projects(*)')
         .eq('id', id)
-        .eq('user_id', user.id)
         .single()
 
-    if (projectError || !project) {
+    if (contractError || !contract) {
         return null
     }
 
-    // Fetch contract
-    const { data: contract } = await supabase
-        .from('contracts')
-        .select('*')
-        .eq('project_id', id)
-        .single()
-
-    return { project, contract }
+    return contract
 }
 
-function generateDefaultContract(project: { client_name: string; name: string; address: string; job_type: string; contract_value: number; start_date: string; end_date: string }) {
-    return `CONSTRUCTION CONTRACT
-
-DATE: ${new Date().toLocaleDateString()}
-
-BETWEEN:
-Builder: [Your Company Name]
-Client: ${project.client_name}
-
-PROJECT:
-Name: ${project.name}
-Address: ${project.address}
-
-1. SCOPE OF WORK
-The Builder shall perform the following work:
-${project.job_type} - [Detailed scope to be inserted]
-
-2. CONTRACT PRICE
-The Client agrees to pay the Builder the sum of $${project.contract_value} for the work.
-
-3. TIMELINE
-Start Date: ${project.start_date || '[TBD]'}
-Completion Date: ${project.end_date || '[TBD]'}
-
-4. PAYMENT TERMS
-[Payment terms to be inserted]
-
-Signed:
-________________________
-Builder
-
-________________________
-Client
-`
-}
-
-export default async function ContractPage({ params }: PageProps) {
+export default async function ContractDetailsPage({ params }: PageProps) {
     const { id } = await params
-    const data = await getProjectAndContract(id)
+    const contract = await getContract(id)
 
-    if (!data) {
+    if (!contract) {
         notFound()
     }
 
-    const { project, contract } = data
+    const project = Array.isArray(contract.projects) ? contract.projects[0] : contract.projects
 
     // Extract contract text from the content field
     let initialContent = ''
-    if (contract?.content) {
+    if (contract.content) {
         // Handle JSONB content field
         if (typeof contract.content === 'object' && contract.content.text) {
             initialContent = contract.content.text
@@ -97,43 +53,38 @@ export default async function ContractPage({ params }: PageProps) {
         }
     }
 
-    // If no contract content, use default template
-    if (!initialContent) {
-        initialContent = generateDefaultContract(project)
-    }
-
     return (
         <div className="space-y-6 h-full">
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                     <Link
-                        href="/dashboard/projects"
+                        href="/dashboard/contracts"
                         className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-500 hover:text-slate-900"
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
                     <div>
                         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-                            {project.name}
+                            Contract Details
                         </h1>
                         <p className="text-slate-500 text-sm">
-                            Contract Editor
+                            {project?.name || 'Unknown Project'} • {project?.client_name || 'Unknown Client'}
                         </p>
                     </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${contract?.status === 'Signed'
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${contract.status === 'Signed'
                         ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
                         : 'bg-amber-50 text-amber-700 border-amber-100'
                         }`}>
-                        {contract?.status || 'Draft'}
+                        {contract.status || 'Draft'}
                     </span>
                 </div>
             </div>
 
             <ContractEditor
-                projectId={project.id}
-                contractId={contract?.id}
+                projectId={contract.project_id}
+                contractId={contract.id}
                 initialContent={initialContent}
             />
         </div>

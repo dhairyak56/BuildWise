@@ -4,14 +4,7 @@ import { useState } from 'react'
 import { X, FileText, Search, Check } from 'lucide-react'
 import { DEFAULT_TEMPLATES, populateTemplate } from '@/lib/contract-templates'
 
-interface TemplateLibraryModalProps {
-    isOpen: boolean
-    onClose: () => void
-    onSelectTemplate: (content: string) => void
-    projectData?: Record<string, any>
-}
-
-export function TemplateLibraryModal({ isOpen, onClose, onSelect, projectData }: { isOpen: boolean; onClose: () => void; onSelect: (template: any) => void; projectData?: any }) {
+export function TemplateLibraryModal({ isOpen, onClose, onSelect, projectData }: { isOpen: boolean; onClose: () => void; onSelect: (template: string) => void; projectData?: Record<string, unknown> }) {
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedCategory, setSelectedCategory] = useState<string>('All')
     const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null)
@@ -94,7 +87,7 @@ export function TemplateLibraryModal({ isOpen, onClose, onSelect, projectData }:
                                     <p className="text-slate-500 text-sm">No templates found</p>
                                 </div>
                             ) : (
-                                filteredTemplates.map((template, index) => {
+                                filteredTemplates.map((template) => {
                                     const actualIndex = DEFAULT_TEMPLATES.indexOf(template)
                                     const isSelected = selectedTemplate === actualIndex
 

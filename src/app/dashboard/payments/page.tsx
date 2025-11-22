@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { createBrowserClient } from '@supabase/ssr'
+import { useState, useEffect, useCallback } from 'react'
+import { createBrowserClient } from '@/lib/supabase'
 import {
     DollarSign,
     Plus,
@@ -9,70 +9,56 @@ import {
     Filter,
     ArrowDownLeft,
     Calendar,
-    CheckCircle2,
     Clock,
     AlertCircle
 } from 'lucide-react'
-import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 export default function PaymentsPage() {
-    const [payments, setPayments] = useState<any[]>([])
+    const [payments, setPayments] = useState<Record<string, unknown>[]>([])
     const [loading, setLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
+    const [statusFilter, setStatusFilter] = useState('All')
 
-    const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    const supabase = createBrowserClient()
 
-    const fetchPayments = async () => {
+    const fetchPayments = useCallback(async () => {
         try {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) return
-
             const { data, error } = await supabase
                 .from('payments')
                 .select(`
                     *,
-                    projects (name, client_name)
+                    projects (
+                        name,
+                        client_name
+                    )
                 `)
-                .eq('projects.user_id', user.id)
                 .order('payment_date', { ascending: false })
 
             if (error) throw error
-
-            // Filter out payments where project is null (RLS or deleted project)
-            const validPayments = data?.filter(p => p.projects) || []
-            setPayments(validPayments)
+            setPayments(data || [])
         } catch (error) {
             console.error('Error fetching payments:', error)
         } finally {
             setLoading(false)
         }
-    }
+    }, [supabase])
 
     useEffect(() => {
         fetchPayments()
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [fetchPayments])
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'Paid': return 'bg-emerald-100 text-emerald-700 border-emerald-200'
-            case 'Scheduled': return 'bg-blue-100 text-blue-700 border-blue-200'
-            case 'Overdue': return 'bg-red-100 text-red-700 border-red-200'
-            default: return 'bg-slate-100 text-slate-700 border-slate-200'
-        }
-    }
+    const filteredPayments = payments.filter((payment) => {
+        const matchesSearch = searchQuery === '' ||
+            String(payment.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            String(payment.client_name || '').toLowerCase().includes(searchQuery.toLowerCase())
 
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'Paid': return <CheckCircle2 className="w-4 h-4 mr-1" />
-            case 'Scheduled': return <Clock className="w-4 h-4 mr-1" />
-            case 'Overdue': return <AlertCircle className="w-4 h-4 mr-1" />
-            default: return null
-        }
-    }
+        const matchesStatus = statusFilter === 'All' || payment.status === statusFilter
+
+        return matchesSearch && matchesStatus
+    })
+
+
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -141,11 +127,15 @@ export default function PaymentsPage() {
                 <div className="h-px sm:h-auto sm:w-px bg-slate-200 mx-2" />
                 <div className="relative min-w-[200px]">
                     <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <select className="w-full pl-10 pr-8 py-3 rounded-xl border-none focus:ring-0 bg-transparent text-slate-700 font-medium cursor-pointer hover:bg-slate-50 transition-colors appearance-none">
-                        <option>All Statuses</option>
-                        <option>Paid</option>
-                        <option>Scheduled</option>
-                        <option>Overdue</option>
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="w-full pl-10 pr-8 py-3 rounded-xl border-none focus:ring-0 bg-transparent text-slate-700 font-medium cursor-pointer hover:bg-slate-50 transition-colors appearance-none"
+                    >
+                        <option value="All">All Statuses</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Scheduled">Scheduled</option>
+                        <option value="Overdue">Overdue</option>
                     </select>
                 </div>
             </div>
@@ -157,7 +147,7 @@ export default function PaymentsPage() {
                         <div key={i} className="h-24 bg-slate-100 rounded-xl animate-pulse" />
                     ))}
                 </div>
-            ) : payments.length === 0 ? (
+            ) : filteredPayments.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-slate-200 p-16 text-center">
                     <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
                         <DollarSign className="w-10 h-10 text-slate-300" />
@@ -185,27 +175,34 @@ export default function PaymentsPage() {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {payments.map((payment) => (
-                                <tr key={payment.id} className="hover:bg-slate-50/50 transition-colors">
+                                <tr key={String(payment.id)} className="hover:bg-slate-50/50 transition-colors group">
                                     <td className="px-6 py-4">
-                                        <div className="font-medium text-slate-900">{payment.description || 'Payment'}</div>
+                                        <div className="flex items-center">
+                                            <div className="p-2 bg-emerald-50 rounded-lg mr-3 group-hover:bg-emerald-100 transition-colors">
+                                                <DollarSign className="w-4 h-4 text-emerald-600" />
+                                            </div>
+                                            <div>
+                                                <div className="font-medium text-slate-900">{String(payment.name || 'Untitled Payment')}</div>
+                                                <div className="text-xs text-slate-500">{String(payment.client_name || 'Unknown Client')}</div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="text-sm text-slate-900 font-medium">{payment.projects?.name}</div>
-                                        <div className="text-xs text-slate-500">{payment.projects?.client_name}</div>
+                                        <div className="font-medium text-slate-900">${Number(payment.amount || 0).toLocaleString()}</div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="font-semibold text-slate-900">${payment.amount.toLocaleString()}</div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={cn("inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border", getStatusColor(payment.status))}>
-                                            {getStatusIcon(payment.status)}
-                                            {payment.status}
+                                        <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium border",
+                                            String(payment.status) === 'Paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                                String(payment.status) === 'Pending' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                                                    'bg-slate-100 text-slate-700 border-slate-200'
+                                        )}>
+                                            {String(payment.status || 'Pending')}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-sm text-slate-500">
                                         <div className="flex items-center">
                                             <Calendar className="w-3 h-3 mr-1.5 text-slate-400" />
-                                            {new Date(payment.payment_date).toLocaleDateString()}
+                                            {new Date(String(payment.created_at)).toLocaleDateString()}
                                         </div>
                                     </td>
                                 </tr>

@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
-import { X, Upload, File, CheckCircle2, AlertCircle } from 'lucide-react'
+import { X, Upload, File, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface DocumentUploadModalProps {
@@ -15,7 +15,7 @@ export default function DocumentUploadModal({ isOpen, onClose, onUploadComplete 
     const [isDragging, setIsDragging] = useState(false)
     const [file, setFile] = useState<File | null>(null)
     const [uploading, setUploading] = useState(false)
-    const [uploadProgress, setUploadProgress] = useState(0)
+
     const [error, setError] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -56,7 +56,7 @@ export default function DocumentUploadModal({ isOpen, onClose, onUploadComplete 
         if (!file) return
 
         setUploading(true)
-        setUploadProgress(0)
+
         setError(null)
 
         try {
@@ -87,7 +87,6 @@ export default function DocumentUploadModal({ isOpen, onClose, onUploadComplete 
 
             if (dbError) throw dbError
 
-            setUploadProgress(100)
             setTimeout(() => {
                 onUploadComplete()
                 onClose()

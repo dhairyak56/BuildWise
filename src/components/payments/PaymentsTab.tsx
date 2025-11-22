@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { DollarSign, Calendar, Plus, Trash2, CheckCircle, Clock, AlertCircle } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
 import AddPaymentModal from './AddPaymentModal'
@@ -29,13 +29,13 @@ export default function PaymentsTab({ projectId, contractValue }: PaymentsTabPro
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
-    const fetchPayments = async () => {
+    const fetchPayments = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('payments')
                 .select('*')
                 .eq('project_id', projectId)
-                .order('payment_date', { ascending: true })
+                .order('payment_date', { ascending: false })
 
             if (error) throw error
             setPayments(data || [])
@@ -44,11 +44,11 @@ export default function PaymentsTab({ projectId, contractValue }: PaymentsTabPro
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [projectId, supabase])
 
     useEffect(() => {
         fetchPayments()
-    }, [projectId])
+    }, [fetchPayments, projectId])
 
     const handleDeletePayment = async (paymentId: string) => {
         if (!confirm('Are you sure you want to delete this payment?')) return

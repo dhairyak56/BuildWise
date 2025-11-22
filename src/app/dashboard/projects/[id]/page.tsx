@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
-import { createBrowserClient } from '@supabase/ssr'
+import { useParams, useRouter } from 'next/navigation'
+import { createBrowserClient } from '@/lib/supabase'
 import {
     Building2,
     Calendar,
@@ -10,29 +10,48 @@ import {
     FileText,
     Upload,
     CreditCard,
-    ArrowLeft
+    ArrowLeft,
+    ExternalLink
 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
+interface Project {
+    id: string
+    name: string
+    status: string
+    client_name: string
+    job_type: string
+    progress: number
+    start_date: string
+    end_date: string
+    contract_value: number
+    address: string
+    contracts: Record<string, unknown>[]
+    documents: Record<string, unknown>[]
+    payments: Record<string, unknown>[]
+}
+
 export default function ProjectDetailsPage() {
     const params = useParams()
+    const router = useRouter()
     const id = params.id as string
     const [activeTab, setActiveTab] = useState('overview')
-    const [project, setProject] = useState<any>(null)
-    const [loading, setLoading] = useState(true)
+    const [project, setProject] = useState<Project | null>(null)
     const [isLoading, setIsLoading] = useState(true)
 
-    const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    const supabase = createBrowserClient()
 
     const fetchProject = async () => {
         try {
             const { data, error } = await supabase
                 .from('projects')
-                .select('*')
+                .select(`
+                    *,
+                    contracts (*),
+                    documents (*),
+                    payments (*)
+                `)
                 .eq('id', params.id)
                 .single()
 
@@ -91,9 +110,11 @@ export default function ProjectDetailsPage() {
                     <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm transition-colors">
                         Edit Project
                     </button>
-                    <button className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium text-sm transition-colors">
-                        Generate Contract
-                    </button>
+                    <Link href={`/dashboard/contracts/new?projectId=${id}`}>
+                        <button className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium text-sm transition-colors">
+                            Generate Contract
+                        </button>
+                    </Link>
                 </div>
             </div>
 
@@ -181,19 +202,28 @@ export default function ProjectDetailsPage() {
                             <div className="bg-slate-50 rounded-xl p-6 border border-slate-200">
                                 <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider">Quick Actions</h3>
                                 <div className="space-y-3">
-                                    <button className="w-full flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 hover:shadow-sm transition-all text-sm font-medium text-slate-700">
+                                    <button
+                                        onClick={() => router.push(`/dashboard/contracts/new?projectId=${id}`)}
+                                        className="w-full flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 hover:shadow-sm transition-all text-sm font-medium text-slate-700"
+                                    >
                                         <span className="flex items-center gap-2">
                                             <FileText className="w-4 h-4 text-blue-600" />
                                             Create Contract
                                         </span>
                                     </button>
-                                    <button className="w-full flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 hover:border-purple-300 hover:shadow-sm transition-all text-sm font-medium text-slate-700">
+                                    <button
+                                        onClick={() => setActiveTab('documents')}
+                                        className="w-full flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 hover:border-purple-300 hover:shadow-sm transition-all text-sm font-medium text-slate-700"
+                                    >
                                         <span className="flex items-center gap-2">
                                             <Upload className="w-4 h-4 text-purple-600" />
                                             Upload Document
                                         </span>
                                     </button>
-                                    <button className="w-full flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 hover:border-emerald-300 hover:shadow-sm transition-all text-sm font-medium text-slate-700">
+                                    <button
+                                        onClick={() => setActiveTab('payments')}
+                                        className="w-full flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 hover:border-emerald-300 hover:shadow-sm transition-all text-sm font-medium text-slate-700"
+                                    >
                                         <span className="flex items-center gap-2">
                                             <DollarSign className="w-4 h-4 text-emerald-600" />
                                             Record Payment
@@ -206,35 +236,109 @@ export default function ProjectDetailsPage() {
                 )}
 
                 {activeTab === 'contracts' && (
-                    <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                        <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-slate-900">No contracts yet</h3>
-                        <p className="text-slate-500 mb-6">Generate a contract to get started.</p>
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors">
-                            Create Contract
-                        </button>
+                    <div className="space-y-4">
+                        {project.contracts && project.contracts.length > 0 ? (
+                            <div className="grid gap-4">
+                                {project.contracts.map((contract) => (
+                                    <div key={String(contract.id)} className="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between hover:shadow-sm transition-all">
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                                                <FileText className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-medium text-slate-900">Contract {new Date(String(contract.created_at)).toLocaleDateString()}</h4>
+                                                <p className="text-sm text-slate-500">{String(contract.status)}</p>
+                                            </div>
+                                        </div>
+                                        <Link href={`/dashboard/contracts/${contract.id}`}>
+                                            <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                                                <ExternalLink className="w-4 h-4 text-slate-400" />
+                                            </button>
+                                        </Link>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                                <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                                <h3 className="text-lg font-medium text-slate-900">No contracts yet</h3>
+                                <p className="text-slate-500 mb-6">Generate a contract to get started.</p>
+                                <Link href={`/dashboard/contracts/new?projectId=${id}`}>
+                                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors">
+                                        Create Contract
+                                    </button>
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 )}
 
                 {activeTab === 'documents' && (
-                    <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                        <Upload className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-slate-900">No documents uploaded</h3>
-                        <p className="text-slate-500 mb-6">Upload plans, permits, or other files.</p>
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors">
-                            Upload File
-                        </button>
+                    <div className="space-y-4">
+                        {project.documents && project.documents.length > 0 ? (
+                            <div className="grid gap-4">
+                                {project.documents.map((doc) => (
+                                    <div key={String(doc.id)} className="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between hover:shadow-sm transition-all">
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                                                <Upload className="w-5 h-5" />
+                                            </div>
+                                            <div className="font-medium text-slate-900">
+                                                {String(doc.name || 'Untitled Document')}
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <span className="text-sm text-slate-500">
+                                                {(Number(doc.size || 0) / 1024).toFixed(1)} KB
+                                            </span>
+                                            <span className="text-sm text-slate-500">
+                                                {new Date(String(doc.created_at)).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                                <Upload className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                                <h3 className="text-lg font-medium text-slate-900">No documents uploaded</h3>
+                                <p className="text-slate-500 mb-6">Upload plans, permits, or other files.</p>
+                                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors">
+                                    Upload File
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
 
                 {activeTab === 'payments' && (
-                    <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                        <CreditCard className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-slate-900">No payments recorded</h3>
-                        <p className="text-slate-500 mb-6">Track payments and invoices here.</p>
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors">
-                            Add Payment
-                        </button>
+                    <div className="space-y-4">
+                        {project.payments && project.payments.length > 0 ? (
+                            <div className="grid gap-4">
+                                {project.payments.map((payment) => (
+                                    <div key={String(payment.id)} className="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between hover:shadow-sm transition-all">
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                                                <DollarSign className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-medium text-slate-900">${Number(payment.amount || 0).toLocaleString()}</h4>
+                                                <p className="text-sm text-slate-500">{String(payment.status)} • {new Date(String(payment.payment_date)).toLocaleDateString()}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                                <CreditCard className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                                <h3 className="text-lg font-medium text-slate-900">No payments recorded</h3>
+                                <p className="text-slate-500 mb-6">Track payments and invoices here.</p>
+                                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors">
+                                    Add Payment
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

@@ -98,12 +98,15 @@ export async function POST(request: Request) {
             emailId: data?.id
         })
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        const errorStack = error instanceof Error ? error.stack : undefined
         console.error('❌ Email sending error:', error)
-        console.error('Error message:', error?.message)
-        console.error('Error stack:', error?.stack)
+        console.error('Error message:', errorMessage)
+        console.error('Error stack:', errorStack)
+
         return NextResponse.json(
-            { error: `Failed to send email: ${error?.message || 'Unknown error'}` },
+            { error: 'Failed to send email', details: errorMessage },
             { status: 500 }
         )
     }

@@ -748,13 +748,16 @@ Date: _________________
 ]
 
 // Helper function to populate template with project data
-export function populateTemplate(template: string, data: Record<string, any>): string {
-    let populated = template
+export function populateTemplate(templateContent: string, data: Record<string, unknown>): string {
+    let populated = templateContent
 
     // Replace all {{variable}} placeholders with actual data
     Object.keys(data).forEach(key => {
-        const regex = new RegExp(`{{${key}}}`, 'g')
-        populated = populated.replace(regex, data[key] || '')
+        const value = data[key]
+        populated = populated.replace(
+            new RegExp(`{{${key}}}`, 'g'),
+            String(value ?? '')
+        )
     })
 
     // Remove any remaining unpopulated placeholders

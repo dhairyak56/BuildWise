@@ -37,7 +37,7 @@ describe('ContractGenerator', () => {
         fireEvent.click(screen.getByText(/Generate Contract/i))
 
         // Check loading state
-        expect(screen.getByText(/Generating.../i)).toBeInTheDocument()
+        expect(screen.getByText(/Generating with AI.../i)).toBeInTheDocument()
 
         // Wait for result
         await waitFor(() => {

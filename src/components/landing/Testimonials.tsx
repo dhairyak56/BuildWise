@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Star } from 'lucide-react'
 
 const testimonials = [
@@ -53,12 +54,15 @@ export default function Testimonials() {
                             <p className="text-slate-600 mb-6 flex-1">
                                 &quot;{testimonial.content}&quot;
                             </p>
-                            <div className="flex items-center">
-                                <img
-                                    src={testimonial.image}
-                                    alt={testimonial.author}
-                                    className="w-12 h-12 rounded-full bg-slate-200 mr-4"
-                                />
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="relative w-12 h-12 rounded-full overflow-hidden">
+                                    <Image
+                                        src={testimonial.image}
+                                        alt={testimonial.author}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
                                 <div>
                                     <div className="font-semibold text-slate-900">{testimonial.author}</div>
                                     <div className="text-sm text-slate-500">

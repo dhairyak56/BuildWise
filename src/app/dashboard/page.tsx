@@ -142,8 +142,7 @@ export default async function DashboardPage() {
         monthlyRevenue,
         revenueChange,
         newProjectsThisWeek,
-        recentActivity,
-        user
+        recentActivity
     } = await getDashboardData()
 
     const stats = [

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { User, Building, Mail, Save, Loader2 } from 'lucide-react'
 import { createBrowserClient } from '@/lib/supabase'
-import { User as SupabaseUser } from '@supabase/supabase-js'
 
 interface FormData {
     fullName: string;
@@ -14,7 +13,6 @@ interface FormData {
 export default function SettingsPage() {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
-    const [user, setUser] = useState<SupabaseUser | null>(null)
     const [formData, setFormData] = useState<FormData>({
         fullName: '',
         companyName: '',
@@ -26,7 +24,6 @@ export default function SettingsPage() {
             const supabase = createBrowserClient()
             const { data: { user } } = await supabase.auth.getUser()
             if (user) {
-                setUser(user)
                 setFormData({
                     fullName: user.user_metadata?.full_name || '',
                     companyName: user.user_metadata?.company_name || '',

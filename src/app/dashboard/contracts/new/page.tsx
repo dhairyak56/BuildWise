@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ContractGenerator } from '@/components/contracts/ContractGenerator'
 import { RiskAnalysis } from '@/components/contracts/RiskAnalysis'
-import { ArrowLeft, Save, Check } from 'lucide-react'
+import { ArrowLeft, Save } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase'

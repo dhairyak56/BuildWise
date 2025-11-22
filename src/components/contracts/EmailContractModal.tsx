@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Mail, X, Send, Loader2, CheckCircle } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 interface EmailContractModalProps {
     isOpen: boolean
