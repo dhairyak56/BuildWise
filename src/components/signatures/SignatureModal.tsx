@@ -16,7 +16,7 @@ export function SignatureModal({ isOpen, onClose, contractId, contractTitle }: S
     const [isLoading, setIsLoading] = useState(false)
     const [sentLink, setSentLink] = useState<string | null>(null)
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsLoading(true)
 
@@ -38,9 +38,9 @@ export function SignatureModal({ isOpen, onClose, contractId, contractTitle }: S
 
             const data = await response.json()
             setSentLink(data.signingLink)
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error sending signature request:', error)
-            alert(error.message || 'Failed to send signature request')
+            alert((error as Error).message || 'Failed to send signature request')
         } finally {
             setIsLoading(false)
         }

@@ -1,14 +1,15 @@
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
+import React from 'react'
 import Hero from './Hero'
 
 // Mock framer-motion
 jest.mock('framer-motion', () => ({
     motion: {
-        div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-        h1: ({ children, ...props }: any) => <h1 {...props}>{children}</h1>,
-        p: ({ children, ...props }: any) => <p {...props}>{children}</p>,
-        button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+        div: function MotionDiv({ children, ...props }: React.ComponentProps<'div'>) { return <div {...props}>{children}</div> },
+        h1: function MotionH1({ children, ...props }: React.ComponentProps<'h1'>) { return <h1 {...props}>{children}</h1> },
+        p: function MotionP({ children, ...props }: React.ComponentProps<'p'>) { return <p {...props}>{children}</p> },
+        button: function MotionButton({ children, ...props }: React.ComponentProps<'button'>) { return <button {...props}>{children}</button> },
     },
     useScroll: () => ({ scrollYProgress: { get: () => 0 } }),
     useTransform: () => ({ get: () => 0 }),

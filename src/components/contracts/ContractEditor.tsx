@@ -156,9 +156,9 @@ export function ContractEditor({ projectId, contractId, initialContent, initialS
             const data = await response.json()
             setRisks(data.risks || [])
             setShowRiskPanel(true)
-        } catch (error) {
+        } catch (error: unknown) {
             console.error('Error scanning risks:', error)
-            alert('Failed to scan for risks. Please try again.')
+            alert((error as Error).message || 'Failed to scan for risks. Please try again.')
         } finally {
             setIsScanning(false)
         }

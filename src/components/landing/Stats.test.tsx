@@ -1,11 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
+import React from 'react'
 import Stats from './Stats'
 
 // Mock framer-motion
 jest.mock('framer-motion', () => ({
     motion: {
-        div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+        div: Object.assign(({ children, ...props }: React.ComponentProps<'div'>) => <div {...props}>{children}</div>, { displayName: 'MotionDiv' }),
     },
     useInView: () => true,
 }))

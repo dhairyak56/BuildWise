@@ -48,76 +48,68 @@ export function DocumentUpload({ projectId, onAnalysisComplete }: DocumentUpload
         return images
     }
 
-    const processFile = async (file: File) => {
+    const processFile = useCallback(async (file: File) => {
         setIsProcessing(true)
         setError(null)
         setProgress(0)
         setStatus('Initializing OCR...')
 
         try {
-            // 1. Client-side OCR with Tesseract.js
-            const worker = await createWorker('eng', 1, {
-                logger: m => {
-                    if (m.status === 'recognizing text') {
-                        setProgress(Math.round(m.progress * 100))
-                        setStatus(`Scanning document: ${Math.round(m.progress * 100)}%`)
-                    }
-                }
-            })
+            // Convert PDF to images if needed
+            let images: string[] = []
+            if (file.type === 'application/pdf') {
+                setStatus('Converting PDF pages...')
+                images = await convertPdfToImages(file)
+            } else {
+                images = [URL.createObjectURL(file)]
+            }
 
-            setStatus('Extracting text...')
+            setProgress(40)
+            setStatus('Analyzing text...')
+
+            // Perform OCR
+            const worker = await createWorker('eng')
             let text = ''
 
-            if (file.type === 'application/pdf') {
-                setStatus('Converting PDF...')
-                const images = await convertPdfToImages(file)
-                setStatus('Scanning PDF page...')
-                const { data } = await worker.recognize(images[0])
-                text = data.text
-            } else {
-                const { data } = await worker.recognize(file)
-                text = data.text
+            for (let i = 0; i < images.length; i++) {
+                setStatus(`Scanning page ${i + 1} of ${images.length}...`)
+                const { data: { text: pageText } } = await worker.recognize(images[i])
+                text += pageText + '\n\n'
+                setProgress(40 + Math.floor((i + 1) / images.length * 40))
             }
 
             await worker.terminate()
 
-            if (!text || text.trim().length === 0) {
-                throw new Error('No text found in document')
-            }
+            setStatus('Extracting details...')
+            setProgress(90)
 
-            // 2. Send to AI for Analysis
-            setStatus('Analyzing with AI...')
+            // Analyze with AI
             const response = await fetch('/api/documents/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    rawText: text,
-                    documentType: 'invoice' // Default, could be inferred or selected
-                })
+                body: JSON.stringify({ text, projectId })
             })
 
-            if (!response.ok) {
-                throw new Error('AI analysis failed')
-            }
+            if (!response.ok) throw new Error('Analysis failed')
 
-            const { data } = await response.json()
-
-            setStatus('Complete!')
+            const data = await response.json()
             onAnalysisComplete(data, file)
-
-        } catch (err: any) {
-            console.error('Error processing document:', err)
-            setError(err.message || 'Failed to process document')
+            setStatus('Complete!')
+            setProgress(100)
+        } catch (err) {
+            console.error('Processing error:', err)
+            const errorMessage = err instanceof Error ? err.message : 'Failed to process document'
+            setError(errorMessage)
         } finally {
             setIsProcessing(false)
         }
-    }
+    }, [projectId, onAnalysisComplete])
 
-    const onDrop = useCallback((acceptedFiles: File[]) => {
+    const onDrop = useCallback(async (acceptedFiles: File[]) => {
         if (acceptedFiles.length > 0) {
-            processFile(acceptedFiles[0])
+            await processFile(acceptedFiles[0])
         }
-    }, [])
+    }, [processFile])
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -154,11 +146,11 @@ export function DocumentUpload({ projectId, onAnalysisComplete }: DocumentUpload
                         <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4">
                             <Upload className="w-8 h-8" />
                         </div>
-                        <h3 className="text-lg font-semibold text-slate-900 mb-1">
-                            Upload Invoice or Receipt
-                        </h3>
+                        <p className="text-xs text-slate-500 mt-1">
+                            We&apos;ll analyze this file to extract project details
+                        </p>
                         <p className="text-slate-500 max-w-sm mx-auto mb-4">
-                            Drag & drop or click to upload. We'll scan it and extract the details automatically.
+                            Drag & drop or click to upload. We&apos;ll scan it and extract the details automatically.
                         </p>
                         <div className="flex gap-2 text-xs text-slate-400 uppercase font-medium tracking-wider">
                             <span>JPG</span>

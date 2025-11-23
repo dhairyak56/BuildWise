@@ -10,24 +10,37 @@ interface Particle {
     speedX: number
     speedY: number
     color: string
+    duration: number // New property
+    delay: number // New property
 }
 
 export default function FloatingParticles() {
     const [particles, setParticles] = useState<Particle[]>([])
 
     useEffect(() => {
-        // Create particles
+        // Initialize particles
         const newParticles: Particle[] = Array.from({ length: 20 }, (_, i) => ({
-            id: i,
+            id: i, // Re-add id for key prop
             x: Math.random() * 100,
             y: Math.random() * 100,
-            size: Math.random() * 60 + 20,
-            speedX: (Math.random() - 0.5) * 0.5,
-            speedY: (Math.random() - 0.5) * 0.5,
+            size: Math.random() * 10 + 5, // Changed size calculation
+            speedX: (Math.random() - 0.5) * 0.5, // Keep speedX
+            speedY: (Math.random() - 0.5) * 0.5, // Keep speedY
+            duration: Math.random() * 20 + 10, // New property
+            delay: Math.random() * 5, // New property
+            delay: Math.random() * 5, // New property
             color: ['teal', 'emerald', 'cyan', 'blue'][Math.floor(Math.random() * 4)],
         }))
-        setParticles(newParticles)
 
+        // Use setTimeout to avoid synchronous state update warning
+        const timer = setTimeout(() => {
+            setParticles(newParticles)
+        }, 0)
+
+        return () => clearTimeout(timer)
+    }, [])
+
+    useEffect(() => {
         // Animate particles
         const interval = setInterval(() => {
             setParticles(prev =>
