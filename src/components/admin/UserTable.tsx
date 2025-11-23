@@ -12,6 +12,7 @@ interface User {
     project_count: number
     contract_count: number
     total_revenue: number
+    is_admin: boolean
 }
 
 interface UserTableProps {
@@ -23,7 +24,7 @@ export function UserTable({ initialUsers }: UserTableProps) {
     const [searchTerm, setSearchTerm] = useState('')
 
     const filteredUsers = users.filter(user =>
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
     const handleUpdate = () => {
@@ -85,7 +86,14 @@ export function UserTable({ initialUsers }: UserTableProps) {
                                     <tr key={user.id} className="hover:bg-slate-50 transition-colors">
                                         <td className="px-6 py-4">
                                             <div>
-                                                <p className="text-sm font-medium text-slate-900">{user.email}</p>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-sm font-medium text-slate-900">{user.email}</p>
+                                                    {user.is_admin && (
+                                                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-700 uppercase tracking-wide">
+                                                            Admin
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <p className="text-xs text-slate-500">{user.id.substring(0, 8)}...</p>
                                             </div>
                                         </td>
@@ -125,6 +133,7 @@ export function UserTable({ initialUsers }: UserTableProps) {
                                             <UserActions
                                                 userId={user.id}
                                                 userEmail={user.email}
+                                                isAdmin={user.is_admin}
                                                 onUpdate={handleUpdate}
                                             />
                                         </td>

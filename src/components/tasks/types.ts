@@ -5,6 +5,7 @@ export interface Task {
     description?: string
     due_date?: string
     assigned_to?: string
+    priority?: 'High' | 'Medium' | 'Low'
     position: number
 }
 

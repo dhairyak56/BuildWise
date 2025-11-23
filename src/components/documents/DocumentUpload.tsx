@@ -87,13 +87,13 @@ export function DocumentUpload({ projectId, onAnalysisComplete }: DocumentUpload
             const response = await fetch('/api/documents/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text, projectId })
+                body: JSON.stringify({ rawText: text, projectId })
             })
 
             if (!response.ok) throw new Error('Analysis failed')
 
-            const data = await response.json()
-            onAnalysisComplete(data, file)
+            const result = await response.json()
+            onAnalysisComplete(result.data, file)
             setStatus('Complete!')
             setProgress(100)
         } catch (err) {

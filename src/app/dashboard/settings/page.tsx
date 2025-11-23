@@ -1,13 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { User, Building, Mail, Save, Loader2 } from 'lucide-react'
+import { User, Building, Mail, Save, Loader2, Bell } from 'lucide-react'
 import { createBrowserClient } from '@/lib/supabase'
 
 interface FormData {
     fullName: string;
     companyName: string;
     email: string;
+    notifications: {
+        email: boolean;
+        push: boolean;
+        weeklyDigest: boolean;
+    }
 }
 
 export default function SettingsPage() {
@@ -16,7 +21,12 @@ export default function SettingsPage() {
     const [formData, setFormData] = useState<FormData>({
         fullName: '',
         companyName: '',
-        email: ''
+        email: '',
+        notifications: {
+            email: true,
+            push: false,
+            weeklyDigest: true
+        }
     })
 
     useEffect(() => {
@@ -27,7 +37,12 @@ export default function SettingsPage() {
                 setFormData({
                     fullName: user.user_metadata?.full_name || '',
                     companyName: user.user_metadata?.company_name || '',
-                    email: user.email || ''
+                    email: user.email || '',
+                    notifications: user.user_metadata?.notifications || {
+                        email: true,
+                        push: false,
+                        weeklyDigest: true
+                    }
                 })
             }
             setLoading(false)
@@ -43,7 +58,8 @@ export default function SettingsPage() {
         const { error } = await supabase.auth.updateUser({
             data: {
                 full_name: formData.fullName,
-                company_name: formData.companyName
+                company_name: formData.companyName,
+                notifications: formData.notifications
             }
         })
 
@@ -111,6 +127,71 @@ export default function SettingsPage() {
                             disabled
                             className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
                         />
+                    </div>
+
+                    <div className="border-t border-slate-100 pt-6">
+                        <h3 className="text-sm font-medium text-slate-900 mb-4 flex items-center">
+                            <Bell className="w-4 h-4 mr-2 text-slate-400" />
+                            Notification Preferences
+                        </h3>
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-slate-700">Email Notifications</p>
+                                    <p className="text-xs text-slate-500">Receive updates about your projects via email</p>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.notifications.email}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            notifications: { ...formData.notifications, email: e.target.checked }
+                                        })}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-slate-700">Push Notifications</p>
+                                    <p className="text-xs text-slate-500">Receive real-time updates in the browser</p>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.notifications.push}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            notifications: { ...formData.notifications, push: e.target.checked }
+                                        })}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-slate-700">Weekly Digest</p>
+                                    <p className="text-xs text-slate-500">Get a weekly summary of your project activity</p>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.notifications.weeklyDigest}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            notifications: { ...formData.notifications, weeklyDigest: e.target.checked }
+                                        })}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="pt-4 flex justify-end">

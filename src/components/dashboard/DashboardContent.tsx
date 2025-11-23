@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { createBrowserClient } from '@supabase/ssr'
 import { DashboardGrid } from '@/components/dashboard/DashboardGrid'
 import { WidgetLibrary } from '@/components/dashboard/WidgetLibrary'
 import { OverviewCharts } from '@/components/dashboard/OverviewCharts'
@@ -45,10 +46,74 @@ export function DashboardContent({ data }: DashboardContentProps) {
     const [isLibraryOpen, setIsLibraryOpen] = useState(false)
     const [activeWidgets, setActiveWidgets] = useState<string[]>(AVAILABLE_WIDGETS.map(w => w.id))
     const [layout, setLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
+    const [isLoadingSettings, setIsLoadingSettings] = useState(true)
+
+    const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+
+    // Fetch user settings on mount
+    useEffect(() => {
+        async function fetchSettings() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) return
+
+                const { data: settings, error } = await supabase
+                    .from('user_settings')
+                    .select('dashboard_layout, active_widgets')
+                    .eq('user_id', user.id)
+                    .single()
+
+                if (settings) {
+                    if (settings.dashboard_layout && Array.isArray(settings.dashboard_layout) && settings.dashboard_layout.length > 0) {
+                        setLayout(settings.dashboard_layout)
+                    }
+                    if (settings.active_widgets && Array.isArray(settings.active_widgets) && settings.active_widgets.length > 0) {
+                        setActiveWidgets(settings.active_widgets)
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching user settings:', error)
+            } finally {
+                setIsLoadingSettings(false)
+            }
+        }
+
+        fetchSettings()
+    }, [supabase])
+
+    // Save settings when layout or active widgets change
+    const saveSettings = useCallback(async (newLayout: Layout[], newActiveWidgets: string[]) => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
+
+            const { error } = await supabase
+                .from('user_settings')
+                .upsert({
+                    user_id: user.id,
+                    dashboard_layout: newLayout,
+                    active_widgets: newActiveWidgets,
+                    updated_at: new Date().toISOString()
+                })
+
+            if (error) throw error
+        } catch (error) {
+            console.error('Error saving user settings:', error)
+        }
+    }, [supabase])
+
+    const handleLayoutChange = (newLayout: Layout[]) => {
+        setLayout(newLayout)
+        saveSettings(newLayout, activeWidgets)
+    }
 
     const handleAddWidget = (widgetId: string) => {
         if (!activeWidgets.includes(widgetId)) {
-            setActiveWidgets([...activeWidgets, widgetId])
+            const newActiveWidgets = [...activeWidgets, widgetId]
+            setActiveWidgets(newActiveWidgets)
 
             // Find widget config
             const widget = AVAILABLE_WIDGETS.find(w => w.id === widgetId)
@@ -79,7 +144,9 @@ export function DashboardContent({ data }: DashboardContentProps) {
                     w: widget.defaultW,
                     h: widget.defaultH
                 }
-                setLayout([...layout, newLayoutItem])
+                const newLayout = [...layout, newLayoutItem]
+                setLayout(newLayout)
+                saveSettings(newLayout, newActiveWidgets)
             }
 
             // Close the library drawer
@@ -88,8 +155,12 @@ export function DashboardContent({ data }: DashboardContentProps) {
     }
 
     const handleRemoveWidget = (widgetId: string) => {
-        setActiveWidgets(activeWidgets.filter(id => id !== widgetId))
-        setLayout(layout.filter(l => l.i !== widgetId))
+        const newActiveWidgets = activeWidgets.filter(id => id !== widgetId)
+        const newLayout = layout.filter(l => l.i !== widgetId)
+
+        setActiveWidgets(newActiveWidgets)
+        setLayout(newLayout)
+        saveSettings(newLayout, newActiveWidgets)
     }
 
     const renderWidget = (id: string) => {
@@ -265,6 +336,14 @@ export function DashboardContent({ data }: DashboardContentProps) {
         }
     }
 
+    if (isLoadingSettings) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+        )
+    }
+
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header Section */}
@@ -293,7 +372,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
             {/* Grid Layout */}
             <DashboardGrid
                 defaultLayout={layout}
-                onLayoutChange={(newLayout) => setLayout(newLayout)}
+                onLayoutChange={handleLayoutChange}
             >
                 {activeWidgets.map(widgetId => (
                     <div key={widgetId} className="h-full">

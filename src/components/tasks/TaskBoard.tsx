@@ -7,8 +7,9 @@ import { TaskListComponent } from './TaskList'
 import { TaskCard } from './TaskCard'
 import { CreateTaskModal } from './CreateTaskModal'
 import { CreateListModal } from './CreateListModal'
-import { Plus, Loader2 } from 'lucide-react'
+import { Plus, Loader2, LayoutList, KanbanSquare } from 'lucide-react'
 import { Task, TaskList } from './types'
+import { TaskTimeline } from './TaskTimeline'
 
 interface TaskBoardProps {
     projectId: string
@@ -24,6 +25,7 @@ export function TaskBoard({ projectId }: TaskBoardProps) {
     const [editingTask, setEditingTask] = useState<Task | null>(null)
     const [currentListId, setCurrentListId] = useState<string>('')
     const [boardId, setBoardId] = useState<string>('')
+    const [view, setView] = useState<'board' | 'timeline'>('board')
 
     const supabase = createBrowserClient()
     const sensors = useSensors(useSensor(PointerSensor))
@@ -223,47 +225,78 @@ export function TaskBoard({ projectId }: TaskBoardProps) {
     }
 
     return (
-        <div className="h-full">
-            <DndContext
-                sensors={sensors}
-                onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
-                onDragEnd={handleDragEnd}
-            >
-                <div className="flex gap-4 overflow-x-auto pb-4">
-                    {lists.map((list) => (
-                        <TaskListComponent
-                            key={list.id}
-                            list={list}
-                            tasks={tasks.filter(t => t.list_id === list.id)}
-                            onAddTask={handleAddTask}
-                            onEditTask={handleEditTask}
-                            onDeleteTask={handleDeleteTask}
-                            onDeleteList={handleDeleteList}
-                        />
-                    ))}
-
+        <div className="h-full flex flex-col">
+            {/* View Toggle */}
+            <div className="flex justify-end mb-4 px-1">
+                <div className="bg-slate-100 p-1 rounded-lg flex items-center">
                     <button
-                        onClick={() => setListModalOpen(true)}
-                        className="bg-slate-100 hover:bg-slate-200 rounded-lg p-4 w-80 flex-shrink-0 flex items-center justify-center gap-2 text-slate-600 font-medium transition-colors"
+                        onClick={() => setView('board')}
+                        className={`p-2 rounded-md transition-all ${view === 'board' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                        title="Board View"
                     >
-                        <Plus className="w-5 h-5" />
-                        Add List
+                        <KanbanSquare className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={() => setView('timeline')}
+                        className={`p-2 rounded-md transition-all ${view === 'timeline' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                        title="Timeline View"
+                    >
+                        <LayoutList className="w-4 h-4" />
                     </button>
                 </div>
+            </div>
 
-                <DragOverlay>
-                    {activeTask ? (
-                        <div className="rotate-3">
-                            <TaskCard
-                                task={activeTask}
-                                onEdit={() => { }}
-                                onDelete={() => { }}
-                            />
+            {view === 'board' ? (
+                <div className="flex-1 overflow-x-auto">
+                    <DndContext
+                        sensors={sensors}
+                        onDragStart={handleDragStart}
+                        onDragOver={handleDragOver}
+                        onDragEnd={handleDragEnd}
+                    >
+                        <div className="flex gap-4 h-full pb-4">
+                            {lists.map((list) => (
+                                <TaskListComponent
+                                    key={list.id}
+                                    list={list}
+                                    tasks={tasks.filter(t => t.list_id === list.id)}
+                                    onAddTask={handleAddTask}
+                                    onEditTask={handleEditTask}
+                                    onDeleteTask={handleDeleteTask}
+                                    onDeleteList={handleDeleteList}
+                                />
+                            ))}
+
+                            <button
+                                onClick={() => setListModalOpen(true)}
+                                className="bg-slate-100 hover:bg-slate-200 rounded-lg p-4 w-80 flex-shrink-0 flex items-center justify-center gap-2 text-slate-600 font-medium transition-colors h-fit"
+                            >
+                                <Plus className="w-5 h-5" />
+                                Add List
+                            </button>
                         </div>
-                    ) : null}
-                </DragOverlay>
-            </DndContext>
+
+                        <DragOverlay>
+                            {activeTask ? (
+                                <div className="rotate-3">
+                                    <TaskCard
+                                        task={activeTask}
+                                        onEdit={() => { }}
+                                        onDelete={() => { }}
+                                    />
+                                </div>
+                            ) : null}
+                        </DragOverlay>
+                    </DndContext>
+                </div>
+            ) : (
+                <div className="flex-1 overflow-y-auto">
+                    <TaskTimeline
+                        tasks={tasks}
+                        onEditTask={handleEditTask}
+                    />
+                </div>
+            )}
 
             <CreateTaskModal
                 isOpen={modalOpen}

@@ -10,10 +10,13 @@ import {
     ArrowDownLeft,
     Calendar,
     Clock,
-    AlertCircle
+    AlertCircle,
+    FileText,
+    Trash2
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import RecordPaymentModal from '@/components/payments/RecordPaymentModal'
+import jsPDF from 'jspdf'
 
 export default function PaymentsPage() {
     const [payments, setPayments] = useState<Record<string, unknown>[]>([])
@@ -23,6 +26,54 @@ export default function PaymentsPage() {
     const [isRecordModalOpen, setIsRecordModalOpen] = useState(false)
 
     const supabase = createBrowserClient()
+
+    const generateInvoice = (payment: any) => {
+        const doc = new jsPDF()
+
+        // Header
+        doc.setFontSize(20)
+        doc.text('INVOICE', 105, 20, { align: 'center' })
+
+        doc.setFontSize(10)
+        doc.text('BuildWise Construction', 20, 30)
+        doc.text('123 Builder Way', 20, 35)
+        doc.text('Sydney, NSW 2000', 20, 40)
+
+        // Invoice Details
+        doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, 140, 30)
+        doc.text(`Invoice #: INV-${payment.id.slice(0, 8).toUpperCase()}`, 140, 35)
+
+        // Bill To
+        doc.text('Bill To:', 20, 55)
+        doc.setFontSize(12)
+        doc.text(payment.client_name || 'Valued Client', 20, 62)
+        doc.setFontSize(10)
+
+        // Table Header
+        doc.setFillColor(240, 240, 240)
+        doc.rect(20, 75, 170, 10, 'F')
+        doc.setFont('helvetica', 'bold')
+        doc.text('Description', 25, 81)
+        doc.text('Amount', 160, 81)
+
+        // Table Content
+        doc.setFont('helvetica', 'normal')
+        doc.text(payment.name || 'Payment', 25, 95)
+        doc.text(`$${Number(payment.amount).toLocaleString()}`, 160, 95)
+
+        // Total
+        doc.line(20, 110, 190, 110)
+        doc.setFont('helvetica', 'bold')
+        doc.text('Total:', 130, 120)
+        doc.text(`$${Number(payment.amount).toLocaleString()}`, 160, 120)
+
+        // Footer
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(8)
+        doc.text('Thank you for your business!', 105, 140, { align: 'center' })
+
+        doc.save(`invoice-${payment.id.slice(0, 8)}.pdf`)
+    }
 
     const fetchPayments = useCallback(async () => {
         try {
@@ -49,6 +100,24 @@ export default function PaymentsPage() {
     useEffect(() => {
         fetchPayments()
     }, [fetchPayments])
+
+    const handleDelete = async (paymentId: string) => {
+        if (!confirm('Are you sure you want to delete this payment? This action cannot be undone.')) return
+
+        try {
+            const { error } = await supabase
+                .from('payments')
+                .delete()
+                .eq('id', paymentId)
+
+            if (error) throw error
+
+            fetchPayments()
+        } catch (error) {
+            console.error('Error deleting payment:', error)
+            alert('Failed to delete payment')
+        }
+    }
 
     const filteredPayments = payments.filter((payment) => {
         const matchesSearch = searchQuery === '' ||
@@ -179,6 +248,7 @@ export default function PaymentsPage() {
                                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -211,6 +281,24 @@ export default function PaymentsPage() {
                                         <div className="flex items-center">
                                             <Calendar className="w-3 h-3 mr-1.5 text-slate-400" />
                                             {new Date(String(payment.created_at)).toLocaleDateString()}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                onClick={() => generateInvoice(payment)}
+                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                title="Generate Invoice"
+                                            >
+                                                <FileText className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(String(payment.id))}
+                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Delete Payment"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>

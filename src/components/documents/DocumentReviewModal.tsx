@@ -43,6 +43,17 @@ export function DocumentReviewModal({ isOpen, onClose, projectId, file, extracte
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        if (!formData.amount || isNaN(parseFloat(formData.amount))) {
+            alert('Please enter a valid amount')
+            return
+        }
+
+        if (!formData.date) {
+            alert('Please select a date')
+            return
+        }
+
         setIsSubmitting(true)
 
         try {
@@ -143,6 +154,12 @@ export function DocumentReviewModal({ isOpen, onClose, projectId, file, extracte
                                 src={URL.createObjectURL(file)}
                                 alt="Preview"
                                 className="max-w-full max-h-[300px] object-contain rounded-lg shadow-sm"
+                            />
+                        ) : file && file.type === 'application/pdf' ? (
+                            <iframe
+                                src={URL.createObjectURL(file)}
+                                className="w-full h-[300px] rounded-lg shadow-sm"
+                                title="PDF Preview"
                             />
                         ) : (
                             <div className="text-center">

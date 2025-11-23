@@ -8,7 +8,8 @@ import {
     Calendar,
     Building2,
     ArrowRight,
-    DollarSign
+    DollarSign,
+    Trash2
 } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
@@ -75,9 +76,27 @@ export default function ProjectsPage() {
         }
     }
 
+    const handleDeleteProject = async (projectId: string) => {
+        if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) return
+
+        try {
+            const { error } = await supabase
+                .from('projects')
+                .delete()
+                .eq('id', projectId)
+
+            if (error) throw error
+
+            setProjects(projects.filter(p => p.id !== projectId))
+        } catch (error) {
+            console.error('Error deleting project:', error)
+            alert('Failed to delete project')
+        }
+    }
+
     return (
         <div className="space-y-8">
-            {/* Header */}
+            {/* ... (Header and Filters remain the same) ... */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
@@ -162,8 +181,20 @@ export default function ProjectsPage() {
                     {filteredProjects.map((project) => (
                         <div
                             key={project.id}
-                            className="group bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 flex flex-col"
+                            className="group bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 flex flex-col relative"
                         >
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    handleDeleteProject(project.id)
+                                }}
+                                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 z-10"
+                                title="Delete Project"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+
                             <div className="flex justify-between items-start mb-4">
                                 <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
                                     <Building2 className="w-6 h-6" />

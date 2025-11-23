@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase'
 import {
     Building2,
@@ -39,6 +39,7 @@ interface Project {
 export default function ProjectDetailsPage() {
     const params = useParams()
     const router = useRouter()
+    const searchParams = useSearchParams()
     const id = params.id as string
     const [activeTab, setActiveTab] = useState('overview')
     const [project, setProject] = useState<Project | null>(null)
@@ -48,6 +49,14 @@ export default function ProjectDetailsPage() {
     const [extractedData, setExtractedData] = useState<any>(null)
 
     const supabase = createBrowserClient()
+
+    // Set active tab from URL query parameter
+    useEffect(() => {
+        const tabParam = searchParams.get('tab')
+        if (tabParam && ['overview', 'contracts', 'documents', 'payments', 'tasks'].includes(tabParam)) {
+            setActiveTab(tabParam)
+        }
+    }, [searchParams])
 
     const fetchProject = async () => {
         try {

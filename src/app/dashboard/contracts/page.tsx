@@ -10,8 +10,10 @@ import {
     MoreHorizontal,
     Download,
     Calendar,
-    Mail
+    Mail,
+    Trash2
 } from 'lucide-react'
+import jsPDF from 'jspdf'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { EmailContractModal } from '@/components/contracts/EmailContractModal'
@@ -81,6 +83,62 @@ export default function ContractsPage() {
     const handleEmailClick = (contract: Contract) => {
         setSelectedContract(contract)
         setIsEmailModalOpen(true)
+    }
+
+    const handleDownload = (contract: Contract) => {
+        const doc = new jsPDF()
+        const project = Array.isArray(contract.projects) ? contract.projects[0] : contract.projects
+
+        // Header
+        doc.setFontSize(20)
+        doc.text('CONTRACT', 105, 20, { align: 'center' })
+
+        doc.setFontSize(10)
+        doc.text('BuildWise Construction', 20, 35)
+        doc.text(`Contract ID: ${contract.id.slice(0, 8).toUpperCase()}`, 20, 40)
+        doc.text(`Date: ${new Date(contract.created_at).toLocaleDateString()}`, 20, 45)
+        doc.text(`Status: ${contract.status}`, 20, 50)
+
+        // Project Details
+        doc.setFontSize(12)
+        doc.text('Project Details:', 20, 65)
+        doc.setFontSize(10)
+        doc.text(`Project: ${project?.name || 'N/A'}`, 20, 72)
+        doc.text(`Client: ${project?.client_name || 'N/A'}`, 20, 77)
+
+        // Contract Content
+        doc.setFontSize(12)
+        doc.text('Contract Terms:', 20, 92)
+        doc.setFontSize(10)
+
+        const content = (typeof contract.content === 'object' && contract.content && 'text' in contract.content && typeof contract.content.text === 'string')
+            ? contract.content.text
+            : typeof contract.content === 'string'
+                ? contract.content
+                : 'No content available'
+
+        const lines = doc.splitTextToSize(content, 170)
+        doc.text(lines, 20, 100)
+
+        doc.save(`contract-${contract.id.slice(0, 8)}.pdf`)
+    }
+
+    const handleDelete = async (contractId: string) => {
+        if (!confirm('Are you sure you want to delete this contract? This action cannot be undone.')) return
+
+        try {
+            const { error } = await supabase
+                .from('contracts')
+                .delete()
+                .eq('id', contractId)
+
+            if (error) throw error
+
+            fetchContracts()
+        } catch (error) {
+            console.error('Error deleting contract:', error)
+            alert('Failed to delete contract')
+        }
     }
 
     const filteredContracts = contracts.filter((contract) => {
@@ -214,11 +272,19 @@ export default function ContractsPage() {
                                                 >
                                                     <Mail className="w-4 h-4" />
                                                 </button>
-                                                <button className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all" title="Download">
+                                                <button
+                                                    onClick={() => handleDownload(contract)}
+                                                    className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
+                                                    title="Download"
+                                                >
                                                     <Download className="w-4 h-4" />
                                                 </button>
-                                                <button className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all">
-                                                    <MoreHorizontal className="w-4 h-4" />
+                                                <button
+                                                    onClick={() => handleDelete(contract.id)}
+                                                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
                                                 </button>
                                             </div>
                                         </td>

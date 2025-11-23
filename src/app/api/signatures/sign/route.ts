@@ -53,6 +53,27 @@ export async function POST(request: Request) {
 
         if (contractError) throw contractError
 
+        // 4. Create notification for the user
+        const { data: contract } = await supabase
+            .from('contracts')
+            .select('title, project_id, projects(user_id)')
+            .eq('id', requestData.contract_id)
+            .single()
+
+        if (contract && contract.projects) {
+            // @ts-ignore - projects is an object here due to the join
+            const userId = contract.projects.user_id
+
+            await supabase
+                .from('notifications')
+                .insert({
+                    user_id: userId,
+                    title: 'Contract Signed',
+                    message: `Contract "${contract.title}" has been signed.`,
+                    type: 'success'
+                })
+        }
+
         return NextResponse.json({ success: true })
 
     } catch (error) {
