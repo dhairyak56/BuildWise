@@ -79,7 +79,7 @@ export default function NewProjectPage() {
 
         if (insertError) {
             console.error('Error saving project:', insertError)
-            alert('Failed to save project. Please try again.')
+            alert(`Failed to save project: ${insertError.message || insertError.details || JSON.stringify(insertError)}`)
             setIsGenerating(false)
             return
         }
@@ -104,7 +104,8 @@ export default function NewProjectPage() {
             })
 
             if (!response.ok) {
-                throw new Error('Failed to generate contract')
+                const errorData = await response.json()
+                throw new Error(errorData.details || errorData.error || 'Failed to generate contract')
             }
 
             const { contract } = await response.json()
@@ -121,7 +122,7 @@ export default function NewProjectPage() {
             router.refresh()
         } catch (error) {
             console.error('Error generating contract:', error)
-            alert('Failed to generate contract. Please try again.')
+            alert(`Failed to generate contract: ${error instanceof Error ? error.message : 'Unknown error'}`)
             setIsGenerating(false)
         }
     }

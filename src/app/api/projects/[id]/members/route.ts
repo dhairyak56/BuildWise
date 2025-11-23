@@ -13,7 +13,7 @@ export async function GET(
         .from('project_members')
         .select('*')
         .eq('project_id', projectId)
-        .order('created_at', { ascending: false })
+        .order('invited_at', { ascending: false })
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 

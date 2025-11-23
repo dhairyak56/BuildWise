@@ -107,7 +107,7 @@ export function ClauseLibrary({ isOpen, onClose, onInsertClause }: ClauseLibrary
         try {
             const { data: { user } } = await supabase.auth.getUser()
             if (user) {
-                console.log('Tracking usage for clause:', clause.id, 'Current count:', clause.usage_count)
+
 
                 // Insert usage record
                 const { error: usageError } = await supabase.from('clause_usage').insert({

@@ -25,7 +25,7 @@ export default function EmailModal({ isOpen, onClose, contractId, contractTitle,
         setErrorMessage('')
 
         try {
-            console.log('Sending email to:', to)
+
 
             const response = await fetch('/api/send-email', {
                 method: 'POST',

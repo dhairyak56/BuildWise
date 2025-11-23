@@ -88,7 +88,7 @@ Provide ONLY the JSON response, no additional text.`
             throw new Error('No response from AI')
         }
 
-        console.log('AI Response:', responseText)
+
 
         // Parse the JSON response
         let parsedResponse

@@ -21,7 +21,11 @@ export function TeamManagement({ projectId }: { projectId: string }) {
     const fetchMembers = useCallback(async () => {
         try {
             const res = await fetch(`/api/projects/${projectId}/members`)
-            if (!res.ok) throw new Error('Failed to fetch members')
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}))
+                console.error('Fetch members failed:', res.status, res.statusText, errorData)
+                throw new Error(errorData.error || 'Failed to fetch members')
+            }
             const data = await res.json()
             setMembers(data)
         } catch (err) {
@@ -123,8 +127,8 @@ export function TeamManagement({ projectId }: { projectId: string }) {
                                 <div className="font-medium text-slate-900">{member.email}</div>
                                 <div className="flex items-center gap-2 text-xs text-slate-500">
                                     <span className={`capitalize px-2 py-0.5 rounded-full ${member.role === 'owner' ? 'bg-purple-100 text-purple-700' :
-                                            member.role === 'editor' ? 'bg-blue-100 text-blue-700' :
-                                                'bg-slate-100 text-slate-700'
+                                        member.role === 'editor' ? 'bg-blue-100 text-blue-700' :
+                                            'bg-slate-100 text-slate-700'
                                         }`}>
                                         {member.role}
                                     </span>
