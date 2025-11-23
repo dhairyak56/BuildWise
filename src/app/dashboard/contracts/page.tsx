@@ -7,7 +7,6 @@ import {
     Plus,
     Search,
     Filter,
-    MoreHorizontal,
     Download,
     Calendar,
     Mail,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createBrowserClient } from '@/lib/supabase'
 import { FileText, DollarSign, Upload, CheckCircle, Clock } from 'lucide-react'
 
@@ -18,11 +18,7 @@ export function RecentActivityWidget() {
     const [isLoading, setIsLoading] = useState(true)
     const supabase = createBrowserClient()
 
-    useEffect(() => {
-        fetchRecentActivity()
-    }, [])
-
-    const fetchRecentActivity = async () => {
+    const fetchRecentActivity = useCallback(async () => {
         try {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) return
@@ -113,7 +109,11 @@ export function RecentActivityWidget() {
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [supabase])
+
+    useEffect(() => {
+        fetchRecentActivity()
+    }, [fetchRecentActivity])
 
     const getIcon = (icon: string) => {
         switch (icon) {
@@ -173,7 +173,7 @@ export function RecentActivityWidget() {
                 </div>
             ) : (
                 <div className="space-y-4">
-                    {activities.map((activity, index) => (
+                    {activities.map((activity) => (
                         <div key={`${activity.type}-${activity.id}`} className="flex items-start gap-3 group">
                             <div className={`p-2 rounded-lg ${getIconColor(activity.icon)} group-hover:scale-110 transition-transform`}>
                                 {getIcon(activity.icon)}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
-import { FileText, Upload, FolderOpen, Download, Trash2, File, Image as ImageIcon, Eye, MoreVertical } from 'lucide-react'
+import { FileText, Upload, FolderOpen, Download, Trash2, File, Image as ImageIcon, Eye } from 'lucide-react'
 import DocumentUploadModal from '@/components/documents/DocumentUploadModal'
 import { DocumentPreviewModal } from '@/components/documents/DocumentPreviewModal'
 
@@ -237,8 +237,8 @@ export default function DocumentsPage() {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className={`p-2 rounded-lg mr-3 ${doc.file_type.includes('pdf') ? 'bg-red-50 text-red-600' :
-                                                        doc.file_type.includes('image') ? 'bg-blue-50 text-blue-600' :
-                                                            'bg-slate-100 text-slate-600'
+                                                    doc.file_type.includes('image') ? 'bg-blue-50 text-blue-600' :
+                                                        'bg-slate-100 text-slate-600'
                                                     }`}>
                                                     {getFileIcon(doc.file_type)}
                                                 </div>

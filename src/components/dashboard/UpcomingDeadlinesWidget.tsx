@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createBrowserClient } from '@/lib/supabase'
 import { Calendar, AlertCircle, Clock, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
@@ -19,11 +19,7 @@ export function UpcomingDeadlinesWidget() {
     const [isLoading, setIsLoading] = useState(true)
     const supabase = createBrowserClient()
 
-    useEffect(() => {
-        fetchDeadlines()
-    }, [])
-
-    const fetchDeadlines = async () => {
+    const fetchDeadlines = useCallback(async () => {
         try {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) return
@@ -65,7 +61,11 @@ export function UpcomingDeadlinesWidget() {
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [supabase])
+
+    useEffect(() => {
+        fetchDeadlines()
+    }, [fetchDeadlines])
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -141,8 +141,8 @@ export function UpcomingDeadlinesWidget() {
                                 <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                                     <div
                                         className={`h-full transition-all ${deadline.status === 'overdue' ? 'bg-red-500' :
-                                                deadline.status === 'urgent' ? 'bg-amber-500' :
-                                                    'bg-blue-500'
+                                            deadline.status === 'urgent' ? 'bg-amber-500' :
+                                                'bg-blue-500'
                                             }`}
                                         style={{ width: `${deadline.progress}%` }}
                                     />

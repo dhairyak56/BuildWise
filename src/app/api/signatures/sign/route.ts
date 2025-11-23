@@ -61,7 +61,7 @@ export async function POST(request: Request) {
             .single()
 
         if (contract && contract.projects) {
-            // @ts-ignore - projects is an object here due to the join
+            // @ts-expect-error - projects is an object here due to the join
             const userId = contract.projects.user_id
 
             await supabase
