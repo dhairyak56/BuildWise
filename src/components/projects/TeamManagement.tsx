@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, MoreVertical, Shield, Trash2, Mail, CheckCircle, Clock } from 'lucide-react'
+import { Plus, Trash2, Clock } from 'lucide-react'
 import { InviteMemberModal } from './InviteMemberModal'
 
 interface Member {

@@ -1,5 +1,5 @@
 import { Task } from './types'
-import { Calendar, Clock, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Calendar, Clock, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface TaskTimelineProps {

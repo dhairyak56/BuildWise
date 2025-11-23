@@ -6,6 +6,8 @@ import { DashboardGrid } from '@/components/dashboard/DashboardGrid'
 import { WidgetLibrary } from '@/components/dashboard/WidgetLibrary'
 import { OverviewCharts } from '@/components/dashboard/OverviewCharts'
 import { TasksWidget } from '@/components/dashboard/TasksWidget'
+import { RecentActivityWidget } from '@/components/dashboard/RecentActivityWidget'
+import { UpcomingDeadlinesWidget } from '@/components/dashboard/UpcomingDeadlinesWidget'
 import { DollarSign, FolderIcon, FileText, Plus, Settings2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
@@ -31,6 +33,8 @@ const AVAILABLE_WIDGETS = [
     { id: 'chart_revenue', title: 'Revenue Overview', description: 'Monthly revenue chart', defaultW: 8, defaultH: 6 },
     { id: 'list_activity', title: 'Recent Activity', description: 'Latest project and document updates', defaultW: 4, defaultH: 6 },
     { id: 'tasks_widget', title: 'Recent Tasks', description: 'Tasks from all your projects', defaultW: 4, defaultH: 6 },
+    { id: 'recent_activity_widget', title: 'Activity Timeline', description: 'Timeline of recent actions across all entities', defaultW: 4, defaultH: 6 },
+    { id: 'upcoming_deadlines', title: 'Upcoming Deadlines', description: 'Projects with approaching deadlines', defaultW: 4, defaultH: 6 },
 ]
 
 const DEFAULT_LAYOUT = [
@@ -329,6 +333,40 @@ export function DashboardContent({ data }: DashboardContentProps) {
                         <div className="flex-1 overflow-hidden">
                             <TasksWidget />
                         </div>
+                    </div>
+                )
+            case 'recent_activity_widget':
+                return (
+                    <div className="h-full rounded-xl relative group overflow-hidden">
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                handleRemoveWidget(id)
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            className="absolute top-2 right-2 p-1 rounded-md bg-slate-100 hover:bg-slate-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
+                        >
+                            <X className="h-3 w-3 text-slate-600 pointer-events-none" />
+                        </button>
+                        <RecentActivityWidget />
+                    </div>
+                )
+            case 'upcoming_deadlines':
+                return (
+                    <div className="h-full rounded-xl relative group overflow-hidden">
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                handleRemoveWidget(id)
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            className="absolute top-2 right-2 p-1 rounded-md bg-slate-100 hover:bg-slate-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
+                        >
+                            <X className="h-3 w-3 text-slate-600 pointer-events-none" />
+                        </button>
+                        <UpcomingDeadlinesWidget />
                     </div>
                 )
             default:
