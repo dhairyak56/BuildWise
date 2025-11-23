@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { arrayMove } from '@dnd-kit/sortable'
 import { createBrowserClient } from '@/lib/supabase'
 import { TaskListComponent } from './TaskList'
 import { TaskCard } from './TaskCard'
@@ -29,11 +28,7 @@ export function TaskBoard({ projectId }: TaskBoardProps) {
     const supabase = createBrowserClient()
     const sensors = useSensors(useSensor(PointerSensor))
 
-    useEffect(() => {
-        loadBoard()
-    }, [projectId])
-
-    const loadBoard = async () => {
+    const loadBoard = useCallback(async () => {
         try {
             // Get or create board
             let { data: board } = await supabase
@@ -78,7 +73,11 @@ export function TaskBoard({ projectId }: TaskBoardProps) {
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [projectId, supabase])
+
+    useEffect(() => {
+        loadBoard()
+    }, [loadBoard])
 
     const handleAddList = async (name: string) => {
         const { data } = await supabase

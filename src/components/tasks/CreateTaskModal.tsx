@@ -12,25 +12,26 @@ interface CreateTaskModalProps {
 }
 
 export function CreateTaskModal({ isOpen, onClose, onSave, task }: CreateTaskModalProps) {
-    const [formData, setFormData] = useState<Partial<Task>>({
-        title: '',
-        description: '',
-        due_date: '',
-        assigned_to: ''
-    })
-
-    useEffect(() => {
+    // Initialize form data based on task prop - avoids setState in useEffect
+    const getInitialFormData = (): Partial<Task> => {
         if (task) {
-            setFormData(task)
-        } else {
-            setFormData({
-                title: '',
-                description: '',
-                due_date: '',
-                assigned_to: ''
-            })
+            return task
         }
-    }, [task, isOpen])
+        return {
+            title: '',
+            description: '',
+            due_date: '',
+            assigned_to: ''
+        }
+    }
+
+    const [formData, setFormData] = useState<Partial<Task>>(getInitialFormData())
+
+    // Reset form when modal opens/closes or task changes
+    useEffect(() => {
+        setFormData(getInitialFormData())
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen])
 
     if (!isOpen) return null
 
