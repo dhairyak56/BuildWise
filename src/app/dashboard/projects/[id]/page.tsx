@@ -122,9 +122,11 @@ export default function ProjectDetailsPage() {
                     </div>
                 </div>
                 <div className="flex gap-3">
-                    <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm transition-colors">
-                        Edit Project
-                    </button>
+                    <Link href={`/dashboard/projects/${id}/settings`}>
+                        <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm transition-colors">
+                            Settings
+                        </button>
+                    </Link>
                     <Link href={`/dashboard/contracts/new?projectId=${id}`}>
                         <button className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium text-sm transition-colors">
                             Generate Contract

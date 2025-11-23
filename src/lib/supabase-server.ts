@@ -35,3 +35,24 @@ export function createClient() {
     )
 }
 
+
+// Admin client (for background tasks, caching, etc. - bypasses RLS)
+export function createAdminClient() {
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!serviceRoleKey) {
+        throw new Error('SUPABASE_SERVICE_ROLE_KEY is missing. Please add it to your .env.local file to enable dashboard caching.')
+    }
+
+    return createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        serviceRoleKey,
+        {
+            cookies: {
+                get(name: string) { return '' },
+                set(name: string, value: string, options: CookieOptions) { },
+                remove(name: string, options: CookieOptions) { },
+            },
+        }
+    )
+}

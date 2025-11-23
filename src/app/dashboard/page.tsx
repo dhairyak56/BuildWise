@@ -1,44 +1,31 @@
-import { createClient } from '@/lib/supabase-server'
+import { createClient, createAdminClient } from '@/lib/supabase-server'
 import { DashboardContent } from '@/components/dashboard/DashboardContent'
 
-async function getDashboardData() {
-    const supabase = createClient()
+import { unstable_cache } from 'next/cache'
 
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        return {
-            activeProjects: 0,
-            pendingContracts: 0,
-            totalRevenue: 0,
-            monthlyRevenue: [],
-            revenueChange: 0,
-            newProjectsThisWeek: 0,
-            recentActivity: [],
-            user: null
-        }
-    }
+const getCachedDashboardData = async (userId: string) => {
+    const supabase = createAdminClient()
 
     // Fetch active projects count
     const { count: activeProjects } = await supabase
         .from('projects')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'Active')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
 
     // Fetch pending contracts count (Draft status)
     const { count: pendingContracts } = await supabase
         .from('contracts')
         .select('project_id, projects!inner(user_id)', { count: 'exact', head: true })
         .eq('status', 'Draft')
-        .eq('projects.user_id', user.id)
+        .eq('projects.user_id', userId)
 
     // Fetch payments for revenue calculation
     const { data: payments } = await supabase
         .from('payments')
         .select('amount, payment_date, project_id, projects!inner(user_id)')
         .eq('status', 'Paid')
-        .eq('projects.user_id', user.id)
+        .eq('projects.user_id', userId)
 
     // Calculate total revenue
     const totalRevenue = payments?.reduce((sum, payment) => sum + Number(payment.amount), 0) || 0
@@ -88,14 +75,14 @@ async function getDashboardData() {
     const { count: newProjectsThisWeek } = await supabase
         .from('projects')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .gte('created_at', oneWeekAgo.toISOString())
 
     // Fetch recent projects
     const { data: recentProjects } = await supabase
         .from('projects')
         .select('id, name, created_at, status')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(3)
 
@@ -103,7 +90,7 @@ async function getDashboardData() {
     const { data: recentDocuments } = await supabase
         .from('documents')
         .select('id, name, created_at')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(3)
 
@@ -112,7 +99,7 @@ async function getDashboardData() {
         ...(recentProjects?.map(p => ({ ...p, type: 'project' })) || []),
         ...(recentDocuments?.map(d => ({ ...d, type: 'document' })) || [])
     ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, 5)
+        .slice(5)
 
     return {
         activeProjects: activeProjects || 0,
@@ -122,6 +109,39 @@ async function getDashboardData() {
         revenueChange,
         newProjectsThisWeek: newProjectsThisWeek || 0,
         recentActivity: activity,
+    }
+}
+
+async function getDashboardData() {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return {
+            activeProjects: 0,
+            pendingContracts: 0,
+            totalRevenue: 0,
+            monthlyRevenue: [],
+            revenueChange: 0,
+            newProjectsThisWeek: 0,
+            recentActivity: [],
+            user: null
+        }
+    }
+
+    const getCachedData = unstable_cache(
+        async () => getCachedDashboardData(user.id),
+        ['dashboard', user.id],
+        {
+            revalidate: 60, // Cache for 60 seconds
+            tags: [`dashboard:${user.id}`]
+        }
+    )
+
+    const data = await getCachedData()
+
+    return {
+        ...data,
         user
     }
 }
