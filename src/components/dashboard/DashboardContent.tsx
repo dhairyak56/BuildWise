@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { DashboardGrid } from '@/components/dashboard/DashboardGrid'
 import { WidgetLibrary } from '@/components/dashboard/WidgetLibrary'
 import { OverviewCharts } from '@/components/dashboard/OverviewCharts'
+import { TasksWidget } from '@/components/dashboard/TasksWidget'
 import { DollarSign, FolderIcon, FileText, Plus, Settings2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
@@ -28,6 +29,7 @@ const AVAILABLE_WIDGETS = [
     { id: 'stat_contracts', title: 'Pending Contracts', description: 'Contracts waiting for signature', defaultW: 4, defaultH: 2 },
     { id: 'chart_revenue', title: 'Revenue Overview', description: 'Monthly revenue chart', defaultW: 8, defaultH: 6 },
     { id: 'list_activity', title: 'Recent Activity', description: 'Latest project and document updates', defaultW: 4, defaultH: 6 },
+    { id: 'tasks_widget', title: 'Recent Tasks', description: 'Tasks from all your projects', defaultW: 4, defaultH: 6 },
 ]
 
 const DEFAULT_LAYOUT = [
@@ -36,6 +38,7 @@ const DEFAULT_LAYOUT = [
     { i: 'stat_contracts', x: 8, y: 0, w: 4, h: 2, minW: 3, minH: 2 },
     { i: 'chart_revenue', x: 0, y: 2, w: 8, h: 6, minW: 6, minH: 4 },
     { i: 'list_activity', x: 8, y: 2, w: 4, h: 6, minW: 3, minH: 4 },
+    { i: 'tasks_widget', x: 0, y: 8, w: 4, h: 6, minW: 3, minH: 4 },
 ]
 
 export function DashboardContent({ data }: DashboardContentProps) {
@@ -235,6 +238,25 @@ export function DashboardContent({ data }: DashboardContentProps) {
                                     ))
                                 )}
                             </div>
+                        </div>
+                    </div>
+                )
+            case 'tasks_widget':
+                return (
+                    <div className="h-full rounded-xl border bg-card text-card-foreground shadow-sm flex flex-col relative group overflow-hidden">
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                handleRemoveWidget(id)
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            className="absolute top-2 right-2 p-1 rounded-md bg-slate-100 hover:bg-slate-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
+                        >
+                            <X className="h-3 w-3 text-slate-600 pointer-events-none" />
+                        </button>
+                        <div className="flex-1 overflow-hidden">
+                            <TasksWidget />
                         </div>
                     </div>
                 )

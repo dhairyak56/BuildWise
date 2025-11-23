@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase-server'
 import { TeamManagement } from '@/components/projects/TeamManagement'
+import { AuditLogViewer } from '@/components/projects/AuditLogViewer'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
@@ -55,7 +56,13 @@ export default async function ProjectSettingsPage({
                     <TeamManagement projectId={id} />
                 </section>
 
-                {/* Future settings sections can go here */}
+                <section>
+                    <div className="mb-4">
+                        <h2 className="text-xl font-semibold text-slate-900">Audit Logs</h2>
+                        <p className="text-slate-500 text-sm">History of important actions in this project.</p>
+                    </div>
+                    <AuditLogViewer projectId={id} />
+                </section>
             </div>
         </div>
     )

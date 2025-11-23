@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { createClient } from '@/lib/supabase-server'
+import { logAction } from '@/lib/logger'
 
 // Initialize Perplexity client using OpenAI SDK
 const perplexity = new OpenAI({
@@ -10,7 +12,7 @@ const perplexity = new OpenAI({
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
-        const { projectName, clientName, siteAddress, jobType, scopeOfWork, contractValue, startDate, endDate } = body
+        const { projectName, clientName, siteAddress, jobType, scopeOfWork, contractValue, startDate, endDate, projectId } = body
 
         // Validate required fields
         if (!projectName || !clientName) {
@@ -64,6 +66,20 @@ Generate a complete, professional construction contract now:`
 
         if (!generatedContract) {
             throw new Error('No contract generated')
+        }
+
+        // Log the action
+        if (projectId) {
+            const supabase = createClient()
+            await logAction(supabase, {
+                action: 'Contract Generated',
+                projectId,
+                details: {
+                    projectName,
+                    clientName,
+                    value: contractValue
+                }
+            })
         }
 
         return NextResponse.json({

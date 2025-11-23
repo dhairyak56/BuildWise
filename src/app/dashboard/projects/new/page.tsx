@@ -99,7 +99,8 @@ export default function NewProjectPage() {
                     scopeOfWork: formData.scopeOfWork,
                     contractValue: formData.contractValue,
                     startDate: formData.startDate,
-                    endDate: formData.endDate
+                    endDate: formData.endDate,
+                    projectId: newProject.id
                 })
             })
 

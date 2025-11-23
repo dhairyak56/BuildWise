@@ -33,7 +33,7 @@ export function DashboardGrid({ children, defaultLayout, onLayoutChange }: Dashb
                     .from('user_settings')
                     .select('dashboard_layout')
                     .eq('user_id', user.id)
-                    .single()
+                    .maybeSingle()
 
                 if (data?.dashboard_layout) {
                     // Ensure layout is valid
@@ -70,7 +70,7 @@ export function DashboardGrid({ children, defaultLayout, onLayoutChange }: Dashb
                     .from('user_settings')
                     .select('user_id')
                     .eq('user_id', user.id)
-                    .single()
+                    .maybeSingle()
 
                 if (existing) {
                     await supabase

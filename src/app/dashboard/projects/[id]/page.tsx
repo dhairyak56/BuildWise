@@ -11,12 +11,14 @@ import {
     Upload,
     CreditCard,
     ArrowLeft,
-    ExternalLink
+    ExternalLink,
+    CheckSquare
 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { DocumentUpload } from '@/components/documents/DocumentUpload'
 import { DocumentReviewModal } from '@/components/documents/DocumentReviewModal'
+import { TaskBoard } from '@/components/tasks/TaskBoard'
 
 interface Project {
     id: string
@@ -91,6 +93,7 @@ export default function ProjectDetailsPage() {
         { id: 'contracts', label: 'Contracts', icon: FileText },
         { id: 'documents', label: 'Documents', icon: Upload },
         { id: 'payments', label: 'Payments', icon: CreditCard },
+        { id: 'tasks', label: 'Tasks', icon: CheckSquare },
     ]
 
     return (
@@ -402,6 +405,12 @@ export default function ProjectDetailsPage() {
                                 </button>
                             </div>
                         )}
+                    </div>
+                )}
+
+                {activeTab === 'tasks' && (
+                    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                        <TaskBoard projectId={id} />
                     </div>
                 )}
             </div>
