@@ -25,7 +25,7 @@ async function getAnalyticsData() {
         .order('created_at', { ascending: true })
 
     // Process monthly revenue
-    const monthlyRevenue: { month: string; revenue: number }[] = []
+    const monthlyRevenue: { name: string; total: number }[] = []
     const revenueByMonth = new Map<string, number>()
 
     payments?.forEach((payment) => {
@@ -44,13 +44,13 @@ async function getAnalyticsData() {
         const monthName = date.toLocaleDateString('en-US', { month: 'short' })
 
         monthlyRevenue.push({
-            month: monthName,
-            revenue: revenueByMonth.get(monthKey) || 0
+            name: monthName,
+            total: revenueByMonth.get(monthKey) || 0
         })
     }
 
     // Process user growth
-    const userGrowth: { month: string; users: number }[] = []
+    const userGrowth: { name: string; total: number }[] = []
     const usersByMonth = new Map<string, number>()
 
     users?.forEach((user) => {
@@ -67,8 +67,8 @@ async function getAnalyticsData() {
 
         cumulativeUsers += usersByMonth.get(monthKey) || 0
         userGrowth.push({
-            month: monthName,
-            users: cumulativeUsers
+            name: monthName,
+            total: cumulativeUsers
         })
     }
 

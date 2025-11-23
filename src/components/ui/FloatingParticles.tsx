@@ -28,7 +28,6 @@ export default function FloatingParticles() {
             speedY: (Math.random() - 0.5) * 0.5, // Keep speedY
             duration: Math.random() * 20 + 10, // New property
             delay: Math.random() * 5, // New property
-            delay: Math.random() * 5, // New property
             color: ['teal', 'emerald', 'cyan', 'blue'][Math.floor(Math.random() * 4)],
         }))
 

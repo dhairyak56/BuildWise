@@ -3,10 +3,10 @@ import { createClient } from '@/lib/supabase-server'
 
 export async function GET(
     request: Request,
-    { params }: { params: { token: string } }
+    { params }: { params: Promise<{ token: string }> }
 ) {
     try {
-        const token = params.token
+        const { token } = await params
         const supabase = await createClient()
 
         // 1. Find request by token
