@@ -28,8 +28,10 @@ async function getUsers() {
         return {
             id: authUser.id,
             email: authUser.email || '',
+            role: authUser.user_metadata?.is_admin ? 'admin' : 'user',
             created_at: authUser.created_at,
             last_sign_in_at: authUser.last_sign_in_at || null,
+            banned_until: authUser.user_metadata?.banned_until || null,
             project_count: stats.project_count || 0,
             contract_count: stats.contract_count || 0,
             total_revenue: stats.total_revenue || 0,

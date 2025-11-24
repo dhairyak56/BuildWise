@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { createBrowserClient } from '@/lib/supabase/client'
+import { createBrowserClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation'
 import { Loader2, Shield } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'

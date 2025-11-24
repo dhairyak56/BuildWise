@@ -29,10 +29,6 @@ export function TasksWidget() {
     const [isLoading, setIsLoading] = useState(true)
     const supabase = createBrowserClient()
 
-    useEffect(() => {
-        loadTasks()
-    }, [loadTasks])
-
     const loadTasks = useCallback(async () => {
         try {
             const { data: { user } } = await supabase.auth.getUser()
@@ -71,6 +67,10 @@ export function TasksWidget() {
             setIsLoading(false)
         }
     }, [supabase])
+
+    useEffect(() => {
+        loadTasks()
+    }, [loadTasks])
 
     if (isLoading) {
         return (
