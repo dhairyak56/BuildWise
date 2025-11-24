@@ -37,7 +37,7 @@ export default function ContractsPage() {
     const [loading, setLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
     const [statusFilter, setStatusFilter] = useState('All')
-    const [selectedContract, setSelectedContract] = useState<Contract | null>(null)
+    const [selectedContract] = useState<Contract | null>(null)
     const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
     const router = useRouter()
 

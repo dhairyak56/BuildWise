@@ -22,17 +22,12 @@ interface UserTableProps {
 }
 
 export function UserTable({ initialUsers }: UserTableProps) {
-    const [users, _setUsers] = useState(initialUsers)
+    const [users] = useState<User[]>(initialUsers)
     const [searchTerm, setSearchTerm] = useState('')
 
     const filteredUsers = users.filter(user =>
         user.email?.toLowerCase().includes(searchTerm.toLowerCase())
     )
-
-    const handleUpdate = () => {
-        // Refresh the page to get updated data
-        window.location.reload()
-    }
 
     return (
         <div className="space-y-4">

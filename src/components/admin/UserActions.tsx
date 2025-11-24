@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Trash2, ShieldCheck, ShieldOff, LogIn } from 'lucide-react'
-import { createBrowserClient } from '@supabase/ssr'
 
 interface UserActionsProps {
     userId: string
@@ -12,10 +11,6 @@ interface UserActionsProps {
 
 export function UserActions({ userId, isAdmin, onUpdate }: UserActionsProps) {
     const [isLoading, setIsLoading] = useState(false)
-    const _supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
 
     const handleAction = async (action: 'delete' | 'make_admin' | 'remove_admin' | 'login_as') => {
         if (action === 'delete' && !confirm('Are you sure you want to delete this user? This action cannot be undone.')) return

@@ -99,7 +99,7 @@ export function ClauseLibrary({ isOpen, onClose, onInsertClause }: ClauseLibrary
 
     useEffect(() => {
         filterClauses()
-    }, [searchQuery, selectedCategory, clauses])
+    }, [searchQuery, selectedCategory, clauses, filterClauses])
 
     const handleInsertClause = async (clause: ClauseTemplate) => {
         // Track usage FIRST (before modal closes)

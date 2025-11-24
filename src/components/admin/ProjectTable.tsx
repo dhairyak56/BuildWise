@@ -1,6 +1,6 @@
 'use client'
 
-import { MoreHorizontal, Search, Trash2, Eye, Edit, User, DollarSign, FileText } from 'lucide-react'
+import { User, DollarSign, FileText } from 'lucide-react'
 import { ProjectActions } from '@/components/admin/ProjectActions'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -28,7 +28,7 @@ const statusColors: Record<string, string> = {
 }
 
 export function ProjectTable({ initialProjects }: ProjectTableProps) {
-    const [projects, setProjects] = useState(initialProjects)
+    const [projects] = useState<Project[]>(initialProjects)
     const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState<string>('all')
 

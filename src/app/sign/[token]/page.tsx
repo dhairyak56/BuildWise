@@ -39,7 +39,7 @@ export default function SigningPage() {
             if (data.status === 'signed') {
                 setIsSigned(true)
             }
-        } catch (error) {
+        } catch {
             setError('This signing link is invalid or has expired.')
         } finally {
             setIsLoading(false)
@@ -61,7 +61,7 @@ export default function SigningPage() {
             if (!response.ok) throw new Error('Failed to submit signature')
 
             setIsSigned(true)
-        } catch (error) {
+        } catch {
             alert('Failed to submit signature. Please try again.')
         } finally {
             setIsSubmitting(false)
