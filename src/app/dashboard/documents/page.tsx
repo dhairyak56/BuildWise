@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
-import { FileText, Upload, FolderOpen, Download, Trash2, File, Image as ImageIcon, Eye } from 'lucide-react'
+import { FileText, Upload, FolderOpen, Download, Trash2, File, Image as ImageIcon, Eye, CheckSquare, Square } from 'lucide-react'
 import DocumentUploadModal from '@/components/documents/DocumentUploadModal'
 import { DocumentPreviewModal } from '@/components/documents/DocumentPreviewModal'
 
@@ -25,6 +25,7 @@ export default function DocumentsPage() {
     const [searchQuery, setSearchQuery] = useState('')
     const [sortBy, setSortBy] = useState<'date' | 'name' | 'size'>('date')
     const [filterType, setFilterType] = useState<'all' | 'pdf' | 'image' | 'other'>('all')
+    const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set())
 
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -126,6 +127,55 @@ export default function DocumentsPage() {
         }
     }
 
+    const toggleDocumentSelection = (documentId: string) => {
+        const newSelected = new Set(selectedDocuments)
+        if (newSelected.has(documentId)) {
+            newSelected.delete(documentId)
+        } else {
+            newSelected.add(documentId)
+        }
+        setSelectedDocuments(newSelected)
+    }
+
+    const toggleSelectAll = () => {
+        if (selectedDocuments.size === filteredDocuments.length) {
+            setSelectedDocuments(new Set())
+        } else {
+            setSelectedDocuments(new Set(filteredDocuments.map(d => d.id)))
+        }
+    }
+
+    const handleBulkDelete = async () => {
+        if (selectedDocuments.size === 0) return
+        if (!confirm(`Are you sure you want to delete ${selectedDocuments.size} document(s)? This action cannot be undone.`)) return
+
+        try {
+            const docsToDelete = documents.filter(d => selectedDocuments.has(d.id))
+
+            // Delete from storage
+            const filePaths = docsToDelete.map(d => d.file_path)
+            const { error: storageError } = await supabase.storage
+                .from('documents')
+                .remove(filePaths)
+
+            if (storageError) throw storageError
+
+            // Delete from database
+            const { error: dbError } = await supabase
+                .from('documents')
+                .delete()
+                .in('id', Array.from(selectedDocuments))
+
+            if (dbError) throw dbError
+
+            setSelectedDocuments(new Set())
+            fetchDocuments()
+        } catch (error) {
+            console.error('Error deleting documents:', error)
+            alert('Failed to delete documents')
+        }
+    }
+
     const formatSize = (bytes: number) => {
         if (bytes === 0) return '0 Bytes'
         const k = 1024
@@ -187,6 +237,33 @@ export default function DocumentsPage() {
                 </div>
             </div>
 
+            {/* Bulk Actions Toolbar */}
+            {selectedDocuments.size > 0 && (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between animate-in slide-in-from-top duration-200">
+                    <div className="flex items-center gap-3">
+                        <CheckSquare className="w-5 h-5 text-blue-600" />
+                        <span className="font-medium text-blue-900">
+                            {selectedDocuments.size} document{selectedDocuments.size > 1 ? 's' : ''} selected
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={handleBulkDelete}
+                            className="px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors flex items-center gap-2"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            Delete Selected
+                        </button>
+                        <button
+                            onClick={() => setSelectedDocuments(new Set())}
+                            className="px-3 py-2 bg-white border border-blue-200 rounded-lg text-sm font-medium text-blue-900 hover:bg-blue-50 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {isLoading ? (
                 <div className="flex justify-center py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
@@ -224,6 +301,18 @@ export default function DocumentsPage() {
                         <table className="w-full">
                             <thead className="bg-slate-50 border-b">
                                 <tr>
+                                    <th className="px-6 py-3 text-left">
+                                        <button
+                                            onClick={toggleSelectAll}
+                                            className="text-slate-400 hover:text-slate-600 transition-colors"
+                                        >
+                                            {selectedDocuments.size === filteredDocuments.length && filteredDocuments.length > 0 ? (
+                                                <CheckSquare className="w-5 h-5 text-blue-600" />
+                                            ) : (
+                                                <Square className="w-5 h-5" />
+                                            )}
+                                        </button>
+                                    </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Type</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Size</th>
@@ -233,7 +322,19 @@ export default function DocumentsPage() {
                             </thead>
                             <tbody className="divide-y divide-slate-200">
                                 {filteredDocuments.map((doc) => (
-                                    <tr key={doc.id} className="hover:bg-slate-50 transition-colors group">
+                                    <tr key={doc.id} className={`hover:bg-slate-50 transition-colors group ${selectedDocuments.has(doc.id) ? 'bg-blue-50/50' : ''}`}>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <button
+                                                onClick={() => toggleDocumentSelection(doc.id)}
+                                                className="text-slate-400 hover:text-slate-600 transition-colors"
+                                            >
+                                                {selectedDocuments.has(doc.id) ? (
+                                                    <CheckSquare className="w-5 h-5 text-blue-600" />
+                                                ) : (
+                                                    <Square className="w-5 h-5" />
+                                                )}
+                                            </button>
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className={`p-2 rounded-lg mr-3 ${doc.file_type.includes('pdf') ? 'bg-red-50 text-red-600' :
@@ -262,11 +363,19 @@ export default function DocumentsPage() {
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button
-                                                    onClick={() => setPreviewDocument({
-                                                        name: doc.name,
-                                                        url: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/documents/${doc.file_path}`,
-                                                        type: doc.file_type
-                                                    })}
+                                                    onClick={async () => {
+                                                        const { data } = await supabase.storage
+                                                            .from('documents')
+                                                            .createSignedUrl(doc.file_path, 3600) // 1 hour expiry
+
+                                                        if (data?.signedUrl) {
+                                                            setPreviewDocument({
+                                                                name: doc.name,
+                                                                url: data.signedUrl,
+                                                                type: doc.file_type
+                                                            })
+                                                        }
+                                                    }}
                                                     className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                                     title="Preview"
                                                 >

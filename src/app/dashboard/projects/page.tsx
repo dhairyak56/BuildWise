@@ -9,7 +9,9 @@ import {
     Building2,
     ArrowRight,
     DollarSign,
-    Trash2
+    Trash2,
+    CheckSquare,
+    Square
 } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
@@ -30,6 +32,7 @@ export default function ProjectsPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
     const [statusFilter, setStatusFilter] = useState('All Statuses')
+    const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set())
 
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -87,10 +90,67 @@ export default function ProjectsPage() {
 
             if (error) throw error
 
-            setProjects(projects.filter(p => p.id !== projectId))
+            fetchProjects()
         } catch (error) {
             console.error('Error deleting project:', error)
             alert('Failed to delete project')
+        }
+    }
+
+    const toggleProjectSelection = (projectId: string) => {
+        const newSelected = new Set(selectedProjects)
+        if (newSelected.has(projectId)) {
+            newSelected.delete(projectId)
+        } else {
+            newSelected.add(projectId)
+        }
+        setSelectedProjects(newSelected)
+    }
+
+    const toggleSelectAll = () => {
+        if (selectedProjects.size === filteredProjects.length) {
+            setSelectedProjects(new Set())
+        } else {
+            setSelectedProjects(new Set(filteredProjects.map(p => p.id)))
+        }
+    }
+
+    const handleBulkDelete = async () => {
+        if (selectedProjects.size === 0) return
+        if (!confirm(`Are you sure you want to delete ${selectedProjects.size} project(s)? This action cannot be undone.`)) return
+
+        try {
+            const { error } = await supabase
+                .from('projects')
+                .delete()
+                .in('id', Array.from(selectedProjects))
+
+            if (error) throw error
+
+            setSelectedProjects(new Set())
+            fetchProjects()
+        } catch (error) {
+            console.error('Error deleting projects:', error)
+            alert('Failed to delete projects')
+        }
+    }
+
+    const handleBulkStatusUpdate = async (newStatus: string) => {
+        if (selectedProjects.size === 0) return
+
+        try {
+            const { error } = await supabase
+                .from('projects')
+                .update({ status: newStatus })
+                .in('id', Array.from(selectedProjects))
+
+            if (error) throw error
+
+            setSelectedProjects(new Set())
+            fetchProjects()
+        } catch (error) {
+            console.error('Error updating projects:', error)
+            alert('Failed to update projects')
         }
     }
 
@@ -120,7 +180,7 @@ export default function ProjectsPage() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input
                         type="text"
-                        placeholder="Search by project or client..."
+                        placeholder="Search projects..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full pl-12 pr-4 py-3 rounded-xl border-none focus:ring-0 bg-transparent text-slate-900 placeholder-slate-400"
@@ -138,10 +198,52 @@ export default function ProjectsPage() {
                         <option>Active</option>
                         <option>On Hold</option>
                         <option>Completed</option>
+                        <option>Planning</option>
                     </select>
                 </div>
             </div>
 
+            {/* Bulk Actions Toolbar */}
+            {selectedProjects.size > 0 && (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between animate-in slide-in-from-top duration-200">
+                    <div className="flex items-center gap-3">
+                        <CheckSquare className="w-5 h-5 text-blue-600" />
+                        <span className="font-medium text-blue-900">
+                            {selectedProjects.size} project{selectedProjects.size > 1 ? 's' : ''} selected
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <select
+                            onChange={(e) => {
+                                if (e.target.value) {
+                                    handleBulkStatusUpdate(e.target.value)
+                                    e.target.value = ''
+                                }
+                            }}
+                            className="px-3 py-2 bg-white border border-blue-200 rounded-lg text-sm font-medium text-blue-900 hover:bg-blue-50 transition-colors"
+                        >
+                            <option value="">Change Status...</option>
+                            <option value="Active">Active</option>
+                            <option value="On Hold">On Hold</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Planning">Planning</option>
+                        </select>
+                        <button
+                            onClick={handleBulkDelete}
+                            className="px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors flex items-center gap-2"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            Delete Selected
+                        </button>
+                        <button
+                            onClick={() => setSelectedProjects(new Set())}
+                            className="px-3 py-2 bg-white border border-blue-200 rounded-lg text-sm font-medium text-blue-900 hover:bg-blue-50 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
             {/* Projects Grid */}
             {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -181,21 +283,39 @@ export default function ProjectsPage() {
                     {filteredProjects.map((project) => (
                         <div
                             key={project.id}
-                            className="group bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 flex flex-col relative"
+                            className={`group bg-white rounded-2xl border p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col relative ${selectedProjects.has(project.id) ? 'border-blue-400 ring-2 ring-blue-100' : 'border-slate-200 hover:border-blue-200'
+                                }`}
                         >
+                            {/* Checkbox for bulk selection - Top Right */}
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    toggleProjectSelection(project.id)
+                                }}
+                                className="absolute top-3 right-3 z-10 p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+                            >
+                                {selectedProjects.has(project.id) ? (
+                                    <CheckSquare className="w-5 h-5 text-blue-600" />
+                                ) : (
+                                    <Square className="w-5 h-5 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                )}
+                            </button>
+
+                            {/* Delete button - moved down slightly */}
                             <button
                                 onClick={(e) => {
                                     e.preventDefault()
                                     e.stopPropagation()
                                     handleDeleteProject(project.id)
                                 }}
-                                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 z-10"
+                                className="absolute top-12 right-3 p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 z-10"
                                 title="Delete Project"
                             >
                                 <Trash2 className="w-4 h-4" />
                             </button>
 
-                            <div className="flex justify-between items-start mb-4">
+                            <div className={`flex justify-between items-start mb-4 transition-all ${selectedProjects.has(project.id) ? 'pr-10' : 'group-hover:pr-10'}`}>
                                 <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
                                     <Building2 className="w-6 h-6" />
                                 </div>
