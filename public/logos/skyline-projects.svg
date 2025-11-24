@@ -1,0 +1,10 @@
+<svg width="260" height="80" viewBox="0 0 260 80" xmlns="http://www.w3.org/2000/svg">
+  <rect width="260" height="80" fill="white"/>
+  <g transform="translate(20, 20)">
+    <!-- Skyline -->
+    <rect x="0" y="18" width="10" height="19" fill="#6b7280"/>
+    <rect x="12" y="12" width="10" height="25" fill="#4b5563"/>
+    <rect x="24" y="15" width="10" height="22" fill="#6b7280"/>
+  </g>
+  <text x="65" y="48" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#374151">SKYLINE PROJECTS</text>
+</svg>

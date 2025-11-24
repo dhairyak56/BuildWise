@@ -1,45 +1,30 @@
 import Image from 'next/image'
-import { cn } from '@/lib/utils'
 
 interface LogoProps {
+    variant?: 'default' | 'white' | 'icon'
     className?: string
-    textClassName?: string
-    variant?: 'default' | 'dark' | 'light'
-    showText?: boolean
+    width?: number
+    height?: number
 }
 
-export function Logo({
-    className,
-    textClassName,
-    variant = 'default',
-    showText = true
-}: LogoProps) {
-    const colors = {
-        default: 'text-slate-900',
-        dark: 'text-white',
-        light: 'text-white'
-    }
+export function Logo({ variant = 'default', className = '', width, height }: LogoProps) {
+    const logoSrc = variant === 'white'
+        ? '/buildwise-logo-white.svg'
+        : variant === 'icon'
+            ? '/buildwise-icon.svg'
+            : '/buildwise-logo.svg'
+
+    const defaultWidth = variant === 'icon' ? 48 : 160
+    const defaultHeight = variant === 'icon' ? 48 : 48
 
     return (
-        <div className={cn("flex items-center gap-2.5", className)}>
-            <div className="relative w-8 h-8 transition-transform hover:scale-105">
-                <Image
-                    src="/Buildwise.svg"
-                    alt="BuildWise"
-                    fill
-                    className="object-contain"
-                    priority
-                />
-            </div>
-            {showText && (
-                <span className={cn(
-                    "font-bold text-xl tracking-tight",
-                    colors[variant],
-                    textClassName
-                )}>
-                    BuildWise
-                </span>
-            )}
-        </div>
+        <Image
+            src={logoSrc}
+            alt="BuildWise"
+            width={width || defaultWidth}
+            height={height || defaultHeight}
+            className={className}
+            priority
+        />
     )
 }

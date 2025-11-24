@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { useEffect } from 'react'
 import { createBrowserClient } from '@/lib/supabase'
+import { Logo } from '@/components/ui/Logo'
 
 export function Sidebar() {
     const pathname = usePathname()
@@ -42,13 +43,7 @@ export function Sidebar() {
             <div className="flex flex-col gap-4 h-full">
                 {/* Logo Area */}
                 <div className="flex gap-3 items-center mb-6 px-2 cursor-pointer" onClick={() => router.push('/dashboard')}>
-                    <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 shadow-sm bg-blue-600 flex items-center justify-center text-white font-bold text-xl">
-                        B
-                    </div>
-                    <div className="flex flex-col">
-                        <h1 className="text-gray-900 text-base font-bold leading-normal">Buildwise</h1>
-                        <p className="text-gray-500 text-xs font-normal leading-normal">SaaS for Builders</p>
-                    </div>
+                    <Logo width={140} height={40} />
                 </div>
 
                 <nav className="flex flex-col gap-1 overflow-y-auto flex-1">

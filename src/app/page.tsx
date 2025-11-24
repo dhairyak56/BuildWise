@@ -5,6 +5,8 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Star, Check, ArrowRight, Shield, Clock, FileText, Zap } from 'lucide-react'
+import { LogoCarousel } from '@/components/landing/LogoCarousel'
+import { Logo } from '@/components/ui/Logo'
 
 // Animation variants
 const fadeIn = {
@@ -35,12 +37,7 @@ export default function Home() {
             <header className="sticky top-0 z-50 w-full border-b border-[#E5E7EB] bg-[#F4F6F8]/80 backdrop-blur-md">
                 <div className="container mx-auto flex items-center justify-between whitespace-nowrap px-4 py-3">
                     <div className="flex items-center gap-4">
-                        <div className="size-8 text-[#4A90E2]">
-                            <svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M8.57829 8.57829C5.52816 11.6284 3.451 15.5145 2.60947 19.7452C1.76794 23.9758 2.19984 28.361 3.85056 32.3462C5.50128 36.3314 8.29667 39.7376 11.8832 42.134C15.4698 44.5305 19.6865 45.8096 24 45.8096C28.3135 45.8096 32.5302 44.5305 36.1168 42.134C39.7033 39.7375 42.4987 36.3314 44.1494 32.3462C45.8002 28.361 46.2321 23.9758 45.3905 19.7452C44.549 15.5145 42.4718 11.6284 39.4217 8.57829L24 24L8.57829 8.57829Z"></path>
-                            </svg>
-                        </div>
-                        <h2 className="text-xl font-bold tracking-tight text-gray-900">BuildWise</h2>
+                        <Logo />
                     </div>
                     <nav className="hidden items-center gap-8 md:flex">
                         <a className="text-sm font-medium text-gray-600 hover:text-[#4A90E2] transition-colors" href="#features">Features</a>
@@ -165,18 +162,19 @@ export default function Home() {
                     </div>
                 </section>
 
-                {/* Trusted By */}
+                {/* Trusted By - Logo Carousel */}
                 <section className="py-10 border-y border-gray-200 bg-white">
                     <div className="container mx-auto px-4">
                         <p className="text-center text-sm font-semibold text-gray-400 uppercase tracking-wider mb-8">Trusted by leading builders across Australia</p>
-                        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                            {/* Placeholder Logos */}
-                            <span className="text-xl font-bold text-gray-400">BUILD CORP</span>
-                            <span className="text-xl font-bold text-gray-400">STRUCTURA</span>
-                            <span className="text-xl font-bold text-gray-400">URBAN CONSTRUCT</span>
-                            <span className="text-xl font-bold text-gray-400">APEX HOMES</span>
-                            <span className="text-xl font-bold text-gray-400">METRO BUILD</span>
-                        </div>
+                        <LogoCarousel
+                            logos={[
+                                { name: 'Apex Builders', src: '/logos/apex-builders.svg' },
+                                { name: 'Summit Construction', src: '/logos/summit-construction.svg' },
+                                { name: 'Foundation Group', src: '/logos/foundation-group.svg' },
+                                { name: 'Skyline Projects', src: '/logos/skyline-projects.svg' },
+                                { name: 'Cornerstone Build', src: '/logos/cornerstone-build.svg' }
+                            ]}
+                        />
                     </div>
                 </section>
 
