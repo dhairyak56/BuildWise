@@ -6,7 +6,7 @@ import { DashboardGrid } from '@/components/dashboard/DashboardGrid'
 import { WidgetLibrary } from '@/components/dashboard/WidgetLibrary'
 import { OverviewCharts } from '@/components/dashboard/OverviewCharts'
 import { TasksWidget } from '@/components/dashboard/TasksWidget'
-import { RecentActivityWidget } from '@/components/dashboard/RecentActivityWidget'
+import RecentActivityWidget from '@/components/dashboard/RecentActivityWidget'
 import { UpcomingDeadlinesWidget } from '@/components/dashboard/UpcomingDeadlinesWidget'
 import { DollarSign, FolderIcon, FileText, Plus, Settings2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -171,7 +171,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
         switch (id) {
             case 'stat_revenue':
                 return (
-                    <div className="h-full rounded-xl p-4 shadow-sm bg-gradient-to-br from-blue-500 to-blue-600 text-white flex flex-col justify-between relative group overflow-hidden">
+                    <div className="h-full rounded-xl p-4 shadow-sm bg-gradient-to-br from-[#4A90E2] to-[#357ABD] text-white flex flex-col justify-between relative group overflow-hidden">
                         <button
                             onClick={(e) => {
                                 e.preventDefault()
@@ -199,7 +199,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
                 )
             case 'stat_projects':
                 return (
-                    <div className="h-full rounded-xl p-4 shadow-sm bg-white border border-slate-200 flex flex-col justify-between relative group overflow-hidden">
+                    <div className="h-full rounded-xl p-4 shadow-sm bg-white border border-gray-200 flex flex-col justify-between relative group overflow-hidden">
                         <button
                             onClick={(e) => {
                                 e.preventDefault()
@@ -207,25 +207,25 @@ export function DashboardContent({ data }: DashboardContentProps) {
                                 handleRemoveWidget(id)
                             }}
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="absolute top-2 right-2 p-1 rounded-md bg-slate-100 hover:bg-slate-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
+                            className="absolute top-2 right-2 p-1 rounded-md bg-gray-100 hover:bg-gray-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
                         >
-                            <X className="h-3 w-3 text-slate-600 pointer-events-none" />
+                            <X className="h-3 w-3 text-gray-600 pointer-events-none" />
                         </button>
                         <div className="flex items-center justify-between min-h-0">
-                            <p className="text-xs sm:text-sm font-medium text-slate-500 truncate">Active Projects</p>
-                            <div className="p-1.5 sm:p-2 rounded-full text-blue-600 bg-blue-50 shrink-0">
+                            <p className="text-xs sm:text-sm font-medium text-gray-500 truncate">Active Projects</p>
+                            <div className="p-1.5 sm:p-2 rounded-full text-[#4A90E2] bg-blue-50 shrink-0">
                                 <FolderIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                             </div>
                         </div>
                         <div className="min-h-0">
-                            <div className="text-lg sm:text-2xl font-bold text-slate-900">{data.activeProjects}</div>
-                            <p className="text-xs mt-1 text-slate-500 truncate">+{data.newProjectsThisWeek} new this week</p>
+                            <div className="text-lg sm:text-2xl font-bold text-gray-900">{data.activeProjects}</div>
+                            <p className="text-xs mt-1 text-gray-500 truncate">+{data.newProjectsThisWeek} new this week</p>
                         </div>
                     </div>
                 )
             case 'stat_contracts':
                 return (
-                    <div className="h-full rounded-xl p-4 shadow-sm bg-white border border-slate-200 flex flex-col justify-between relative group overflow-hidden">
+                    <div className="h-full rounded-xl p-4 shadow-sm bg-white border border-gray-200 flex flex-col justify-between relative group overflow-hidden">
                         <button
                             onClick={(e) => {
                                 e.preventDefault()
@@ -233,25 +233,25 @@ export function DashboardContent({ data }: DashboardContentProps) {
                                 handleRemoveWidget(id)
                             }}
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="absolute top-2 right-2 p-1 rounded-md bg-slate-100 hover:bg-slate-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
+                            className="absolute top-2 right-2 p-1 rounded-md bg-gray-100 hover:bg-gray-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
                         >
-                            <X className="h-3 w-3 text-slate-600 pointer-events-none" />
+                            <X className="h-3 w-3 text-gray-600 pointer-events-none" />
                         </button>
                         <div className="flex items-center justify-between min-h-0">
-                            <p className="text-xs sm:text-sm font-medium text-slate-500 truncate">Pending Contracts</p>
+                            <p className="text-xs sm:text-sm font-medium text-gray-500 truncate">Pending Contracts</p>
                             <div className="p-1.5 sm:p-2 rounded-full text-amber-600 bg-amber-50 shrink-0">
                                 <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
                             </div>
                         </div>
                         <div className="min-h-0">
-                            <div className="text-lg sm:text-2xl font-bold text-slate-900">{data.pendingContracts}</div>
-                            <p className="text-xs mt-1 text-slate-500 truncate">{data.pendingContracts} require attention</p>
+                            <div className="text-lg sm:text-2xl font-bold text-gray-900">{data.pendingContracts}</div>
+                            <p className="text-xs mt-1 text-gray-500 truncate">{data.pendingContracts} require attention</p>
                         </div>
                     </div>
                 )
             case 'chart_revenue':
                 return (
-                    <div className="h-full rounded-xl border bg-card text-card-foreground shadow-sm flex flex-col relative group overflow-hidden">
+                    <div className="h-full rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col relative group overflow-hidden">
                         <button
                             onClick={(e) => {
                                 e.preventDefault()
@@ -259,13 +259,13 @@ export function DashboardContent({ data }: DashboardContentProps) {
                                 handleRemoveWidget(id)
                             }}
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="absolute top-2 right-2 p-1 rounded-md bg-slate-100 hover:bg-slate-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
+                            className="absolute top-2 right-2 p-1 rounded-md bg-gray-100 hover:bg-gray-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
                         >
-                            <X className="h-3 w-3 text-slate-600 pointer-events-none" />
+                            <X className="h-3 w-3 text-gray-600 pointer-events-none" />
                         </button>
                         <div className="p-3 sm:p-4 flex flex-col space-y-1 pb-2 shrink-0">
-                            <h3 className="text-sm sm:text-base font-semibold leading-none tracking-tight truncate">Overview</h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground truncate">Monthly revenue breakdown</p>
+                            <h3 className="text-sm sm:text-base font-semibold leading-none tracking-tight text-gray-900 truncate">Overview</h3>
+                            <p className="text-xs sm:text-sm text-gray-500 truncate">Monthly revenue breakdown</p>
                         </div>
                         <div className="flex-1 p-3 sm:p-4 pt-0 pl-2 min-h-0 overflow-hidden">
                             <OverviewCharts data={data.monthlyRevenue} />
@@ -274,7 +274,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
                 )
             case 'list_activity':
                 return (
-                    <div className="h-full rounded-xl border bg-card text-card-foreground shadow-sm flex flex-col relative group overflow-hidden">
+                    <div className="h-full rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col relative group overflow-hidden">
                         <button
                             onClick={(e) => {
                                 e.preventDefault()
@@ -282,18 +282,18 @@ export function DashboardContent({ data }: DashboardContentProps) {
                                 handleRemoveWidget(id)
                             }}
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="absolute top-2 right-2 p-1 rounded-md bg-slate-100 hover:bg-slate-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
+                            className="absolute top-2 right-2 p-1 rounded-md bg-gray-100 hover:bg-gray-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
                         >
-                            <X className="h-3 w-3 text-slate-600 pointer-events-none" />
+                            <X className="h-3 w-3 text-gray-600 pointer-events-none" />
                         </button>
                         <div className="p-3 sm:p-4 flex flex-col space-y-1 pb-3 shrink-0">
-                            <h3 className="text-sm sm:text-base font-semibold leading-none tracking-tight truncate">Recent Activity</h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground truncate">Latest updates</p>
+                            <h3 className="text-sm sm:text-base font-semibold leading-none tracking-tight text-gray-900 truncate">Recent Activity</h3>
+                            <p className="text-xs sm:text-sm text-gray-500 truncate">Latest updates</p>
                         </div>
                         <div className="flex-1 p-3 sm:p-4 pt-0 overflow-y-auto min-h-0">
                             <div className="space-y-6">
                                 {data.recentActivity.length === 0 ? (
-                                    <div className="text-center py-8 text-muted-foreground text-sm">No recent activity</div>
+                                    <div className="text-center py-8 text-gray-500 text-sm">No recent activity</div>
                                 ) : (
                                     data.recentActivity.map((item: any) => (
                                         <div key={item.id} className="flex items-center group">
@@ -301,11 +301,11 @@ export function DashboardContent({ data }: DashboardContentProps) {
                                                 "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border",
                                                 item.type === 'project' ? "bg-blue-50 border-blue-100" : "bg-purple-50 border-purple-100"
                                             )}>
-                                                {item.type === 'project' ? <FolderIcon className="h-3 w-3 text-blue-600" /> : <FileText className="h-3 w-3 text-purple-600" />}
+                                                {item.type === 'project' ? <FolderIcon className="h-3 w-3 text-[#4A90E2]" /> : <FileText className="h-3 w-3 text-purple-600" />}
                                             </div>
                                             <div className="ml-3 space-y-1 min-w-0">
-                                                <p className="text-sm font-medium leading-none truncate group-hover:text-primary transition-colors">{item.name}</p>
-                                                <p className="text-xs text-muted-foreground truncate">
+                                                <p className="text-sm font-medium leading-none truncate group-hover:text-[#4A90E2] transition-colors text-gray-900">{item.name}</p>
+                                                <p className="text-xs text-gray-500 truncate">
                                                     {item.type === 'project' ? 'Project Created' : 'Document Uploaded'}
                                                 </p>
                                             </div>
@@ -318,7 +318,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
                 )
             case 'tasks_widget':
                 return (
-                    <div className="h-full rounded-xl border bg-card text-card-foreground shadow-sm flex flex-col relative group overflow-hidden">
+                    <div className="h-full rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col relative group overflow-hidden">
                         <button
                             onClick={(e) => {
                                 e.preventDefault()
@@ -326,9 +326,9 @@ export function DashboardContent({ data }: DashboardContentProps) {
                                 handleRemoveWidget(id)
                             }}
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="absolute top-2 right-2 p-1 rounded-md bg-slate-100 hover:bg-slate-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
+                            className="absolute top-2 right-2 p-1 rounded-md bg-gray-100 hover:bg-gray-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
                         >
-                            <X className="h-3 w-3 text-slate-600 pointer-events-none" />
+                            <X className="h-3 w-3 text-gray-600 pointer-events-none" />
                         </button>
                         <div className="flex-1 overflow-hidden">
                             <TasksWidget />
@@ -345,9 +345,9 @@ export function DashboardContent({ data }: DashboardContentProps) {
                                 handleRemoveWidget(id)
                             }}
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="absolute top-2 right-2 p-1 rounded-md bg-slate-100 hover:bg-slate-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
+                            className="absolute top-2 right-2 p-1 rounded-md bg-gray-100 hover:bg-gray-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
                         >
-                            <X className="h-3 w-3 text-slate-600 pointer-events-none" />
+                            <X className="h-3 w-3 text-gray-600 pointer-events-none" />
                         </button>
                         <RecentActivityWidget />
                     </div>
@@ -362,9 +362,9 @@ export function DashboardContent({ data }: DashboardContentProps) {
                                 handleRemoveWidget(id)
                             }}
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="absolute top-2 right-2 p-1 rounded-md bg-slate-100 hover:bg-slate-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
+                            className="absolute top-2 right-2 p-1 rounded-md bg-gray-100 hover:bg-gray-200 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-50"
                         >
-                            <X className="h-3 w-3 text-slate-600 pointer-events-none" />
+                            <X className="h-3 w-3 text-gray-600 pointer-events-none" />
                         </button>
                         <UpcomingDeadlinesWidget />
                     </div>
@@ -383,23 +383,23 @@ export function DashboardContent({ data }: DashboardContentProps) {
     }
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 font-poppins">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h1>
-                    <p className="text-slate-500 mt-1">Overview of your construction projects and performance.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">Dashboard</h1>
+                    <p className="text-gray-500 mt-1">Overview of your construction projects and performance.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => setIsLibraryOpen(true)}
-                        className="inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors border border-slate-200 bg-white hover:bg-slate-50 h-10 px-4 py-2"
+                        className="inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors border border-gray-200 bg-white hover:bg-gray-50 h-10 px-4 py-2 text-gray-700"
                     >
-                        <Settings2 className="mr-2 h-4 w-4 text-slate-500" />
+                        <Settings2 className="mr-2 h-4 w-4 text-gray-500" />
                         Customize
                     </button>
                     <Link href="/dashboard/projects/new">
-                        <button className="inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors bg-slate-900 text-white hover:bg-slate-800 h-10 px-4 py-2 shadow-lg">
+                        <button className="inline-flex items-center justify-center rounded-lg text-sm font-bold transition-colors bg-[#4A90E2] text-white hover:bg-[#4A90E2]/90 h-10 px-4 py-2 shadow-md">
                             <Plus className="mr-2 h-4 w-4" />
                             New Project
                         </button>

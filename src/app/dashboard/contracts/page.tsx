@@ -10,12 +10,19 @@ import {
     Download,
     Calendar,
     Mail,
-    Trash2
+    Trash2,
+    MoreVertical,
+    Edit,
+    Eye,
+    Home,
+    Hammer,
+    HardHat
 } from 'lucide-react'
 import jsPDF from 'jspdf'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { EmailContractModal } from '@/components/contracts/EmailContractModal'
+import { useRouter } from 'next/navigation'
 
 interface Contract {
     id: string
@@ -38,6 +45,7 @@ export default function ContractsPage() {
     const [statusFilter, setStatusFilter] = useState('All')
     const [selectedContract, setSelectedContract] = useState<Contract | null>(null)
     const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
+    const router = useRouter()
 
     const supabase = createBrowserClient()
 
@@ -72,10 +80,11 @@ export default function ContractsPage() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'Draft': return 'bg-slate-100 text-slate-700'
-            case 'Pending': return 'bg-amber-50 text-amber-700'
-            case 'Signed': return 'bg-emerald-50 text-emerald-700'
-            default: return 'bg-slate-100 text-slate-700'
+            case 'Draft': return '#ADB5BD' // Gray
+            case 'Pending': return '#F5A623' // Orange/Yellow
+            case 'Signed': return '#28A745' // Green
+            case 'Needs Attention': return '#DC3545' // Red
+            default: return '#4A90E2' // Blue
         }
     }
 
@@ -99,208 +108,221 @@ export default function ContractsPage() {
         doc.text(`Status: ${contract.status}`, 20, 50)
 
         // Project Details
-        doc.setFontSize(12)
-        doc.text('Project Details:', 20, 65)
+        doc.setFontSize(14)
+        doc.text('Project Details', 20, 65)
         doc.setFontSize(10)
-        doc.text(`Project: ${project?.name || 'N/A'}`, 20, 72)
-        doc.text(`Client: ${project?.client_name || 'N/A'}`, 20, 77)
-
-        // Contract Content
-        doc.setFontSize(12)
-        doc.text('Contract Terms:', 20, 92)
-        doc.setFontSize(10)
-
-        const content = (typeof contract.content === 'object' && contract.content && 'text' in contract.content && typeof contract.content.text === 'string')
-            ? contract.content.text
-            : typeof contract.content === 'string'
-                ? contract.content
-                : 'No content available'
-
-        const lines = doc.splitTextToSize(content, 170)
-        doc.text(lines, 20, 100)
+        doc.text(`Project: ${project?.name || 'N/A'}`, 20, 75)
+        doc.text(`Client: ${project?.client_name || 'N/A'}`, 20, 80)
 
         doc.save(`contract-${contract.id.slice(0, 8)}.pdf`)
     }
 
-    const handleDelete = async (contractId: string) => {
-        if (!confirm('Are you sure you want to delete this contract? This action cannot be undone.')) return
+    const handleDelete = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this contract?')) return
 
         try {
             const { error } = await supabase
                 .from('contracts')
                 .delete()
-                .eq('id', contractId)
+                .eq('id', id)
 
             if (error) throw error
-
             fetchContracts()
         } catch (error) {
             console.error('Error deleting contract:', error)
-            alert('Failed to delete contract')
         }
     }
 
-    const filteredContracts = contracts.filter((contract) => {
+    const filteredContracts = contracts.filter(contract => {
         const project = Array.isArray(contract.projects) ? contract.projects[0] : contract.projects
-        const matchesSearch = searchQuery === '' ||
+        const matchesSearch =
             project?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            project?.client_name?.toLowerCase().includes(searchQuery.toLowerCase())
-
+            project?.client_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            contract.id.toLowerCase().includes(searchQuery.toLowerCase())
         const matchesStatus = statusFilter === 'All' || contract.status === statusFilter
-
         return matchesSearch && matchesStatus
     })
 
+    // Calculate stats
+    const stats = {
+        drafts: contracts.filter(c => c.status === 'Draft').length,
+        pending: contracts.filter(c => c.status === 'Pending').length,
+        signed: contracts.filter(c => c.status === 'Signed').length,
+        total: contracts.length
+    }
+
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-                        Contracts
-                    </h1>
-                    <p className="text-slate-500 mt-1">
-                        Manage and track your legal agreements
-                    </p>
-                </div>
-                <Link href="/dashboard/contracts/new">
-                    <button className="inline-flex items-center justify-center px-5 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 font-medium transition-all shadow-lg shadow-slate-900/20 hover:shadow-slate-900/30 transform hover:-translate-y-0.5">
-                        <Plus className="w-5 h-5 mr-2" />
-                        New Contract
-                    </button>
-                </Link>
-            </div>
+        <div className="w-full font-poppins">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            {/* Filters */}
-            <div className="bg-white p-1 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-2">
-                <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                        type="text"
-                        placeholder="Search contracts..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 rounded-xl border-none focus:ring-0 bg-transparent text-slate-900 placeholder-slate-400"
-                    />
-                </div>
-                <div className="h-px sm:h-auto sm:w-px bg-slate-200 mx-2" />
-                <div className="relative min-w-[200px]">
-                    <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full pl-10 pr-8 py-3 rounded-xl border-none focus:ring-0 bg-transparent text-slate-700 font-medium cursor-pointer hover:bg-slate-50 transition-colors appearance-none"
-                    >
-                        <option value="All">All Statuses</option>
-                        <option value="Draft">Draft</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Signed">Signed</option>
-                    </select>
-                </div>
-            </div>
+                {/* Left Column */}
+                <div className="lg:col-span-2 flex flex-col gap-6">
 
-            {/* Contracts List */}
-            {loading ? (
-                <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-24 bg-slate-100 rounded-xl animate-pulse" />
-                    ))}
-                </div>
-            ) : contracts.length === 0 ? (
-                <div className="bg-white rounded-2xl border border-slate-200 p-16 text-center">
-                    <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <FileText className="w-10 h-10 text-slate-300" />
+                    {/* Page Heading */}
+                    <div className="flex flex-wrap justify-between items-center gap-4">
+                        <h1 className="text-gray-900 text-3xl font-bold tracking-tight">Contracts</h1>
+                        <Link href="/dashboard/contracts/new" className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-[#4A90E2] text-white text-base font-semibold shadow-md hover:bg-[#4A90E2]/90 transition-colors gap-2">
+                            <Plus className="w-5 h-5" />
+                            <span className="truncate">Create New Contract</span>
+                        </Link>
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">No contracts yet</h3>
-                    <p className="text-slate-500 max-w-md mx-auto mb-8">
-                        Create your first contract to start tracking agreements with your clients.
-                    </p>
-                    <Link href="/dashboard/contracts/new">
-                        <button className="inline-flex items-center px-6 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 font-medium transition-all shadow-lg shadow-slate-900/20">
-                            <Plus className="w-5 h-5 mr-2" />
-                            Create Contract
-                        </button>
-                    </Link>
-                </div>
-            ) : (
-                <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-slate-50 border-b border-slate-200">
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Contract Name</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Project</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date Created</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {filteredContracts.map((contract) => {
-                                const project = Array.isArray(contract.projects) ? contract.projects[0] : contract.projects
-                                return (
-                                    <tr key={contract.id} className="hover:bg-slate-50/50 transition-colors group">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center">
-                                                <div className="p-2 bg-blue-50 rounded-lg mr-3 group-hover:bg-blue-100 transition-colors">
-                                                    <FileText className="w-4 h-4 text-blue-600" />
-                                                </div>
-                                                <span className="font-medium text-slate-900">Contract #{contract.id.slice(0, 8)}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-sm text-slate-900 font-medium">{project?.name || 'Untitled Project'}</div>
-                                            <div className="text-xs text-slate-500">{project?.client_name || 'Unknown Client'}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium border", getStatusColor(contract.status))}>
-                                                {contract.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-slate-500">
-                                            <div className="flex items-center">
-                                                <Calendar className="w-3 h-3 mr-1.5 text-slate-400" />
-                                                {new Date(contract.created_at).toLocaleDateString()}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end space-x-2">
-                                                <button
-                                                    onClick={() => handleEmailClick(contract)}
-                                                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                                    title="Email"
-                                                >
-                                                    <Mail className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDownload(contract)}
-                                                    className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
-                                                    title="Download"
-                                                >
-                                                    <Download className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(contract.id)}
-                                                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                                                    title="Delete"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            )}
 
-            <EmailContractModal
-                isOpen={isEmailModalOpen}
-                onClose={() => setIsEmailModalOpen(false)}
-                contractId={selectedContract?.id}
-                contractText={JSON.stringify(selectedContract?.content || '')}
-            />
+                    {/* Search and Filter Bar */}
+                    <div className="flex flex-col md:flex-row gap-4">
+                        <div className="flex-grow">
+                            <div className="flex w-full flex-1 items-stretch rounded-lg h-12 bg-white border border-gray-200 shadow-sm focus-within:ring-2 focus-within:ring-[#4A90E2]/20 focus-within:border-[#4A90E2]">
+                                <div className="text-gray-400 flex items-center justify-center pl-4">
+                                    <Search className="w-5 h-5" />
+                                </div>
+                                <input
+                                    className="flex w-full min-w-0 flex-1 border-none bg-transparent h-full placeholder:text-gray-400 px-4 pl-2 text-base focus:ring-0 focus:outline-none"
+                                    placeholder="Search by contract name or client..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex gap-2 overflow-x-auto pb-2">
+                            {['All', 'Draft', 'Pending', 'Signed'].map((status) => (
+                                <button
+                                    key={status}
+                                    onClick={() => setStatusFilter(status)}
+                                    className={`flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 border transition-colors ${statusFilter === status
+                                        ? 'bg-[#4A90E2]/10 text-[#4A90E2] border-transparent'
+                                        : 'bg-white border-gray-200 hover:bg-gray-50 text-gray-600'
+                                        }`}
+                                >
+                                    <p className="text-sm font-medium">{status === 'All' ? 'All' : status}</p>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Section Header */}
+                    <h2 className="text-gray-800 text-xl font-semibold tracking-tight pt-2">Recent Contracts</h2>
+
+                    {/* Contract List */}
+                    <div className="flex flex-col gap-4">
+                        {loading ? (
+                            <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4A90E2] mx-auto"></div>
+                                <p className="mt-4 text-gray-500">Loading contracts...</p>
+                            </div>
+                        ) : filteredContracts.length === 0 ? (
+                            <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+                                <FileText className="mx-auto h-12 w-12 text-gray-300" />
+                                <h3 className="mt-2 text-sm font-semibold text-gray-900">No contracts found</h3>
+                                <p className="mt-1 text-sm text-gray-500">Get started by creating a new contract.</p>
+                            </div>
+                        ) : (
+                            filteredContracts.map((contract) => {
+                                const project = Array.isArray(contract.projects) ? contract.projects[0] : contract.projects
+                                const statusColor = getStatusColor(contract.status)
+
+                                return (
+                                    <div key={contract.id} className="cursor-pointer group flex flex-col md:flex-row items-start md:items-center gap-4 p-5 rounded-xl bg-white border border-gray-200 hover:shadow-md hover:border-[#4A90E2]/30 transition-all">
+                                        <div className="flex-grow" onClick={() => router.push(`/dashboard/contracts/${contract.id}`)}>
+                                            <h3 className="font-semibold text-base text-gray-900 group-hover:text-[#4A90E2] transition-colors">
+                                                {project?.name || 'Untitled Contract'}
+                                            </h3>
+                                            <p className="text-sm text-gray-500">Client: {project?.client_name || 'Unknown Client'}</p>
+                                        </div>
+                                        <div className="flex items-center gap-2 min-w-[140px]">
+                                            <div className="size-2.5 rounded-full" style={{ backgroundColor: statusColor }}></div>
+                                            <span className="text-sm font-medium" style={{ color: statusColor }}>{contract.status}</span>
+                                        </div>
+                                        <p className="text-sm text-gray-400 w-full md:w-auto text-left min-w-[160px]">
+                                            {new Date(contract.created_at).toLocaleDateString()}
+                                        </p>
+                                        <div className="flex items-center gap-1 self-end md:self-center">
+                                            <button onClick={() => router.push(`/dashboard/contracts/${contract.id}`)} className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600">
+                                                <Edit className="w-5 h-5" />
+                                            </button>
+                                            <button onClick={() => handleDownload(contract)} className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600">
+                                                <Download className="w-5 h-5" />
+                                            </button>
+                                            <button onClick={() => handleDelete(contract.id)} className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-red-500">
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )
+                            })
+                        )}
+                    </div>
+                </div>
+
+                {/* Right Sidebar */}
+                <div className="flex flex-col gap-6">
+                    {/* Templates Module */}
+                    <div className="p-6 rounded-xl bg-white border border-gray-200 shadow-sm">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Start from a Template</h3>
+                        <div className="flex flex-col gap-2">
+                            <Link href="/dashboard/contracts/new" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 group">
+                                <div className="flex items-center justify-center size-10 rounded-lg bg-[#4A90E2]/10 text-[#4A90E2] group-hover:bg-[#4A90E2] group-hover:text-white transition-colors">
+                                    <Home className="w-5 h-5" />
+                                </div>
+                                <span className="font-medium text-sm text-gray-700">Standard Residential Contract</span>
+                            </Link>
+                            <Link href="/dashboard/contracts/new" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 group">
+                                <div className="flex items-center justify-center size-10 rounded-lg bg-[#F5A623]/10 text-[#F5A623] group-hover:bg-[#F5A623] group-hover:text-white transition-colors">
+                                    <Hammer className="w-5 h-5" />
+                                </div>
+                                <span className="font-medium text-sm text-gray-700">Renovation Agreement</span>
+                            </Link>
+                            <Link href="/dashboard/contracts/new" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 group">
+                                <div className="flex items-center justify-center size-10 rounded-lg bg-gray-500/10 text-gray-600 group-hover:bg-gray-600 group-hover:text-white transition-colors">
+                                    <HardHat className="w-5 h-5" />
+                                </div>
+                                <span className="font-medium text-sm text-gray-700">Subcontractor Agreement</span>
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Status Overview Module */}
+                    <div className="p-6 rounded-xl bg-white border border-gray-200 shadow-sm">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-5">Contracts at a Glance</h3>
+                        <div className="flex flex-col gap-5">
+                            <div>
+                                <div className="flex justify-between items-center text-sm mb-1">
+                                    <span className="font-medium text-gray-600">Drafts</span>
+                                    <span className="font-bold text-gray-900">{stats.drafts}</span>
+                                </div>
+                                <div className="w-full bg-gray-100 rounded-full h-2">
+                                    <div className="bg-[#ADB5BD] h-2 rounded-full" style={{ width: `${stats.total ? (stats.drafts / stats.total) * 100 : 0}%` }}></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div className="flex justify-between items-center text-sm mb-1">
+                                    <span className="font-medium text-gray-600">Pending</span>
+                                    <span className="font-bold text-gray-900">{stats.pending}</span>
+                                </div>
+                                <div className="w-full bg-gray-100 rounded-full h-2">
+                                    <div className="bg-[#F5A623] h-2 rounded-full" style={{ width: `${stats.total ? (stats.pending / stats.total) * 100 : 0}%` }}></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div className="flex justify-between items-center text-sm mb-1">
+                                    <span className="font-medium text-gray-600">Signed</span>
+                                    <span className="font-bold text-gray-900">{stats.signed}</span>
+                                </div>
+                                <div className="w-full bg-gray-100 rounded-full h-2">
+                                    <div className="bg-[#28A745] h-2 rounded-full" style={{ width: `${stats.total ? (stats.signed / stats.total) * 100 : 0}%` }}></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {selectedContract && (
+                <EmailContractModal
+                    isOpen={isEmailModalOpen}
+                    onClose={() => setIsEmailModalOpen(false)}
+                    contractId={selectedContract.id}
+                    contractText={JSON.stringify(selectedContract.content || '')}
+                />
+            )}
         </div>
     )
 }

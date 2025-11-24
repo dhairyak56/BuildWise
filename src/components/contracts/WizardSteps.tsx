@@ -21,10 +21,10 @@ export function WizardSteps({ steps, currentStep }: WizardStepsProps) {
                             <div className="relative flex flex-col items-center group">
                                 <div
                                     className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${isCompleted
-                                            ? 'bg-blue-600 border-blue-600 text-white'
-                                            : isCurrent
-                                                ? 'bg-white border-blue-600 text-blue-600 shadow-lg shadow-blue-900/20'
-                                                : 'bg-white border-slate-200 text-slate-400'
+                                        ? 'bg-[#4A90E2] border-[#4A90E2] text-white'
+                                        : isCurrent
+                                            ? 'bg-white border-[#4A90E2] text-[#4A90E2] shadow-lg shadow-blue-500/20'
+                                            : 'bg-white border-gray-200 text-gray-400'
                                         }`}
                                 >
                                     {isCompleted ? (
@@ -35,7 +35,7 @@ export function WizardSteps({ steps, currentStep }: WizardStepsProps) {
                                 </div>
                                 <div className="absolute top-12 w-32 text-center">
                                     <span
-                                        className={`text-xs font-medium transition-colors ${isCurrent ? 'text-blue-600' : 'text-slate-500'
+                                        className={`text-xs font-medium transition-colors ${isCurrent ? 'text-[#4A90E2]' : 'text-gray-500'
                                             }`}
                                     >
                                         {step.name}
@@ -46,7 +46,7 @@ export function WizardSteps({ steps, currentStep }: WizardStepsProps) {
                             {/* Connector Line */}
                             {index < steps.length - 1 && (
                                 <div
-                                    className={`w-16 sm:w-24 h-0.5 mx-2 transition-colors duration-300 ${isCompleted ? 'bg-blue-600' : 'bg-slate-200'
+                                    className={`w-16 sm:w-24 h-0.5 mx-2 transition-colors duration-300 ${isCompleted ? 'bg-[#4A90E2]' : 'bg-gray-200'
                                         }`}
                                 />
                             )}

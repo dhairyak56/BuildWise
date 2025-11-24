@@ -60,12 +60,12 @@ export default function AnalyticsPage() {
         }
     }
     return (
-        <div className="p-8 max-w-[1600px] mx-auto">
+        <div className="p-8 max-w-[1600px] mx-auto font-poppins">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900">Analytics Dashboard</h1>
-                    <p className="text-slate-500 mt-1">
+                    <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+                    <p className="text-gray-500 mt-1">
                         Track your business performance, cash flow, and project profitability
                     </p>
                 </div>
@@ -74,19 +74,19 @@ export default function AnalyticsPage() {
                         <select
                             value={dateRange}
                             onChange={(e) => setDateRange(e.target.value as '7' | '30' | '90' | '365')}
-                            className="flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium transition-colors shadow-sm appearance-none pr-10 cursor-pointer"
+                            className="flex items-center px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors shadow-sm appearance-none pr-10 cursor-pointer"
                         >
                             <option value="7">Last 7 Days</option>
                             <option value="30">Last 30 Days</option>
                             <option value="90">Last 90 Days</option>
                             <option value="365">Last Year</option>
                         </select>
-                        <Calendar className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500" />
+                        <Calendar className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" />
                     </div>
                     <button
                         onClick={handleExport}
                         disabled={isExporting}
-                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center px-4 py-2 bg-[#4A90E2] text-white rounded-lg hover:bg-[#357ABD] font-medium transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Download className="w-4 h-4 mr-2" />
                         {isExporting ? 'Exporting...' : 'Export Report'}

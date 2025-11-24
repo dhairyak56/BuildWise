@@ -13,7 +13,7 @@ interface Activity {
     icon: 'contract' | 'payment' | 'document' | 'project'
 }
 
-export function RecentActivityWidget() {
+export default function RecentActivityWidget() {
     const [activities, setActivities] = useState<Activity[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const supabase = createBrowserClient()

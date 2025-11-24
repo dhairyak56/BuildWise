@@ -61,9 +61,9 @@ export default function Pricing() {
     const isInView = useInView(ref, { once: true, margin: "-100px" })
 
     return (
-        <section id="pricing" className="py-24 bg-white relative overflow-hidden">
+        <section id="pricing" className="py-24 bg-white relative overflow-hidden font-poppins">
             {/* Subtle background */}
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-50 to-white"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white"></div>
 
             <div className="section-container relative z-10">
                 {/* Section Header */}
@@ -74,13 +74,13 @@ export default function Pricing() {
                     animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                     transition={{ duration: 0.6 }}
                 >
-                    <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4">
+                    <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
                         Simple, Transparent{' '}
-                        <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-[#4A90E2] to-[#357ABD] bg-clip-text text-transparent">
                             Pricing
                         </span>
                     </h2>
-                    <p className="text-xl text-slate-600">
+                    <p className="text-xl text-gray-600">
                         Choose the perfect plan for your business. All plans include a 14-day free trial.
                     </p>
                 </motion.div>
@@ -91,8 +91,8 @@ export default function Pricing() {
                         <motion.div
                             key={index}
                             className={`relative rounded-2xl p-8 transition-all duration-300 ${plan.popular
-                                    ? 'bg-white border-2 border-blue-600 shadow-xl shadow-blue-600/10 scale-105'
-                                    : 'bg-white border border-slate-200 hover:border-blue-200 hover:shadow-lg'
+                                ? 'bg-white border-2 border-[#4A90E2] shadow-xl shadow-blue-500/10 scale-105'
+                                : 'bg-white border border-gray-200 hover:border-blue-200 hover:shadow-lg'
                                 }`}
                             initial={{ opacity: 0, y: 20 }}
                             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
@@ -102,7 +102,7 @@ export default function Pricing() {
                             {/* Popular Badge */}
                             {plan.popular && (
                                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                                    <div className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-blue-600 text-white text-sm font-semibold shadow-lg">
+                                    <div className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-[#4A90E2] text-white text-sm font-semibold shadow-lg">
                                         <Sparkles className="h-4 w-4" />
                                         Most Popular
                                     </div>
@@ -110,27 +110,27 @@ export default function Pricing() {
                             )}
 
                             {/* Plan Name */}
-                            <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                            <h3 className="text-2xl font-bold text-gray-900 mb-2">
                                 {plan.name}
                             </h3>
 
                             {/* Description */}
-                            <p className="text-slate-600 mb-6">
+                            <p className="text-gray-600 mb-6">
                                 {plan.description}
                             </p>
 
                             {/* Price */}
                             <div className="mb-6">
                                 {plan.price === 'Custom' ? (
-                                    <div className="text-4xl font-bold text-slate-900">
+                                    <div className="text-4xl font-bold text-gray-900">
                                         Custom
                                     </div>
                                 ) : (
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-5xl font-bold text-slate-900">
+                                        <span className="text-5xl font-bold text-gray-900">
                                             ${plan.price}
                                         </span>
-                                        <span className="text-lg text-slate-600">
+                                        <span className="text-lg text-gray-600">
                                             /month
                                         </span>
                                     </div>
@@ -141,8 +141,8 @@ export default function Pricing() {
                             <Link href={plan.cta === 'Contact Sales' ? '/contact' : '/signup'}>
                                 <button
                                     className={`w-full py-3 px-6 rounded-lg font-semibold transition-all duration-200 mb-8 ${plan.popular
-                                            ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/50'
-                                            : 'bg-slate-900 text-white hover:bg-slate-800'
+                                        ? 'bg-[#4A90E2] text-white hover:bg-[#357ABD] shadow-lg shadow-blue-500/50'
+                                        : 'bg-gray-900 text-white hover:bg-gray-800'
                                         }`}
                                 >
                                     {plan.cta}
@@ -154,7 +154,7 @@ export default function Pricing() {
                                 {plan.features.map((feature, i) => (
                                     <li key={i} className="flex items-start gap-3">
                                         <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                                        <span className="text-slate-600">
+                                        <span className="text-gray-600">
                                             {feature}
                                         </span>
                                     </li>
@@ -171,7 +171,7 @@ export default function Pricing() {
                     animate={isInView ? { opacity: 1 } : { opacity: 0 }}
                     transition={{ duration: 0.6, delay: 0.4 }}
                 >
-                    <p className="text-slate-600">
+                    <p className="text-gray-600">
                         All plans include a 14-day free trial. No credit card required.
                     </p>
                 </motion.div>

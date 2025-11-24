@@ -6,10 +6,10 @@ import Pricing from './Pricing'
 // Mock framer-motion
 jest.mock('framer-motion', () => ({
     motion: {
-        div: function MotionDiv({ children, ...props }: React.ComponentProps<'div'>) { return <div {...props}>{children}</div> },
-        h2: function MotionH2({ children, ...props }: React.ComponentProps<'h2'>) { return <h2 {...props}>{children}</h2> },
-        h3: function MotionH3({ children, ...props }: React.ComponentProps<'h3'>) { return <h3 {...props}>{children}</h3> },
-        p: function MotionP({ children, ...props }: React.ComponentProps<'p'>) { return <p {...props}>{children}</p> },
+        div: function MotionDiv({ children, whileHover, initial, animate, transition, viewport, whileInView, variants, ...props }: any) { return <div {...props}>{children}</div> },
+        h2: function MotionH2({ children, whileHover, initial, animate, transition, viewport, whileInView, variants, ...props }: any) { return <h2 {...props}>{children}</h2> },
+        h3: function MotionH3({ children, whileHover, initial, animate, transition, viewport, whileInView, variants, ...props }: any) { return <h3 {...props}>{children}</h3> },
+        p: function MotionP({ children, whileHover, initial, animate, transition, viewport, whileInView, variants, ...props }: any) { return <p {...props}>{children}</p> },
     },
     useInView: () => true,
 }))

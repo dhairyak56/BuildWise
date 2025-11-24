@@ -6,15 +6,15 @@ import { motion } from 'framer-motion'
 
 export default function Hero() {
     return (
-        <section className="relative pt-32 pb-20 overflow-hidden bg-white">
+        <section className="relative pt-32 pb-20 overflow-hidden bg-white font-poppins">
             {/* Subtle gradient background */}
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-white"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-gray-50 via-white to-white"></div>
 
             {/* Grid pattern */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
 
             {/* Radial gradient overlay */}
-            <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-blue-400 opacity-20 blur-[100px]"></div>
+            <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-[#4A90E2] opacity-20 blur-[100px]"></div>
 
             <div className="section-container relative z-10">
                 <div className="max-w-4xl mx-auto text-center">
@@ -26,8 +26,8 @@ export default function Hero() {
                         transition={{ duration: 0.5 }}
                     >
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4A90E2] opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#4A90E2]"></span>
                         </span>
                         <span className="text-sm font-medium text-blue-900">
                             Trusted by 500+ Australian builders
@@ -36,21 +36,21 @@ export default function Hero() {
 
                     {/* Main heading */}
                     <motion.h1
-                        className="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 mb-6 tracking-tight"
+                        className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 tracking-tight"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
                     >
                         Professional Contracts
                         <br />
-                        <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-[#4A90E2] to-[#357ABD] bg-clip-text text-transparent">
                             Generated in Minutes
                         </span>
                     </motion.h1>
 
                     {/* Subheading */}
                     <motion.p
-                        className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed"
+                        className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
@@ -66,13 +66,13 @@ export default function Hero() {
                         transition={{ duration: 0.5, delay: 0.3 }}
                     >
                         <Link href="/signup">
-                            <button className="group inline-flex items-center justify-center px-7 py-3.5 text-base font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-lg shadow-blue-600/50 hover:shadow-xl hover:shadow-blue-600/50 hover:-translate-y-0.5">
+                            <button className="group inline-flex items-center justify-center px-7 py-3.5 text-base font-semibold text-white bg-[#4A90E2] rounded-lg hover:bg-[#357ABD] transition-all duration-200 shadow-lg shadow-blue-500/50 hover:shadow-xl hover:shadow-blue-500/50 hover:-translate-y-0.5">
                                 Start Free Trial
                                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                             </button>
                         </Link>
                         <Link href="/dashboard">
-                            <button className="inline-flex items-center justify-center px-7 py-3.5 text-base font-semibold text-slate-700 bg-white rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all duration-200">
+                            <button className="inline-flex items-center justify-center px-7 py-3.5 text-base font-semibold text-gray-700 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200">
                                 View Demo
                             </button>
                         </Link>
@@ -80,7 +80,7 @@ export default function Hero() {
 
                     {/* Trust indicators */}
                     <motion.div
-                        className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-600"
+                        className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-600"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.5, delay: 0.4 }}
@@ -107,23 +107,23 @@ export default function Hero() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.5 }}
                 >
-                    <div className="relative rounded-xl overflow-hidden shadow-2xl border border-slate-200 bg-white">
+                    <div className="relative rounded-xl overflow-hidden shadow-2xl border border-gray-200 bg-white">
                         {/* Browser chrome */}
-                        <div className="bg-slate-100 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
+                        <div className="bg-gray-100 px-4 py-3 border-b border-gray-200 flex items-center gap-2">
                             <div className="flex gap-2">
-                                <div className="w-3 h-3 rounded-full bg-slate-300"></div>
-                                <div className="w-3 h-3 rounded-full bg-slate-300"></div>
-                                <div className="w-3 h-3 rounded-full bg-slate-300"></div>
+                                <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+                                <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+                                <div className="w-3 h-3 rounded-full bg-gray-300"></div>
                             </div>
                             <div className="flex-1 flex justify-center">
-                                <div className="px-3 py-1 rounded-md bg-white border border-slate-200 text-xs text-slate-500 font-medium">
+                                <div className="px-3 py-1 rounded-md bg-white border border-gray-200 text-xs text-gray-500 font-medium">
                                     buildwise.ai/dashboard
                                 </div>
                             </div>
                         </div>
 
                         {/* Dashboard content */}
-                        <div className="p-8 bg-gradient-to-br from-slate-50 to-white">
+                        <div className="p-8 bg-gradient-to-br from-gray-50 to-white">
                             <div className="grid grid-cols-3 gap-6 mb-6">
                                 {[
                                     { label: 'Active Projects', value: '24', color: 'blue' },
@@ -132,13 +132,13 @@ export default function Hero() {
                                 ].map((stat, i) => (
                                     <motion.div
                                         key={i}
-                                        className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm"
+                                        className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm"
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ delay: 0.7 + (i * 0.1), duration: 0.4 }}
                                     >
                                         <div className={`text-2xl font-bold text-${stat.color}-600 mb-1`}>{stat.value}</div>
-                                        <div className="text-xs text-slate-500">{stat.label}</div>
+                                        <div className="text-xs text-gray-500">{stat.label}</div>
                                     </motion.div>
                                 ))}
                             </div>
@@ -152,16 +152,16 @@ export default function Hero() {
                                 ].map((contract, i) => (
                                     <motion.div
                                         key={i}
-                                        className="bg-white rounded-lg p-4 border border-slate-200 flex items-center justify-between"
+                                        className="bg-white rounded-lg p-4 border border-gray-200 flex items-center justify-between"
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: 1 + (i * 0.1), duration: 0.4 }}
                                     >
                                         <div className="flex-1">
-                                            <div className="font-medium text-slate-900 mb-1">{contract.name}</div>
-                                            <div className="w-full bg-slate-100 rounded-full h-1.5">
+                                            <div className="font-medium text-gray-900 mb-1">{contract.name}</div>
+                                            <div className="w-full bg-gray-100 rounded-full h-1.5">
                                                 <motion.div
-                                                    className="bg-blue-600 h-1.5 rounded-full"
+                                                    className="bg-[#4A90E2] h-1.5 rounded-full"
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${contract.progress}%` }}
                                                     transition={{ delay: 1.2 + (i * 0.1), duration: 0.8 }}
@@ -169,8 +169,8 @@ export default function Hero() {
                                             </div>
                                         </div>
                                         <span className={`ml-4 px-3 py-1 rounded-full text-xs font-medium ${contract.status === 'Active' ? 'bg-blue-50 text-blue-700' :
-                                                contract.status === 'Review' ? 'bg-amber-50 text-amber-700' :
-                                                    'bg-green-50 text-green-700'
+                                            contract.status === 'Review' ? 'bg-amber-50 text-amber-700' :
+                                                'bg-green-50 text-green-700'
                                             }`}>
                                             {contract.status}
                                         </span>

@@ -11,21 +11,21 @@ const stats = [
         value: '500+',
         label: 'Active Builders',
         description: 'Trust BuildWise daily',
-        color: 'bg-blue-600',
+        color: 'bg-[#4A90E2]',
     },
     {
         icon: Clock,
         value: '15k+',
         label: 'Hours Saved',
         description: 'By our customers',
-        color: 'bg-blue-600',
+        color: 'bg-[#4A90E2]',
     },
     {
         icon: TrendingUp,
         value: '40%',
         label: 'Growth Rate',
         description: 'Average capacity increase',
-        color: 'bg-blue-600',
+        color: 'bg-[#4A90E2]',
     },
     {
         icon: Award,
@@ -41,7 +41,7 @@ export default function Stats() {
     const isInView = useInView(ref, { once: true })
 
     return (
-        <section ref={ref} className="py-20 bg-slate-900 relative overflow-hidden">
+        <section ref={ref} className="py-20 bg-gray-900 relative overflow-hidden font-poppins">
             <div className="section-container relative z-10">
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
                     {stats.map((stat, index) => {
@@ -70,7 +70,7 @@ export default function Stats() {
                                 </div>
 
                                 {/* Description */}
-                                <div className="text-xs text-slate-400">
+                                <div className="text-xs text-gray-400">
                                     {stat.description}
                                 </div>
                             </motion.div>

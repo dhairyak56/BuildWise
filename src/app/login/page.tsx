@@ -38,7 +38,7 @@ export default function LoginPage() {
         }
     }
     return (
-        <div className="min-h-screen flex bg-white">
+        <div className="min-h-screen flex bg-white font-poppins">
             {/* Left Side - Form */}
             <div className="flex-1 flex items-center justify-center p-8 sm:p-12 lg:p-16">
                 <div className="w-full max-w-md space-y-8">
@@ -46,10 +46,10 @@ export default function LoginPage() {
                         <Link href="/" className="mb-8 block">
                             <Logo />
                         </Link>
-                        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
                             Welcome back
                         </h1>
-                        <p className="text-slate-500 text-sm">
+                        <p className="text-gray-500 text-sm">
                             Enter your details to access your workspace
                         </p>
                     </div>
@@ -63,7 +63,7 @@ export default function LoginPage() {
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                            <label htmlFor="email" className="text-sm font-medium text-slate-700">
+                            <label htmlFor="email" className="text-sm font-medium text-gray-700">
                                 Email
                             </label>
                             <input
@@ -72,18 +72,18 @@ export default function LoginPage() {
                                 placeholder="name@company.com"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all bg-slate-50 focus:bg-white"
+                                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#4A90E2] focus:ring-2 focus:ring-[#4A90E2]/20 outline-none transition-all bg-gray-50 focus:bg-white"
                                 required
                             />
                         </div>
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <label htmlFor="password" className="text-sm font-medium text-slate-700">
+                                <label htmlFor="password" className="text-sm font-medium text-gray-700">
                                     Password
                                 </label>
                                 <Link
                                     href="/forgot-password"
-                                    className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                                    className="text-sm font-medium text-[#4A90E2] hover:text-[#357ABD]"
                                 >
                                     Forgot password?
                                 </Link>
@@ -94,7 +94,7 @@ export default function LoginPage() {
                                 placeholder="••••••••"
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all bg-slate-50 focus:bg-white"
+                                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#4A90E2] focus:ring-2 focus:ring-[#4A90E2]/20 outline-none transition-all bg-gray-50 focus:bg-white"
                                 required
                             />
                         </div>
@@ -102,7 +102,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-600/20 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="w-full bg-[#4A90E2] hover:bg-[#357ABD] text-white font-semibold py-3 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/20 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {isLoading ? (
                                 <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -114,10 +114,10 @@ export default function LoginPage() {
 
                     <div className="relative">
                         <div className="absolute inset-0 flex items-center">
-                            <span className="w-full border-t border-slate-200" />
+                            <span className="w-full border-t border-gray-200" />
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-white px-2 text-slate-500">
+                            <span className="bg-white px-2 text-gray-500">
                                 Or continue with
                             </span>
                         </div>
@@ -135,7 +135,7 @@ export default function LoginPage() {
                                     },
                                 })
                             }}
-                            className="flex items-center justify-center px-4 py-2.5 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors font-medium text-slate-700 text-sm"
+                            className="flex items-center justify-center px-4 py-2.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700 text-sm"
                         >
                             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                                 <path
@@ -159,9 +159,9 @@ export default function LoginPage() {
                         </button>
                     </div>
 
-                    <p className="text-center text-sm text-slate-600">
+                    <p className="text-center text-sm text-gray-600">
                         Don&apos;t have an account?{' '}
-                        <Link href="/signup" className="font-semibold text-blue-600 hover:text-blue-700">
+                        <Link href="/signup" className="font-semibold text-[#4A90E2] hover:text-[#357ABD]">
                             Sign up
                         </Link>
                     </p>
@@ -169,30 +169,30 @@ export default function LoginPage() {
             </div>
 
             {/* Right Side - Visual */}
-            <div className="hidden lg:flex flex-1 bg-slate-900 relative overflow-hidden items-center justify-center p-12">
+            <div className="hidden lg:flex flex-1 bg-gray-900 relative overflow-hidden items-center justify-center p-12">
                 <div className="absolute inset-0 grid-bg opacity-[0.1]"></div>
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-blue-900/50"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-900 to-[#4A90E2]/30"></div>
 
                 <div className="relative z-10 max-w-lg text-center">
-                    <div className="mb-8 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600/20 text-blue-400 ring-1 ring-blue-500/50">
+                    <div className="mb-8 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#4A90E2]/20 text-[#4A90E2] ring-1 ring-[#4A90E2]/50">
                         <Shield size={32} />
                     </div>
                     <h2 className="text-3xl font-bold text-white mb-6">
                         Secure Contracts for Modern Builders
                     </h2>
-                    <p className="text-slate-400 text-lg mb-10 leading-relaxed">
+                    <p className="text-gray-400 text-lg mb-10 leading-relaxed">
                         &quot;BuildWise has transformed how we manage contracts. It&apos;s like having a legal team in your pocket.&quot; It&apos;s fast, secure, and incredibly easy to use.&quot;
                     </p>
 
                     <div className="flex items-center justify-center space-x-4">
                         <div className="flex -space-x-2">
                             {[1, 2, 3].map((i) => (
-                                <div key={i} className="w-10 h-10 rounded-full border-2 border-slate-900 bg-slate-700"></div>
+                                <div key={i} className="w-10 h-10 rounded-full border-2 border-gray-900 bg-gray-700"></div>
                             ))}
                         </div>
                         <div className="text-left">
                             <div className="text-white font-semibold">500+ Builders</div>
-                            <div className="text-slate-500 text-sm">Trust BuildWise</div>
+                            <div className="text-gray-500 text-sm">Trust BuildWise</div>
                         </div>
                     </div>
                 </div>

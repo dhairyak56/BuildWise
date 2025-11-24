@@ -1,32 +1,29 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
     LayoutDashboard,
     FolderKanban,
     FileText,
     Settings,
     LogOut,
-    PlusCircle
+    PlusCircle,
+    Shield,
+    Diff,
+    Users,
+    BarChart3,
+    HelpCircle,
+    FileSignature,
+    DollarSign
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase'
-
-import { Logo } from '@/components/ui/Logo'
-
-const navigation = [
-    { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Projects', href: '/dashboard/projects', icon: FolderKanban },
-    { name: 'Documents', href: '/dashboard/documents', icon: FileText },
-    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
-]
 
 export function Sidebar() {
     const pathname = usePathname()
-    const [user, setUser] = useState<{ email?: string, user_metadata?: { full_name?: string } } | null>(null)
     const router = useRouter()
+    const [user, setUser] = useState<{ email?: string, user_metadata?: { full_name?: string } } | null>(null)
 
     useEffect(() => {
         const getUser = async () => {
@@ -44,60 +41,97 @@ export function Sidebar() {
         router.refresh()
     }
 
+    const isActive = (path: string) => pathname === path || pathname?.startsWith(`${path}/`)
+
     return (
-        <aside className="w-64 bg-slate-900 border-r border-slate-800 flex-col hidden md:flex h-screen fixed left-0 top-0 z-30">
-            {/* Logo */}
-            <div className="h-16 flex items-center px-6 border-b border-slate-800">
-                <Link href="/dashboard" className="group">
-                    <Logo variant="dark" />
-                </Link>
-            </div>
-
-            {/* Navigation */}
-            <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-                {navigation.map((item) => {
-                    const isActive = pathname === item.href
-                    return (
-                        <Link
-                            key={item.name}
-                            href={item.href}
-                            className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${isActive
-                                ? 'bg-blue-600 text-white shadow-md shadow-blue-900/20'
-                                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                                }`}
-                        >
-                            <item.icon
-                                className={`mr-3 h-5 w-5 transition-colors ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-white'
-                                    }`}
-                            />
-                            {item.name}
-                        </Link>
-                    )
-                })}
-
-                <div className="pt-6 mt-6 border-t border-slate-800">
-                    <Link href="/dashboard/projects/new" className="w-full flex items-center px-3 py-2.5 text-sm font-medium text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded-lg transition-colors group">
-                        <PlusCircle className="mr-3 h-5 w-5" />
-                        New Project
-                    </Link>
+        <aside className="flex flex-col w-64 p-4 border-r border-gray-200 bg-white h-screen sticky top-0 hidden md:flex font-poppins">
+            <div className="flex flex-col gap-4 h-full">
+                {/* Logo Area */}
+                <div className="flex gap-3 items-center mb-6 px-2 cursor-pointer" onClick={() => router.push('/dashboard')}>
+                    <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 shadow-sm bg-blue-600 flex items-center justify-center text-white font-bold text-xl">
+                        B
+                    </div>
+                    <div className="flex flex-col">
+                        <h1 className="text-gray-900 text-base font-bold leading-normal">Buildwise</h1>
+                        <p className="text-gray-500 text-xs font-normal leading-normal">SaaS for Builders</p>
+                    </div>
                 </div>
-            </nav>
 
-            {/* User Profile */}
-            <div className="p-4 border-t border-slate-800">
-                <div className="flex items-center w-full p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer group">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg">
-                        {user?.user_metadata?.full_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
+                <nav className="flex flex-col gap-1 overflow-y-auto flex-1">
+                    <Link
+                        href="/dashboard"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left ${pathname === '/dashboard' ? 'bg-[#4A90E2]/10 text-[#4A90E2]' : 'text-gray-600 hover:bg-gray-50'}`}
+                    >
+                        <LayoutDashboard className={`w-5 h-5 ${pathname === '/dashboard' ? 'fill-current' : ''}`} />
+                        <p className="text-sm font-medium">Dashboard</p>
+                    </Link>
+
+                    <div className="px-3 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Project Tools</div>
+
+                    <Link
+                        href="/dashboard/projects"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left ${isActive('/dashboard/projects') ? 'bg-[#4A90E2]/10 text-[#4A90E2]' : 'text-gray-600 hover:bg-gray-50'}`}
+                    >
+                        <FolderKanban className={`w-5 h-5 ${isActive('/dashboard/projects') ? 'fill-current' : ''}`} />
+                        <p className="text-sm font-medium">Projects</p>
+                    </Link>
+
+                    <Link
+                        href="/dashboard/contracts"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left ${isActive('/dashboard/contracts') ? 'bg-[#4A90E2]/10 text-[#4A90E2]' : 'text-gray-600 hover:bg-gray-50'}`}
+                    >
+                        <FileSignature className={`w-5 h-5 ${isActive('/dashboard/contracts') ? 'fill-current' : ''}`} />
+                        <p className="text-sm font-medium">Contracts</p>
+                    </Link>
+
+                    <Link
+                        href="/dashboard/documents"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left ${isActive('/dashboard/documents') ? 'bg-[#4A90E2]/10 text-[#4A90E2]' : 'text-gray-600 hover:bg-gray-50'}`}
+                    >
+                        <FileText className={`w-5 h-5 ${isActive('/dashboard/documents') ? 'fill-current' : ''}`} />
+                        <p className="text-sm font-medium">Documents</p>
+                    </Link>
+
+                    <Link
+                        href="/dashboard/payments"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left ${isActive('/dashboard/payments') ? 'bg-[#4A90E2]/10 text-[#4A90E2]' : 'text-gray-600 hover:bg-gray-50'}`}
+                    >
+                        <DollarSign className={`w-5 h-5 ${isActive('/dashboard/payments') ? 'fill-current' : ''}`} />
+                        <p className="text-sm font-medium">Payments</p>
+                    </Link>
+
+                    <div className="px-3 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Organization</div>
+
+                    <Link
+                        href="/dashboard/settings"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left ${isActive('/dashboard/settings') ? 'bg-[#4A90E2]/10 text-[#4A90E2]' : 'text-gray-600 hover:bg-gray-50'}`}
+                    >
+                        <Users className={`w-5 h-5 ${isActive('/dashboard/settings') ? 'fill-current' : ''}`} />
+                        <p className="text-sm font-medium">Team Members</p>
+                    </Link>
+                    <Link
+                        href="/dashboard/analytics"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left ${isActive('/dashboard/analytics') ? 'bg-[#4A90E2]/10 text-[#4A90E2]' : 'text-gray-600 hover:bg-gray-50'}`}
+                    >
+                        <BarChart3 className={`w-5 h-5 ${isActive('/dashboard/analytics') ? 'fill-current' : ''}`} />
+                        <p className="text-sm font-medium">Analytics</p>
+                    </Link>
+                </nav>
+
+                <div className="mt-auto flex flex-col gap-4">
+                    <Link href="/dashboard/projects/new" className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#4A90E2] text-white text-sm font-bold shadow-md hover:bg-[#4A90E2]/90 transition-colors">
+                        <span className="truncate">New Project</span>
+                    </Link>
+                    <div className="flex flex-col gap-1">
+                        <button className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors text-left">
+                            <HelpCircle className="w-5 h-5" />
+                            <p className="text-sm font-medium">Help Center</p>
+                        </button>
+                        <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors text-left">
+                            <LogOut className="w-5 h-5" />
+                            <p className="text-sm font-medium">Log out</p>
+                        </button>
                     </div>
-                    <div className="ml-3 flex-1 overflow-hidden">
-                        <p className="text-sm font-medium text-white truncate">
-                            {user?.user_metadata?.full_name || 'User'}
-                        </p>
-                        <p className="text-xs text-slate-500 truncate">{user?.email}</p>
-                    </div>
-                    <button onClick={handleLogout} className="p-1 hover:bg-slate-700 rounded-full transition-colors">
-                        <LogOut className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors" />
-                    </button>
                 </div>
             </div>
         </aside>

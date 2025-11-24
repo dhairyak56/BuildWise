@@ -23,14 +23,14 @@ export function JobDetailsForm({ data, updateData }: JobDetailsFormProps) {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-2">
-                <label htmlFor="jobType" className="text-sm font-medium text-slate-700">
+                <label htmlFor="jobType" className="text-sm font-medium text-gray-700">
                     Job Type
                 </label>
                 <select
                     id="jobType"
                     value={data.jobType || ''}
                     onChange={(e) => updateData({ jobType: e.target.value })}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all bg-slate-50 focus:bg-white"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#4A90E2] focus:ring-2 focus:ring-[#4A90E2]/20 outline-none transition-all bg-gray-50 focus:bg-white"
                 >
                     <option value="" disabled>Select a job type</option>
                     {jobTypes.map((type) => (
@@ -41,10 +41,10 @@ export function JobDetailsForm({ data, updateData }: JobDetailsFormProps) {
 
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                    <label htmlFor="scopeOfWork" className="text-sm font-medium text-slate-700">
+                    <label htmlFor="scopeOfWork" className="text-sm font-medium text-gray-700">
                         Scope of Work
                     </label>
-                    <button className="flex items-center text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 px-2 py-1 rounded-md transition-colors">
+                    <button className="flex items-center text-xs font-medium text-[#4A90E2] hover:text-[#357ABD] bg-blue-50 px-2 py-1 rounded-md transition-colors">
                         <Sparkles className="w-3 h-3 mr-1" />
                         Auto-generate with AI
                     </button>
@@ -55,9 +55,9 @@ export function JobDetailsForm({ data, updateData }: JobDetailsFormProps) {
                     placeholder="Describe the work to be performed in detail..."
                     value={data.scopeOfWork || ''}
                     onChange={(e) => updateData({ scopeOfWork: e.target.value })}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all bg-slate-50 focus:bg-white resize-none"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#4A90E2] focus:ring-2 focus:ring-[#4A90E2]/20 outline-none transition-all bg-gray-50 focus:bg-white resize-none"
                 />
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-gray-500">
                     Be as specific as possible to ensure the contract covers all necessary tasks.
                 </p>
             </div>

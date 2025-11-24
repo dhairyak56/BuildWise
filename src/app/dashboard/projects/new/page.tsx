@@ -129,19 +129,19 @@ export default function NewProjectPage() {
     }
 
     return (
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto font-poppins">
             <div className="mb-8">
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
                     New Contract
                 </h1>
-                <p className="text-slate-500">
+                <p className="text-gray-500">
                     Create a new construction contract in minutes with AI.
                 </p>
             </div>
 
             <WizardSteps steps={steps} currentStep={currentStep} />
 
-            <div className="mt-8 bg-white rounded-xl border border-slate-200 shadow-sm p-6 sm:p-8 min-h-[400px] flex flex-col">
+            <div className="mt-8 bg-white rounded-xl border border-gray-200 shadow-sm p-6 sm:p-8 min-h-[400px] flex flex-col">
                 <div className="flex-1">
                     {currentStep === 1 && (
                         <ProjectBasicsForm data={formData} updateData={updateFormData} />
@@ -155,7 +155,7 @@ export default function NewProjectPage() {
                     {currentStep === 4 && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start space-x-3">
-                                <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+                                <div className="p-2 bg-blue-100 rounded-lg text-[#4A90E2]">
                                     <FileText className="w-5 h-5" />
                                 </div>
                                 <div>
@@ -166,23 +166,23 @@ export default function NewProjectPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-4 border-t border-slate-100 pt-4">
+                            <div className="space-y-4 border-t border-gray-100 pt-4">
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
-                                        <span className="block text-slate-500">Project</span>
-                                        <span className="font-medium text-slate-900">{formData.projectName || '-'}</span>
+                                        <span className="block text-gray-500">Project</span>
+                                        <span className="font-medium text-gray-900">{formData.projectName || '-'}</span>
                                     </div>
                                     <div>
-                                        <span className="block text-slate-500">Client</span>
-                                        <span className="font-medium text-slate-900">{formData.clientName || '-'}</span>
+                                        <span className="block text-gray-500">Client</span>
+                                        <span className="font-medium text-gray-900">{formData.clientName || '-'}</span>
                                     </div>
                                     <div>
-                                        <span className="block text-slate-500">Job Type</span>
-                                        <span className="font-medium text-slate-900">{formData.jobType || '-'}</span>
+                                        <span className="block text-gray-500">Job Type</span>
+                                        <span className="font-medium text-gray-900">{formData.jobType || '-'}</span>
                                     </div>
                                     <div>
-                                        <span className="block text-slate-500">Value</span>
-                                        <span className="font-medium text-slate-900">${formData.contractValue || '0.00'}</span>
+                                        <span className="block text-gray-500">Value</span>
+                                        <span className="font-medium text-gray-900">${formData.contractValue || '0.00'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -190,13 +190,13 @@ export default function NewProjectPage() {
                     )}
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
+                <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
                     <button
                         onClick={handleBack}
                         disabled={currentStep === 1 || isGenerating}
                         className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors ${currentStep === 1
-                            ? 'text-slate-300 cursor-not-allowed'
-                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                            ? 'text-gray-300 cursor-not-allowed'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                             }`}
                     >
                         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -206,7 +206,7 @@ export default function NewProjectPage() {
                     <button
                         onClick={handleNext}
                         disabled={isGenerating}
-                        className="flex items-center px-6 py-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium text-sm transition-colors shadow-lg shadow-slate-900/20 disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="flex items-center px-6 py-2.5 bg-[#4A90E2] text-white rounded-lg hover:bg-[#357ABD] font-medium text-sm transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                         {isGenerating ? (
                             <>

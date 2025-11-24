@@ -66,25 +66,25 @@ const features = [
         icon: CustomIcons.Lightning,
         title: 'Lightning Fast',
         description: 'Generate professional contracts in under 2 minutes. What used to take 8 hours now takes 20 minutes.',
-        color: 'text-blue-600',
-        bg: 'bg-teal-50',
-        gradient: 'from-blue-600 to-indigo-600',
+        color: 'text-[#4A90E2]',
+        bg: 'bg-blue-50',
+        gradient: 'from-[#4A90E2] to-[#357ABD]',
     },
     {
         icon: CustomIcons.Shield,
         title: 'Risk Protection',
         description: 'AI scans every clause for risks, missing terms, and compliance issues before you sign.',
-        color: 'text-blue-500',
-        bg: 'bg-emerald-50',
-        gradient: 'from-blue-500 to-blue-600',
+        color: 'text-[#4A90E2]',
+        bg: 'bg-blue-50',
+        gradient: 'from-[#4A90E2] to-[#357ABD]',
     },
     {
         icon: CustomIcons.Document,
         title: 'Instant Variations',
         description: 'Generate variation orders on the fly when project scope changes. Keep clients informed.',
-        color: 'text-blue-500',
+        color: 'text-[#4A90E2]',
         bg: 'bg-blue-50',
-        gradient: 'from-blue-500 to-indigo-600',
+        gradient: 'from-[#4A90E2] to-[#357ABD]',
     },
     {
         icon: CustomIcons.Clock,
@@ -123,7 +123,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0], index: n
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
             transition={{ duration: 0.6, delay: index * 0.1 }}
             whileHover={{ y: -8, scale: 1.02 }}
-            className="group relative p-8 rounded-2xl bg-slate-50 border border-slate-100 hover:border-teal-200 hover:shadow-2xl transition-all duration-300 overflow-hidden"
+            className="group relative p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:border-blue-200 hover:shadow-2xl transition-all duration-300 overflow-hidden"
         >
             {/* Animated gradient background on hover */}
             <motion.div
@@ -143,16 +143,16 @@ function FeatureCard({ feature, index }: { feature: typeof features[0], index: n
             </motion.div>
 
             {/* Content */}
-            <h3 className="text-xl font-semibold text-slate-900 mb-3 relative z-10">
+            <h3 className="text-xl font-semibold text-gray-900 mb-3 relative z-10">
                 {feature.title}
             </h3>
-            <p className="text-slate-600 leading-relaxed relative z-10">
+            <p className="text-gray-600 leading-relaxed relative z-10">
                 {feature.description}
             </p>
 
             {/* Animated corner decoration */}
             <motion.div
-                className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-teal-400/20 to-transparent rounded-bl-full"
+                className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-400/20 to-transparent rounded-bl-full"
                 initial={{ scale: 0, opacity: 0 }}
                 whileHover={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.3 }}
@@ -166,10 +166,10 @@ export default function Features() {
     const isInView = useInView(ref, { once: true, margin: "-100px" })
 
     return (
-        <section ref={ref} className="py-24 bg-white relative overflow-hidden">
+        <section ref={ref} className="py-24 bg-white relative overflow-hidden font-poppins">
             {/* Animated background elements */}
             <motion.div
-                className="absolute top-1/4 left-0 w-96 h-96 bg-teal-200/10 rounded-full blur-3xl"
+                className="absolute top-1/4 left-0 w-96 h-96 bg-blue-200/10 rounded-full blur-3xl"
                 animate={{
                     x: [0, 100, 0],
                     y: [0, -50, 0],
@@ -190,14 +190,14 @@ export default function Features() {
                     transition={{ duration: 0.8 }}
                 >
                     <motion.h2
-                        className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4"
+                        className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4"
                         initial={{ opacity: 0, y: 20 }}
                         animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                         transition={{ duration: 0.6, delay: 0.2 }}
                     >
                         Everything You Need to{' '}
                         <motion.span
-                            className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent"
+                            className="bg-gradient-to-r from-[#4A90E2] via-[#357ABD] to-[#4A90E2] bg-clip-text text-transparent"
                             animate={{
                                 backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
                             }}
@@ -212,7 +212,7 @@ export default function Features() {
                         </motion.span>
                     </motion.h2>
                     <motion.p
-                        className="text-xl text-slate-600"
+                        className="text-xl text-gray-600"
                         initial={{ opacity: 0 }}
                         animate={isInView ? { opacity: 1 } : { opacity: 0 }}
                         transition={{ duration: 0.6, delay: 0.4 }}

@@ -45,22 +45,22 @@ const workflows = [
         title: 'Client Onboarding',
         description: 'Transform scattered client information into structured case files in minutes. Combine meetings, emails, messages, and documents into organized, searchable files your team can access instantly.',
         icon: WorkflowIllustrations.Onboarding,
-        bgColor: 'bg-teal-100/50',
-        iconColor: 'text-blue-600',
+        bgColor: 'bg-blue-100/50',
+        iconColor: 'text-[#4A90E2]',
     },
     {
         title: 'Smart Generation',
         description: 'AI analyzes your project details and generates compliant contracts in under 2 minutes. Every clause is tailored to Australian construction law and your specific trade.',
         icon: WorkflowIllustrations.Generation,
-        bgColor: 'bg-cyan-100/50',
-        iconColor: 'text-indigo-600',
+        bgColor: 'bg-blue-100/50',
+        iconColor: 'text-[#4A90E2]',
     },
     {
         title: 'Risk Analysis',
         description: 'Analyze thousands of documents and extract key terms with relative accuracy. Pinpoint entire case folders in minutes, identifying critical information and patterns across hundreds of files.',
         icon: WorkflowIllustrations.Analysis,
         bgColor: 'bg-blue-100/50',
-        iconColor: 'text-blue-500',
+        iconColor: 'text-[#4A90E2]',
     },
 ]
 
@@ -69,7 +69,7 @@ export default function Workflow() {
     const isInView = useInView(ref, { once: true, margin: "-100px" })
 
     return (
-        <section ref={ref} className="py-24 bg-slate-50">
+        <section ref={ref} className="py-24 bg-gray-50 font-poppins">
             <div className="section-container">
                 {/* Section Header */}
                 <motion.div
@@ -78,14 +78,14 @@ export default function Workflow() {
                     animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                     transition={{ duration: 0.8 }}
                 >
-                    <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4">
+                    <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
                         Built for{' '}
-                        <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-[#4A90E2] via-[#357ABD] to-[#4A90E2] bg-clip-text text-transparent">
                             Every Stage
                         </span>
                         {' '}of Your Workflow
                     </h2>
-                    <p className="text-xl text-slate-600">
+                    <p className="text-xl text-gray-600">
                         From client onboarding to contract signing, we have got you covered
                     </p>
                 </motion.div>
@@ -124,20 +124,20 @@ export default function Workflow() {
                                             {[1, 2, 3].map((i) => (
                                                 <motion.div
                                                     key={i}
-                                                    className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-slate-100"
+                                                    className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-100"
                                                     initial={{ opacity: 0, x: -20 }}
                                                     animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
                                                     transition={{ delay: index * 0.2 + (i * 0.1), duration: 0.5 }}
                                                 >
-                                                    <CheckCircle2 className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                                                    <CheckCircle2 className="h-5 w-5 text-[#4A90E2] flex-shrink-0" />
                                                     <div className="flex-1 flex items-center gap-2">
                                                         <motion.div
-                                                            className="h-2 bg-blue-600 rounded-full"
+                                                            className="h-2 bg-[#4A90E2] rounded-full"
                                                             initial={{ width: 0 }}
                                                             animate={isInView ? { width: `${100 - (i * 20)}%` } : { width: 0 }}
                                                             transition={{ delay: index * 0.2 + (i * 0.1) + 0.3, duration: 0.8 }}
                                                         />
-                                                        <div className="h-2 bg-slate-200 rounded-full flex-1"></div>
+                                                        <div className="h-2 bg-gray-200 rounded-full flex-1"></div>
                                                     </div>
                                                 </motion.div>
                                             ))}
@@ -153,10 +153,10 @@ export default function Workflow() {
                                 animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: index % 2 === 1 ? 50 : -50 }}
                                 transition={{ duration: 0.8, delay: index * 0.2 + 0.2 }}
                             >
-                                <h3 className="text-3xl font-bold text-slate-900 mb-4">
+                                <h3 className="text-3xl font-bold text-gray-900 mb-4">
                                     {workflow.title}
                                 </h3>
-                                <p className="text-lg text-slate-600 leading-relaxed">
+                                <p className="text-lg text-gray-600 leading-relaxed">
                                     {workflow.description}
                                 </p>
                             </motion.div>
