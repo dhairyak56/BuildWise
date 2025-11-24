@@ -6,14 +6,13 @@ import { createBrowserClient } from '@supabase/ssr'
 
 interface UserActionsProps {
     userId: string
-    userEmail: string
     isAdmin: boolean
     onUpdate: () => void
 }
 
-export function UserActions({ userId, userEmail, isAdmin, onUpdate }: UserActionsProps) {
+export function UserActions({ userId, isAdmin, onUpdate }: UserActionsProps) {
     const [isLoading, setIsLoading] = useState(false)
-    const supabase = createBrowserClient(
+    const _supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )

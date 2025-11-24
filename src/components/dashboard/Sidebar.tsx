@@ -6,30 +6,24 @@ import {
     LayoutDashboard,
     FolderKanban,
     FileText,
-    Settings,
     LogOut,
-    PlusCircle,
-    Shield,
-    Diff,
     Users,
     BarChart3,
     HelpCircle,
     FileSignature,
     DollarSign
 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { createBrowserClient } from '@/lib/supabase'
 
 export function Sidebar() {
     const pathname = usePathname()
     const router = useRouter()
-    const [user, setUser] = useState<{ email?: string, user_metadata?: { full_name?: string } } | null>(null)
 
     useEffect(() => {
         const getUser = async () => {
             const supabase = createBrowserClient()
-            const { data: { user } } = await supabase.auth.getUser()
-            setUser(user)
+            await supabase.auth.getSession()
         }
         getUser()
     }, [])

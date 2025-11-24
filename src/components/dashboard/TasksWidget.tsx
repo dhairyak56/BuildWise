@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createBrowserClient } from '@/lib/supabase'
 import { CheckSquare, Calendar, Loader2, ExternalLink } from 'lucide-react'
 import { format } from 'date-fns'
@@ -31,9 +31,9 @@ export function TasksWidget() {
 
     useEffect(() => {
         loadTasks()
-    }, [])
+    }, [loadTasks])
 
-    const loadTasks = async () => {
+    const loadTasks = useCallback(async () => {
         try {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) return
@@ -70,7 +70,7 @@ export function TasksWidget() {
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [supabase])
 
     if (isLoading) {
         return (

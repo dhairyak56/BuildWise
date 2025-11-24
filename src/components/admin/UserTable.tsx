@@ -1,14 +1,16 @@
 'use client'
 
-import { Users, FolderKanban, FileText, DollarSign } from 'lucide-react'
+import { FolderKanban, FileText, DollarSign } from 'lucide-react'
 import { UserActions } from '@/components/admin/UserActions'
 import { useState } from 'react'
 
 interface User {
     id: string
     email: string
+    role: string
     created_at: string
     last_sign_in_at: string | null
+    banned_until: string | null
     project_count: number
     contract_count: number
     total_revenue: number
@@ -20,7 +22,7 @@ interface UserTableProps {
 }
 
 export function UserTable({ initialUsers }: UserTableProps) {
-    const [users, setUsers] = useState(initialUsers)
+    const [users, _setUsers] = useState(initialUsers)
     const [searchTerm, setSearchTerm] = useState('')
 
     const filteredUsers = users.filter(user =>
@@ -132,9 +134,8 @@ export function UserTable({ initialUsers }: UserTableProps) {
                                         <td className="px-6 py-4">
                                             <UserActions
                                                 userId={user.id}
-                                                userEmail={user.email}
-                                                isAdmin={user.is_admin}
-                                                onUpdate={handleUpdate}
+                                                isAdmin={user.role === 'admin'}
+                                                onUpdate={() => window.location.reload()}
                                             />
                                         </td>
                                     </tr>

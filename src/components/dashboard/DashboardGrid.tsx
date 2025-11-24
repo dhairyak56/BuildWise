@@ -6,17 +6,16 @@ import { createBrowserClient } from '@/lib/supabase'
 import { debounce } from 'lodash'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
-import { Loader2, Settings2, Plus } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
 interface DashboardGridProps {
     children: React.ReactNode[]
     defaultLayout: Layout[]
-    onLayoutChange?: (layout: Layout[]) => void
 }
 
-export function DashboardGrid({ children, defaultLayout, onLayoutChange }: DashboardGridProps) {
+export function DashboardGrid({ children, defaultLayout }: DashboardGridProps) {
     const [layouts, setLayouts] = useState<{ lg: Layout[] }>({ lg: defaultLayout })
     const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
@@ -29,7 +28,7 @@ export function DashboardGrid({ children, defaultLayout, onLayoutChange }: Dashb
                 const { data: { user } } = await supabase.auth.getUser()
                 if (!user) return
 
-                const { data, error } = await supabase
+                const { data } = await supabase
                     .from('user_settings')
                     .select('dashboard_layout')
                     .eq('user_id', user.id)
@@ -50,7 +49,7 @@ export function DashboardGrid({ children, defaultLayout, onLayoutChange }: Dashb
         }
 
         loadLayout()
-    }, [])
+    }, [supabase])
 
     // Update layout when defaultLayout changes (e.g., when widgets are removed)
     useEffect(() => {
@@ -58,6 +57,7 @@ export function DashboardGrid({ children, defaultLayout, onLayoutChange }: Dashb
     }, [defaultLayout])
 
     // Save layout to DB (debounced)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const saveLayout = useCallback(
         debounce(async (newLayout: Layout[]) => {
             setIsSaving(true)
@@ -91,7 +91,7 @@ export function DashboardGrid({ children, defaultLayout, onLayoutChange }: Dashb
                 setIsSaving(false)
             }
         }, 1000),
-        []
+        [supabase]
     )
 
     const handleLayoutChange = (currentLayout: Layout[]) => {

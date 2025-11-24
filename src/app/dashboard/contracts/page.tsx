@@ -6,21 +6,15 @@ import {
     FileText,
     Plus,
     Search,
-    Filter,
     Download,
-    Calendar,
-    Mail,
     Trash2,
-    MoreVertical,
     Edit,
-    Eye,
     Home,
     Hammer,
     HardHat
 } from 'lucide-react'
 import jsPDF from 'jspdf'
 import Link from 'next/link'
-import { cn } from '@/lib/utils'
 import { EmailContractModal } from '@/components/contracts/EmailContractModal'
 import { useRouter } from 'next/navigation'
 
@@ -88,10 +82,6 @@ export default function ContractsPage() {
         }
     }
 
-    const handleEmailClick = (contract: Contract) => {
-        setSelectedContract(contract)
-        setIsEmailModalOpen(true)
-    }
 
     const handleDownload = (contract: Contract) => {
         const doc = new jsPDF()

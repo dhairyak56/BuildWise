@@ -1,0 +1,69 @@
+
+> buildwise@0.1.0 lint
+> eslint
+
+
+/Users/dhairyakandhari/Documents/BuildWise MVP/buildwise/coverage/lcov-report/block-navigation.js
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+/Users/dhairyakandhari/Documents/BuildWise MVP/buildwise/src/app/api/admin/impersonate/route.ts
+  15:23  warning  '_adminUser' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  15:42  warning  '_adminError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/dhairyakandhari/Documents/BuildWise MVP/buildwise/src/app/dashboard/contracts/page.tsx
+  40:30  warning  'setSelectedContract' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/dhairyakandhari/Documents/BuildWise MVP/buildwise/src/app/page.tsx
+  302:86   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  302:106  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+/Users/dhairyakandhari/Documents/BuildWise MVP/buildwise/src/app/sign/[token]/page.tsx
+  42:18  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  64:18  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/dhairyakandhari/Documents/BuildWise MVP/buildwise/src/components/admin/ProjectTable.tsx
+   3:10  warning  'MoreHorizontal' is defined but never used        @typescript-eslint/no-unused-vars
+   3:26  warning  'Search' is defined but never used                @typescript-eslint/no-unused-vars
+   3:34  warning  'Trash2' is defined but never used                @typescript-eslint/no-unused-vars
+   3:42  warning  'Eye' is defined but never used                   @typescript-eslint/no-unused-vars
+   3:47  warning  'Edit' is defined but never used                  @typescript-eslint/no-unused-vars
+  31:22  warning  'setProjects' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/dhairyakandhari/Documents/BuildWise MVP/buildwise/src/components/admin/UserActions.tsx
+  15:11  warning  '_supabase' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/dhairyakandhari/Documents/BuildWise MVP/buildwise/src/components/admin/UserTable.tsx
+  25:19  warning  '_setUsers' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  32:11  warning  'handleUpdate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/dhairyakandhari/Documents/BuildWise MVP/buildwise/src/components/clauses/ClauseLibrary.tsx
+  48:8  warning  React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/dhairyakandhari/Documents/BuildWise MVP/buildwise/src/components/contracts/ContractEditor.tsx
+    5:8   warning  'Image' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  603:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/dhairyakandhari/Documents/BuildWise MVP/buildwise/src/components/dashboard/DashboardContent.tsx
+  67:41  warning  'error' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/dhairyakandhari/Documents/BuildWise MVP/buildwise/src/components/dashboard/DashboardGrid.tsx
+   9:19  warning  'Settings2' is defined but never used                                                                        @typescript-eslint/no-unused-vars
+   9:30  warning  'Plus' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+  19:58  warning  'onLayoutChange' is defined but never used                                                                   @typescript-eslint/no-unused-vars
+  32:31  warning  'error' is assigned a value but never used                                                                   @typescript-eslint/no-unused-vars
+  53:8   warning  React Hook useEffect has a missing dependency: 'supabase'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  61:24  warning  React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead   react-hooks/exhaustive-deps
+
+/Users/dhairyakandhari/Documents/BuildWise MVP/buildwise/src/components/dashboard/Sidebar.tsx
+   9:5   warning  'Settings' is defined but never used       @typescript-eslint/no-unused-vars
+  11:5   warning  'PlusCircle' is defined but never used     @typescript-eslint/no-unused-vars
+  12:5   warning  'Shield' is defined but never used         @typescript-eslint/no-unused-vars
+  13:5   warning  'Diff' is defined but never used           @typescript-eslint/no-unused-vars
+  26:12  warning  'user' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/dhairyakandhari/Documents/BuildWise MVP/buildwise/src/components/dashboard/TasksWidget.tsx
+  34:8  warning  React Hook useEffect has a missing dependency: 'loadTasks'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+✖ 33 problems (2 errors, 31 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

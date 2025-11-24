@@ -49,9 +49,9 @@ export function createAdminClient() {
         serviceRoleKey,
         {
             cookies: {
-                get(_name: string) { return '' },
-                set(_name: string, _value: string, _options: CookieOptions) { },
-                remove(_name: string, _options: CookieOptions) { },
+                get() { return '' },
+                set() { },
+                remove() { },
             },
         }
     )

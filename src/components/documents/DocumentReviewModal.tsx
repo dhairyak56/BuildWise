@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@/lib/supabase'
-import { X, DollarSign, Calendar, Building2, FileText, Check, Loader2 } from 'lucide-react'
+import { X, FileText, Loader2, Building2, DollarSign, Calendar, Check } from 'lucide-react'
+import Image from 'next/image'
 
 interface ExtractedData {
     vendor_name?: string
@@ -80,7 +81,7 @@ export function DocumentReviewModal({ isOpen, onClose, projectId, file, extracte
             }
 
             // 2. Create Document Record
-            const { data: docData, error: docError } = await supabase
+            const { error: docError } = await supabase
                 .from('documents')
                 .insert({
                     project_id: projectId,
@@ -150,10 +151,13 @@ export function DocumentReviewModal({ isOpen, onClose, projectId, file, extracte
                     {/* Left: File Preview (Placeholder for now) */}
                     <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 flex flex-col items-center justify-center min-h-[300px]">
                         {file && file.type.startsWith('image/') ? (
-                            <img
+                            <Image
                                 src={URL.createObjectURL(file)}
-                                alt="Preview"
-                                className="max-w-full max-h-[300px] object-contain rounded-lg shadow-sm"
+                                alt="Document Preview"
+                                width={800}
+                                height={600}
+                                className="max-w-full h-auto max-h-[300px] object-contain rounded-lg shadow-sm mx-auto"
+                                unoptimized
                             />
                         ) : file && file.type === 'application/pdf' ? (
                             <iframe

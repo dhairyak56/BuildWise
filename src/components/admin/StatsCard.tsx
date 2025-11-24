@@ -1,6 +1,6 @@
 'use client'
 
-import { LucideIcon, TrendingUp, TrendingDown, Users, FolderKanban, DollarSign, FileText } from 'lucide-react'
+import { TrendingUp, TrendingDown, Users, FolderKanban, DollarSign, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface StatsCardProps {

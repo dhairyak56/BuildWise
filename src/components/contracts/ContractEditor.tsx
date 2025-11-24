@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Save, AlertTriangle, Loader2, Download, Mail, CheckCircle2, FileText, Send, X, Sparkles, BookOpen } from 'lucide-react'
+import Image from 'next/image'
 import { createBrowserClient } from '@/lib/supabase'
 import { RiskPanel } from './RiskPanel'
 import { ContractAssistant } from './ContractAssistant'
@@ -599,7 +600,14 @@ export function ContractEditor({ projectId, contractId, initialContent, initialS
                     {senderSignature && (
                         <div className="mt-6 pt-6 border-t border-slate-200">
                             <p className="text-sm font-medium text-slate-500 mb-2">Signed by Contractor</p>
-                            <img src={senderSignature} alt="Contractor Signature" className="h-16 object-contain" />
+                            <Image
+                                src={senderSignature}
+                                alt="Contractor Signature"
+                                width={200}
+                                height={80}
+                                className="h-16 w-auto object-contain"
+                                unoptimized
+                            />
                             <p className="text-xs text-slate-400 mt-1">
                                 {new Date().toLocaleDateString()}
                             </p>

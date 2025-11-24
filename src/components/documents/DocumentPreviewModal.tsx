@@ -1,6 +1,7 @@
 'use client'
 
 import { X, Download, ExternalLink } from 'lucide-react'
+import Image from 'next/image'
 
 interface DocumentPreviewModalProps {
     isOpen: boolean
@@ -66,10 +67,13 @@ export function DocumentPreviewModal({ isOpen, onClose, document }: DocumentPrev
                             title={document.name}
                         />
                     ) : isImage ? (
-                        <img
+                        <Image
                             src={document.url}
-                            alt={document.name}
-                            className="max-w-full max-h-full object-contain"
+                            alt="Document Preview"
+                            width={800}
+                            height={600}
+                            className="max-w-full h-auto mx-auto border shadow-sm"
+                            unoptimized
                         />
                     ) : (
                         <div className="text-center p-8">

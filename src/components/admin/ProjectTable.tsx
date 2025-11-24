@@ -1,6 +1,6 @@
 'use client'
 
-import { FolderKanban, User, DollarSign, FileText } from 'lucide-react'
+import { MoreHorizontal, Search, Trash2, Eye, Edit, User, DollarSign, FileText } from 'lucide-react'
 import { ProjectActions } from '@/components/admin/ProjectActions'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'

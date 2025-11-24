@@ -12,7 +12,7 @@ export async function POST(request: Request) {
         }
 
         // 2. Verify the caller is an admin
-        const { data: adminUser, error: adminError } = await supabase.auth.admin.getUserById(user.id)
+        const { data: _adminUser, error: _adminError } = await supabase.auth.admin.getUserById(user.id)
         // Note: The above check is insufficient because getUserById works for any user if called by service role.
         // We need to check the user's metadata or a specific admin table.
         // However, since we are using the standard client for the initial check, we can rely on RLS or metadata.

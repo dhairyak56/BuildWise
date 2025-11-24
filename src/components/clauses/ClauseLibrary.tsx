@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { X, Search, Plus, DollarSign, Shield, AlertTriangle, XCircle, Edit, Scale, FileText, CheckCircle, Lock, Eye, Zap, Sparkles } from 'lucide-react'
 import { createBrowserClient } from '@/lib/supabase'
 
@@ -41,18 +41,7 @@ export function ClauseLibrary({ isOpen, onClose, onInsertClause }: ClauseLibrary
 
     const supabase = createBrowserClient()
 
-    useEffect(() => {
-        if (isOpen) {
-            loadData()
-        }
-    }, [isOpen])
-
-    useEffect(() => {
-        filterClauses()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchQuery, selectedCategory, clauses])
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setIsLoading(true)
         try {
             // Load categories
@@ -78,9 +67,15 @@ export function ClauseLibrary({ isOpen, onClose, onInsertClause }: ClauseLibrary
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [supabase])
 
-    const filterClauses = () => {
+    useEffect(() => {
+        if (isOpen) {
+            loadData()
+        }
+    }, [isOpen, loadData])
+
+    const filterClauses = useCallback(() => {
         let filtered = clauses
 
         // Filter by category
@@ -100,7 +95,11 @@ export function ClauseLibrary({ isOpen, onClose, onInsertClause }: ClauseLibrary
         }
 
         setFilteredClauses(filtered)
-    }
+    }, [clauses, selectedCategory, searchQuery])
+
+    useEffect(() => {
+        filterClauses()
+    }, [searchQuery, selectedCategory, clauses])
 
     const handleInsertClause = async (clause: ClauseTemplate) => {
         // Track usage FIRST (before modal closes)

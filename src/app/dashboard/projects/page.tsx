@@ -107,14 +107,6 @@ export default function ProjectsPage() {
         setSelectedProjects(newSelected)
     }
 
-    const toggleSelectAll = () => {
-        if (selectedProjects.size === filteredProjects.length) {
-            setSelectedProjects(new Set())
-        } else {
-            setSelectedProjects(new Set(filteredProjects.map(p => p.id)))
-        }
-    }
-
     const handleBulkDelete = async () => {
         if (selectedProjects.size === 0) return
         if (!confirm(`Are you sure you want to delete ${selectedProjects.size} project(s)? This action cannot be undone.`)) return

@@ -64,7 +64,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
                 const { data: { user } } = await supabase.auth.getUser()
                 if (!user) return
 
-                const { data: settings, error } = await supabase
+                const { data: settings } = await supabase
                     .from('user_settings')
                     .select('dashboard_layout, active_widgets')
                     .eq('user_id', user.id)
@@ -109,10 +109,6 @@ export function DashboardContent({ data }: DashboardContentProps) {
         }
     }, [supabase])
 
-    const handleLayoutChange = (newLayout: Layout[]) => {
-        setLayout(newLayout)
-        saveSettings(newLayout, activeWidgets)
-    }
 
     const handleAddWidget = (widgetId: string) => {
         if (!activeWidgets.includes(widgetId)) {
@@ -410,7 +406,6 @@ export function DashboardContent({ data }: DashboardContentProps) {
             {/* Grid Layout */}
             <DashboardGrid
                 defaultLayout={layout}
-                onLayoutChange={handleLayoutChange}
             >
                 {activeWidgets.map(widgetId => (
                     <div key={widgetId} className="h-full">

@@ -31,7 +31,6 @@ async function getAnalyticsData() {
     payments?.forEach((payment) => {
         const date = new Date(payment.payment_date)
         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-        const monthName = date.toLocaleDateString('en-US', { month: 'short' })
 
         revenueByMonth.set(monthKey, (revenueByMonth.get(monthKey) || 0) + Number(payment.amount))
     })
