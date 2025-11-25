@@ -11,16 +11,11 @@ interface Task {
     title: string
     description?: string
     due_date?: string
-    list_id: string
-    task_lists: {
+    status: string
+    project_id: string
+    projects: {
+        id: string
         name: string
-        task_boards: {
-            project_id: string
-            projects: {
-                id: string
-                name: string
-            }
-        }
     }
 }
 
@@ -39,15 +34,9 @@ export function TasksWidget() {
                 .from('tasks')
                 .select(`
                     *,
-                    task_lists (
-                        name,
-                        task_boards (
-                            project_id,
-                            projects (
-                                id,
-                                name
-                            )
-                        )
+                    projects (
+                        id,
+                        name
                     )
                 `)
                 .order('created_at', { ascending: false })
@@ -55,10 +44,8 @@ export function TasksWidget() {
 
             if (error) throw error
 
-            // Filter tasks that belong to user's projects
-            const userTasks = data?.filter(task =>
-                task.task_lists?.task_boards?.projects
-            ) || []
+            // Filter tasks that belong to user's projects (RLS should handle this, but good to be safe)
+            const userTasks = data?.filter(task => task.projects) || []
 
             setTasks(userTasks)
         } catch (error) {
@@ -80,6 +67,20 @@ export function TasksWidget() {
                 </div>
             </div>
         )
+    }
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'todo': return 'bg-slate-100 text-slate-600'
+            case 'in_progress': return 'bg-blue-50 text-blue-600'
+            case 'review': return 'bg-purple-50 text-purple-600'
+            case 'done': return 'bg-green-50 text-green-600'
+            default: return 'bg-slate-100 text-slate-600'
+        }
+    }
+
+    const formatStatus = (status: string) => {
+        return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
     }
 
     return (
@@ -105,7 +106,7 @@ export function TasksWidget() {
                     {tasks.map((task) => (
                         <Link
                             key={task.id}
-                            href={`/dashboard/projects/${task.task_lists.task_boards.projects.id}?tab=tasks`}
+                            href={`/dashboard/projects/${task.project_id}?tab=tasks`}
                             className="block p-3 rounded-lg border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 transition-all group"
                         >
                             <div className="flex items-start justify-between gap-3">
@@ -115,11 +116,11 @@ export function TasksWidget() {
                                     </h4>
                                     <div className="flex items-center gap-2 mt-1">
                                         <span className="text-xs text-slate-500 truncate">
-                                            {task.task_lists.task_boards.projects.name}
+                                            {task.projects?.name}
                                         </span>
                                         <span className="text-xs text-slate-400">•</span>
-                                        <span className="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded">
-                                            {task.task_lists.name}
+                                        <span className={`text-xs px-2 py-0.5 rounded ${getStatusColor(task.status)}`}>
+                                            {formatStatus(task.status)}
                                         </span>
                                     </div>
                                     {task.due_date && (

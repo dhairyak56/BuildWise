@@ -1,219 +1,155 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { createBrowserClient } from '@/lib/supabase'
-import { TaskListComponent } from './TaskList'
-import { TaskCard } from './TaskCard'
+import { useState, useEffect } from 'react'
+import { Task } from '@/types/task'
+import { TaskColumn } from './TaskColumn'
 import { CreateTaskModal } from './CreateTaskModal'
-import { CreateListModal } from './CreateListModal'
-import { Plus, Loader2, LayoutList, KanbanSquare } from 'lucide-react'
-import { Task, TaskList } from './types'
-import { TaskTimeline } from './TaskTimeline'
+import { TaskDetailModal } from './TaskDetailModal'
+import { Plus, Loader2 } from 'lucide-react'
+import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, PointerSensor, useSensor, useSensors, closestCorners } from '@dnd-kit/core'
+import { arrayMove } from '@dnd-kit/sortable'
+import { TaskCard } from './TaskCard'
 
 interface TaskBoardProps {
     projectId: string
 }
 
+const COLUMNS = [
+    { id: 'todo' as const, title: 'To Do', color: 'bg-slate-100' },
+    { id: 'in_progress' as const, title: 'In Progress', color: 'bg-blue-50' },
+    { id: 'review' as const, title: 'Review', color: 'bg-purple-50' },
+    { id: 'done' as const, title: 'Done', color: 'bg-green-50' }
+]
+
 export function TaskBoard({ projectId }: TaskBoardProps) {
-    const [lists, setLists] = useState<TaskList[]>([])
     const [tasks, setTasks] = useState<Task[]>([])
     const [isLoading, setIsLoading] = useState(true)
-    const [activeTask, setActiveTask] = useState<Task | null>(null)
-    const [modalOpen, setModalOpen] = useState(false)
-    const [listModalOpen, setListModalOpen] = useState(false)
-    const [editingTask, setEditingTask] = useState<Task | null>(null)
-    const [currentListId, setCurrentListId] = useState<string>('')
-    const [boardId, setBoardId] = useState<string>('')
-    const [view, setView] = useState<'board' | 'timeline'>('board')
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+    const [activeDragTask, setActiveDragTask] = useState<Task | null>(null)
+    const [initialStatus, setInitialStatus] = useState<Task['status']>('todo')
 
-    const supabase = createBrowserClient()
-    const sensors = useSensors(useSensor(PointerSensor))
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        })
+    )
 
-    const loadBoard = useCallback(async () => {
+    useEffect(() => {
+        fetchTasks()
+    }, [projectId])
+
+    const fetchTasks = async () => {
         try {
-            // Get or create board
-            let { data: board } = await supabase
-                .from('task_boards')
-                .select('*')
-                .eq('project_id', projectId)
-                .single()
-
-            if (!board) {
-                const { data: newBoard } = await supabase
-                    .from('task_boards')
-                    .insert({ project_id: projectId })
-                    .select()
-                    .single()
-                board = newBoard
-            }
-
-            if (!board) throw new Error('Failed to create board')
-            setBoardId(board.id)
-
-            // Load lists
-            const { data: listsData } = await supabase
-                .from('task_lists')
-                .select('*')
-                .eq('board_id', board.id)
-                .order('position')
-
-            setLists(listsData || [])
-
-            // Load tasks
-            if (listsData && listsData.length > 0) {
-                const { data: tasksData } = await supabase
-                    .from('tasks')
-                    .select('*')
-                    .in('list_id', listsData.map(l => l.id))
-                    .order('position')
-
-                setTasks(tasksData || [])
-            }
+            const response = await fetch(`/api/projects/${projectId}/tasks`)
+            if (!response.ok) throw new Error('Failed to fetch tasks')
+            const data = await response.json()
+            setTasks(data)
         } catch (error) {
-            console.error('Error loading board:', error)
+            console.error('Error fetching tasks:', error)
         } finally {
             setIsLoading(false)
         }
-    }, [projectId, supabase])
-
-    useEffect(() => {
-        loadBoard()
-    }, [loadBoard])
-
-    const handleAddList = async (name: string) => {
-        const { data } = await supabase
-            .from('task_lists')
-            .insert({
-                board_id: boardId,
-                name,
-                position: lists.length
-            })
-            .select()
-            .single()
-
-        if (data) {
-            setLists([...lists, data])
-        }
     }
 
-    const handleDeleteList = async (listId: string) => {
-        if (!confirm('Delete this list and all its tasks?')) return
-
-        await supabase.from('task_lists').delete().eq('id', listId)
-        setLists(lists.filter(l => l.id !== listId))
-        setTasks(tasks.filter(t => t.list_id !== listId))
+    const handleCreateTask = (status: Task['status'] = 'todo') => {
+        setInitialStatus(status)
+        setIsCreateModalOpen(true)
     }
 
-    const handleAddTask = (listId: string) => {
-        setCurrentListId(listId)
-        setEditingTask(null)
-        setModalOpen(true)
+    const handleTaskCreated = (newTask: Task) => {
+        setTasks([newTask, ...tasks])
+        setIsCreateModalOpen(false)
     }
 
-    const handleEditTask = (task: Task) => {
-        setEditingTask(task)
-        setCurrentListId(task.list_id)
-        setModalOpen(true)
+    const handleTaskUpdated = (updatedTask: Task) => {
+        setTasks(tasks.map(t => t.id === updatedTask.id ? updatedTask : t))
+        setSelectedTask(null)
     }
 
-    const handleSaveTask = async (taskData: Partial<Task>) => {
-        try {
-            if (editingTask) {
-                // Update existing task
-                const { data, error } = await supabase
-                    .from('tasks')
-                    .update(taskData)
-                    .eq('id', editingTask.id)
-                    .select()
-                    .single()
-
-                if (error) {
-                    console.error('Error updating task:', error)
-                    alert(`Failed to update task: ${error.message}`)
-                    return
-                }
-
-                if (data) {
-                    setTasks(tasks.map(t => t.id === data.id ? data : t))
-                }
-            } else {
-                // Create new task
-                const newTask = {
-                    ...taskData,
-                    list_id: currentListId,
-                    position: tasks.filter(t => t.list_id === currentListId).length
-                }
-
-                console.log('Creating task:', newTask)
-
-                const { data, error } = await supabase
-                    .from('tasks')
-                    .insert(newTask)
-                    .select()
-                    .single()
-
-                if (error) {
-                    console.error('Error creating task:', error)
-                    alert(`Failed to create task: ${error.message}`)
-                    return
-                }
-
-                console.log('Task created:', data)
-
-                if (data) {
-                    setTasks([...tasks, data])
-                }
-            }
-        } catch (err) {
-            console.error('Unexpected error saving task:', err)
-            alert('An unexpected error occurred')
-        }
-    }
-
-    const handleDeleteTask = async (taskId: string) => {
-        if (!confirm('Delete this task?')) return
-
-        await supabase.from('tasks').delete().eq('id', taskId)
+    const handleTaskDeleted = (taskId: string) => {
         setTasks(tasks.filter(t => t.id !== taskId))
+        setSelectedTask(null)
     }
 
     const handleDragStart = (event: any) => {
-        const task = tasks.find(t => t.id === event.active.id)
-        setActiveTask(task || null)
+        const { active } = event
+        const task = tasks.find(t => t.id === active.id)
+        if (task) setActiveDragTask(task)
     }
 
     const handleDragOver = (event: DragOverEvent) => {
         const { active, over } = event
         if (!over) return
 
-        const activeTask = tasks.find(t => t.id === active.id)
+        const activeId = active.id
+        const overId = over.id
+
+        // Find the containers
+        const activeTask = tasks.find(t => t.id === activeId)
+        const overTask = tasks.find(t => t.id === overId)
+
         if (!activeTask) return
 
-        // Check if dragging over a list
-        const overList = lists.find(l => l.id === over.id)
-        if (overList && activeTask.list_id !== overList.id) {
-            // Move task to new list
-            setTasks(tasks.map(t =>
-                t.id === activeTask.id ? { ...t, list_id: overList.id } : t
-            ))
+        // If dropping over a column container
+        if (COLUMNS.some(col => col.id === overId)) {
+            const newStatus = overId as Task['status']
+            if (activeTask.status !== newStatus) {
+                const updatedTasks = tasks.map(t =>
+                    t.id === activeId ? { ...t, status: newStatus } : t
+                )
+                setTasks(updatedTasks)
+            }
         }
     }
 
     const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event
-        setActiveTask(null)
+        setActiveDragTask(null)
 
         if (!over) return
 
-        const activeTask = tasks.find(t => t.id === active.id)
+        const activeId = active.id as string
+        const overId = over.id as string
+
+        const activeTask = tasks.find(t => t.id === activeId)
         if (!activeTask) return
 
-        // Update task position in database
-        await supabase
-            .from('tasks')
-            .update({ list_id: activeTask.list_id })
-            .eq('id', activeTask.id)
+        let newStatus = activeTask.status
+
+        // If dropped over a column
+        if (COLUMNS.some(col => col.id === overId)) {
+            newStatus = overId as Task['status']
+        }
+        // If dropped over another task
+        else {
+            const overTask = tasks.find(t => t.id === overId)
+            if (overTask) {
+                newStatus = overTask.status
+            }
+        }
+
+        // Optimistic update
+        if (activeTask.status !== newStatus) {
+            const updatedTasks = tasks.map(t =>
+                t.id === activeId ? { ...t, status: newStatus } : t
+            )
+            setTasks(updatedTasks)
+
+            // API call
+            try {
+                await fetch(`/api/tasks/${activeId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                })
+            } catch (error) {
+                console.error('Error updating task status:', error)
+                fetchTasks() // Revert on error
+            }
+        }
     }
 
     if (isLoading) {
@@ -226,90 +162,65 @@ export function TaskBoard({ projectId }: TaskBoardProps) {
 
     return (
         <div className="h-full flex flex-col">
-            {/* View Toggle */}
-            <div className="flex justify-end mb-4 px-1">
-                <div className="bg-slate-100 p-1 rounded-lg flex items-center">
-                    <button
-                        onClick={() => setView('board')}
-                        className={`p-2 rounded-md transition-all ${view === 'board' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
-                        title="Board View"
-                    >
-                        <KanbanSquare className="w-4 h-4" />
-                    </button>
-                    <button
-                        onClick={() => setView('timeline')}
-                        className={`p-2 rounded-md transition-all ${view === 'timeline' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
-                        title="Timeline View"
-                    >
-                        <LayoutList className="w-4 h-4" />
-                    </button>
+            <div className="flex items-center justify-between mb-6">
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-900">Task Board</h2>
+                    <p className="text-sm text-slate-500 mt-1">Manage your project tasks</p>
                 </div>
+                <button
+                    onClick={() => handleCreateTask('todo')}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                >
+                    <Plus className="w-4 h-4" />
+                    Add Task
+                </button>
             </div>
 
-            {view === 'board' ? (
-                <div className="flex-1 overflow-x-auto">
-                    <DndContext
-                        sensors={sensors}
-                        onDragStart={handleDragStart}
-                        onDragOver={handleDragOver}
-                        onDragEnd={handleDragEnd}
-                    >
-                        <div className="flex gap-4 h-full pb-4">
-                            {lists.map((list) => (
-                                <TaskListComponent
-                                    key={list.id}
-                                    list={list}
-                                    tasks={tasks.filter(t => t.list_id === list.id)}
-                                    onAddTask={handleAddTask}
-                                    onEditTask={handleEditTask}
-                                    onDeleteTask={handleDeleteTask}
-                                    onDeleteList={handleDeleteList}
-                                />
-                            ))}
-
-                            <button
-                                onClick={() => setListModalOpen(true)}
-                                className="bg-slate-100 hover:bg-slate-200 rounded-lg p-4 w-80 flex-shrink-0 flex items-center justify-center gap-2 text-slate-600 font-medium transition-colors h-fit"
-                            >
-                                <Plus className="w-5 h-5" />
-                                Add List
-                            </button>
-                        </div>
-
-                        <DragOverlay>
-                            {activeTask ? (
-                                <div className="rotate-3">
-                                    <TaskCard
-                                        task={activeTask}
-                                        onEdit={() => { }}
-                                        onDelete={() => { }}
-                                    />
-                                </div>
-                            ) : null}
-                        </DragOverlay>
-                    </DndContext>
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCorners}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragEnd={handleDragEnd}
+            >
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 overflow-x-auto pb-4 min-h-[500px]">
+                    {COLUMNS.map(column => (
+                        <TaskColumn
+                            key={column.id}
+                            id={column.id}
+                            title={column.title}
+                            color={column.color}
+                            tasks={tasks.filter(t => t.status === column.id)}
+                            onTaskClick={setSelectedTask}
+                            onAddTask={() => handleCreateTask(column.id)}
+                        />
+                    ))}
                 </div>
-            ) : (
-                <div className="flex-1 overflow-y-auto">
-                    <TaskTimeline
-                        tasks={tasks}
-                        onEditTask={handleEditTask}
-                    />
-                </div>
-            )}
+
+                <DragOverlay>
+                    {activeDragTask ? (
+                        <TaskCard task={activeDragTask} onClick={() => { }} />
+                    ) : null}
+                </DragOverlay>
+            </DndContext>
 
             <CreateTaskModal
-                isOpen={modalOpen}
-                onClose={() => setModalOpen(false)}
-                onSave={handleSaveTask}
-                task={editingTask}
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                projectId={projectId}
+                initialStatus={initialStatus}
+                onTaskCreated={handleTaskCreated}
             />
 
-            <CreateListModal
-                isOpen={listModalOpen}
-                onClose={() => setListModalOpen(false)}
-                onSave={handleAddList}
-            />
+            {selectedTask && (
+                <TaskDetailModal
+                    isOpen={!!selectedTask}
+                    onClose={() => setSelectedTask(null)}
+                    task={selectedTask}
+                    onTaskUpdated={handleTaskUpdated}
+                    onTaskDeleted={handleTaskDeleted}
+                />
+            )}
         </div>
     )
 }
