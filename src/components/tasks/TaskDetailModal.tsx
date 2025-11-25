@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Task } from '@/types/task'
-import { X, Calendar, Flag, Trash2, CheckCircle2, Clock } from 'lucide-react'
+import { X, Trash2, Clock } from 'lucide-react'
 import { TaskComments } from './TaskComments'
 
 interface TaskDetailModalProps {

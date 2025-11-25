@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Task } from '@/types/task'
-import { X, Calendar, User, Flag, AlignLeft } from 'lucide-react'
+import { X, Calendar, Flag, AlignLeft } from 'lucide-react'
 
 interface CreateTaskModalProps {
     isOpen: boolean

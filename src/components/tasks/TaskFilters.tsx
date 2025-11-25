@@ -1,7 +1,6 @@
 'use client'
 
-import { Search, Filter, X } from 'lucide-react'
-import { Task } from '@/types/task'
+import { Search, X, Filter } from 'lucide-react'
 import { useState } from 'react'
 
 interface TaskFiltersProps {
@@ -64,8 +63,8 @@ export function TaskFilters({ onFilterChange, onSearchChange }: TaskFiltersProps
                 <button
                     onClick={() => setShowFilters(!showFilters)}
                     className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors ${showFilters || activeFilterCount > 0
-                            ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                            : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
                         }`}
                 >
                     <Filter className="w-4 h-4" />
@@ -101,8 +100,8 @@ export function TaskFilters({ onFilterChange, onSearchChange }: TaskFiltersProps
                                     key={priority}
                                     onClick={() => togglePriority(priority)}
                                     className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${filters.priority.includes(priority)
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300'
                                         }`}
                                 >
                                     {priority.charAt(0).toUpperCase() + priority.slice(1)}

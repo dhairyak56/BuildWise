@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { ContractVersion } from '@/types/version'
 import { X, ArrowLeftRight, FileText } from 'lucide-react'
 import { diffLines, Change } from 'diff'
@@ -14,15 +14,12 @@ interface VersionCompareProps {
 
 export function VersionCompare({ version1, version2, isOpen, onClose }: VersionCompareProps) {
     const [viewMode, setViewMode] = useState<'split' | 'unified'>('split')
-    const [diff, setDiff] = useState<Change[]>([])
 
-    useEffect(() => {
-        if (isOpen && version1 && version2) {
-            const text1 = version1.content.text || ''
-            const text2 = version2.content.text || ''
-            const differences = diffLines(text1, text2)
-            setDiff(differences)
-        }
+    const diff = useMemo(() => {
+        if (!isOpen || !version1 || !version2) return []
+        const text1 = version1.content.text || ''
+        const text2 = version2.content.text || ''
+        return diffLines(text1, text2)
     }, [isOpen, version1, version2])
 
     if (!isOpen) return null
@@ -98,8 +95,8 @@ export function VersionCompare({ version1, version2, isOpen, onClose }: VersionC
                         <button
                             onClick={() => setViewMode('split')}
                             className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${viewMode === 'split'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-white text-slate-600 hover:bg-slate-100'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-white text-slate-600 hover:bg-slate-100'
                                 }`}
                         >
                             Split View
@@ -107,8 +104,8 @@ export function VersionCompare({ version1, version2, isOpen, onClose }: VersionC
                         <button
                             onClick={() => setViewMode('unified')}
                             className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${viewMode === 'unified'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-white text-slate-600 hover:bg-slate-100'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-white text-slate-600 hover:bg-slate-100'
                                 }`}
                         >
                             Unified View

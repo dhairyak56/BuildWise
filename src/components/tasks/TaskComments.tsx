@@ -24,6 +24,7 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
 
     useEffect(() => {
         fetchComments()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [taskId])
 
     const fetchComments = async () => {

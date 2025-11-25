@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { ContractClause, ClauseCategory } from '@/types/clause'
-import { Search, Filter, FileText, Plus, Loader2, Check } from 'lucide-react'
+import { Search, FileText, Plus, Loader2, Check } from 'lucide-react'
 
 interface ClauseLibraryProps {
     onSelectClause?: (clause: ContractClause) => void
@@ -43,6 +43,7 @@ export function ClauseLibrary({ onSelectClause, selectedClauses = [], applicable
 
     useEffect(() => {
         fetchClauses()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedCategory, applicableTo])
 
     const fetchClauses = async () => {
@@ -104,8 +105,8 @@ export function ClauseLibrary({ onSelectClause, selectedClauses = [], applicable
                 <button
                     onClick={() => setSelectedCategory(null)}
                     className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${selectedCategory === null
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }`}
                 >
                     All Categories
@@ -115,8 +116,8 @@ export function ClauseLibrary({ onSelectClause, selectedClauses = [], applicable
                         key={category}
                         onClick={() => setSelectedCategory(category)}
                         className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${selectedCategory === category
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                             }`}
                     >
                         {CATEGORY_LABELS[category]}
@@ -135,8 +136,8 @@ export function ClauseLibrary({ onSelectClause, selectedClauses = [], applicable
                         <div
                             key={clause.id}
                             className={`border-2 rounded-lg transition-all ${isSelected(clause.id)
-                                    ? 'border-blue-500 bg-blue-50'
-                                    : 'border-slate-200 bg-white hover:border-blue-300'
+                                ? 'border-blue-500 bg-blue-50'
+                                : 'border-slate-200 bg-white hover:border-blue-300'
                                 }`}
                         >
                             <div className="p-4">
@@ -173,8 +174,8 @@ export function ClauseLibrary({ onSelectClause, selectedClauses = [], applicable
                                         <button
                                             onClick={() => onSelectClause(clause)}
                                             className={`p-2 rounded-lg transition-colors ${isSelected(clause.id)
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                                 }`}
                                         >
                                             {isSelected(clause.id) ? (

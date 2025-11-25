@@ -8,7 +8,7 @@ import { TaskDetailModal } from './TaskDetailModal'
 import { TaskFilters, TaskFilterState } from './TaskFilters'
 import { Plus, Loader2 } from 'lucide-react'
 import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, PointerSensor, useSensor, useSensors, closestCorners } from '@dnd-kit/core'
-import { arrayMove } from '@dnd-kit/sortable'
+
 import { TaskCard } from './TaskCard'
 
 interface TaskBoardProps {
@@ -41,7 +41,10 @@ export function TaskBoard({ projectId }: TaskBoardProps) {
     )
 
     useEffect(() => {
-        fetchTasks()
+        if (projectId) {
+            fetchTasks()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [projectId])
 
     const fetchTasks = async () => {
@@ -109,17 +112,14 @@ export function TaskBoard({ projectId }: TaskBoardProps) {
         if (!over) return
 
         const activeId = active.id
-        const overId = over.id
-
-        // Find the containers
-        const activeTask = tasks.find(t => t.id === activeId)
-        const overTask = tasks.find(t => t.id === overId)
+        const overColumn = over.id as Task['status']
+        const activeTask = tasks.find(t => t.id === active.id)
 
         if (!activeTask) return
 
         // If dropping over a column container
-        if (COLUMNS.some(col => col.id === overId)) {
-            const newStatus = overId as Task['status']
+        if (COLUMNS.some(col => col.id === overColumn)) {
+            const newStatus = overColumn
             if (activeTask.status !== newStatus) {
                 const updatedTasks = tasks.map(t =>
                     t.id === activeId ? { ...t, status: newStatus } : t

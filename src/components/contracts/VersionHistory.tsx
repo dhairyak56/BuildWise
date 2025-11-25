@@ -22,6 +22,7 @@ export function VersionHistory({ contractId, isOpen, onClose, onRestore, onCompa
         if (isOpen && contractId) {
             fetchVersions()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, contractId])
 
     const fetchVersions = async () => {
@@ -110,8 +111,8 @@ export function VersionHistory({ contractId, isOpen, onClose, onRestore, onCompa
                                 <div
                                     key={version.id}
                                     className={`border-2 rounded-lg p-4 transition-all cursor-pointer ${selectedVersions.includes(version.id)
-                                            ? 'border-blue-500 bg-blue-50'
-                                            : 'border-slate-200 bg-white hover:border-blue-300'
+                                        ? 'border-blue-500 bg-blue-50'
+                                        : 'border-slate-200 bg-white hover:border-blue-300'
                                         }`}
                                     onClick={() => handleSelectVersion(version.id)}
                                 >

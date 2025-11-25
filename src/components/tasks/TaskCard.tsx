@@ -3,7 +3,7 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Task } from '@/types/task'
-import { Calendar, User as UserIcon, AlertCircle } from 'lucide-react'
+import { Calendar, User } from 'lucide-react'
 
 interface TaskCardProps {
     task: Task
@@ -68,7 +68,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
                         </div>
                     ) : (
                         <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center">
-                            <UserIcon className="w-3 h-3 text-slate-400" />
+                            <User className="w-3 h-3 text-slate-400" />
                         </div>
                     )}
                 </div>
