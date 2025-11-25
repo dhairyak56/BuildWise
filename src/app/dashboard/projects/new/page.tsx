@@ -51,19 +51,15 @@ export default function NewProjectPage() {
         }
     }
 
-    const handleGenerate = async () => {
-        setIsGenerating(true)
-
+    const createProject = async () => {
         const supabase = createBrowserClient()
         const { data: { user } } = await supabase.auth.getUser()
 
         if (!user) {
-            alert('You must be logged in to save a project.')
-            setIsGenerating(false)
-            return
+            alert('You must be logged in to create a project.')
+            return null
         }
 
-        // Get the project ID from the response (we need to modify the insert to return data)
         const { data: newProject, error: insertError } = await supabase.from('projects').insert({
             user_id: user.id,
             name: formData.projectName,
@@ -80,13 +76,36 @@ export default function NewProjectPage() {
         if (insertError) {
             console.error('Error saving project:', insertError)
             alert(`Failed to save project: ${insertError.message || insertError.details || JSON.stringify(insertError)}`)
+            return null
+        }
+
+        return newProject
+    }
+
+    const handleSkipContract = async () => {
+        setIsGenerating(true)
+        const newProject = await createProject()
+
+        if (newProject) {
+            router.push(`/dashboard/projects/${newProject.id}`)
+            router.refresh()
+        }
+
+        setIsGenerating(false)
+    }
+
+    const handleGenerate = async () => {
+        setIsGenerating(true)
+
+        // First, create the project
+        const newProject = await createProject()
+
+        if (!newProject) {
             setIsGenerating(false)
             return
         }
 
-        // Call AI to generate contract
-        setIsGenerating(true)
-
+        // Then, generate the contract
         try {
             const response = await fetch('/api/generate-contract', {
                 method: 'POST',
@@ -112,6 +131,7 @@ export default function NewProjectPage() {
             const { contract } = await response.json()
 
             // Create contract in database
+            const supabase = createBrowserClient()
             await supabase.from('contracts').insert({
                 project_id: newProject.id,
                 content: { text: contract },
@@ -119,11 +139,14 @@ export default function NewProjectPage() {
             })
 
             setIsGenerating(false)
-            router.push(`/dashboard/projects/${newProject.id}/contract`)
+            router.push(`/dashboard/projects/${newProject.id}?tab=contracts`)
             router.refresh()
         } catch (error) {
             console.error('Error generating contract:', error)
-            alert(`Failed to generate contract: ${error instanceof Error ? error.message : 'Unknown error'}`)
+            // Project was created, so redirect there even if contract generation failed
+            alert(`Project created, but contract generation failed: ${error instanceof Error ? error.message : 'Unknown error'}. You can generate a contract from the project page.`)
+            router.push(`/dashboard/projects/${newProject.id}`)
+            router.refresh()
             setIsGenerating(false)
         }
     }
@@ -194,7 +217,7 @@ export default function NewProjectPage() {
                     <button
                         onClick={handleBack}
                         disabled={currentStep === 1 || isGenerating}
-                        className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors ${currentStep === 1
+                        className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors ${currentStep === 1 || isGenerating
                             ? 'text-gray-300 cursor-not-allowed'
                             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                             }`}
@@ -203,28 +226,40 @@ export default function NewProjectPage() {
                         Back
                     </button>
 
-                    <button
-                        onClick={handleNext}
-                        disabled={isGenerating}
-                        className="flex items-center px-6 py-2.5 bg-[#4A90E2] text-white rounded-lg hover:bg-[#357ABD] font-medium text-sm transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
-                    >
-                        {isGenerating ? (
-                            <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                Generating...
-                            </>
-                        ) : currentStep === steps.length ? (
-                            <>
-                                Generate Contract
-                                <SparklesIcon className="w-4 h-4 ml-2" />
-                            </>
-                        ) : (
-                            <>
-                                Next Step
-                                <ArrowRight className="w-4 h-4 ml-2" />
-                            </>
+                    <div className="flex items-center gap-3">
+                        {currentStep === steps.length && (
+                            <button
+                                onClick={handleSkipContract}
+                                disabled={isGenerating}
+                                className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Skip for now
+                            </button>
                         )}
-                    </button>
+
+                        <button
+                            onClick={handleNext}
+                            disabled={isGenerating}
+                            className="flex items-center px-6 py-2.5 bg-[#4A90E2] text-white rounded-lg hover:bg-[#357ABD] font-medium text-sm transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-70 disabled:cursor-not-allowed min-w-[180px] justify-center"
+                        >
+                            {isGenerating ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    {currentStep === steps.length ? 'Generating...' : 'Creating...'}
+                                </>
+                            ) : currentStep === steps.length ? (
+                                <>
+                                    Generate Contract
+                                    <SparklesIcon className="w-4 h-4 ml-2" />
+                                </>
+                            ) : (
+                                <>
+                                    Next Step
+                                    <ArrowRight className="w-4 h-4 ml-2" />
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

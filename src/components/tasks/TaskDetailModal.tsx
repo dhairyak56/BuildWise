@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Task } from '@/types/task'
 import { X, Calendar, Flag, Trash2, CheckCircle2, Clock } from 'lucide-react'
+import { TaskComments } from './TaskComments'
 
 interface TaskDetailModalProps {
     isOpen: boolean
@@ -169,6 +170,11 @@ export function TaskDetailModal({ isOpen, onClose, task, onTaskUpdated, onTaskDe
                             <Clock className="w-4 h-4" />
                             <span>Created {new Date(task.created_at).toLocaleString()}</span>
                         </div>
+                    </div>
+
+                    {/* Comments */}
+                    <div className="pt-6 border-t border-slate-100">
+                        <TaskComments taskId={task.id} />
                     </div>
                 </div>
 

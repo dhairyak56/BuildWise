@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Task } from '@/types/task'
 import { TaskColumn } from './TaskColumn'
 import { CreateTaskModal } from './CreateTaskModal'
 import { TaskDetailModal } from './TaskDetailModal'
+import { TaskFilters, TaskFilterState } from './TaskFilters'
 import { Plus, Loader2 } from 'lucide-react'
 import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, PointerSensor, useSensor, useSensors, closestCorners } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
@@ -28,6 +29,8 @@ export function TaskBoard({ projectId }: TaskBoardProps) {
     const [selectedTask, setSelectedTask] = useState<Task | null>(null)
     const [activeDragTask, setActiveDragTask] = useState<Task | null>(null)
     const [initialStatus, setInitialStatus] = useState<Task['status']>('todo')
+    const [searchQuery, setSearchQuery] = useState('')
+    const [filters, setFilters] = useState<TaskFilterState>({ priority: [], status: [] })
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -73,6 +76,27 @@ export function TaskBoard({ projectId }: TaskBoardProps) {
         setTasks(tasks.filter(t => t.id !== taskId))
         setSelectedTask(null)
     }
+
+    // Filter and search tasks
+    const filteredTasks = useMemo(() => {
+        return tasks.filter(task => {
+            // Search filter
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase()
+                const matchesSearch =
+                    task.title.toLowerCase().includes(query) ||
+                    task.description?.toLowerCase().includes(query)
+                if (!matchesSearch) return false
+            }
+
+            // Priority filter
+            if (filters.priority.length > 0 && !filters.priority.includes(task.priority)) {
+                return false
+            }
+
+            return true
+        })
+    }, [tasks, searchQuery, filters])
 
     const handleDragStart = (event: any) => {
         const { active } = event
@@ -176,6 +200,14 @@ export function TaskBoard({ projectId }: TaskBoardProps) {
                 </button>
             </div>
 
+            {/* Filters */}
+            <div className="mb-6">
+                <TaskFilters
+                    onFilterChange={setFilters}
+                    onSearchChange={setSearchQuery}
+                />
+            </div>
+
             <DndContext
                 sensors={sensors}
                 collisionDetection={closestCorners}
@@ -190,7 +222,7 @@ export function TaskBoard({ projectId }: TaskBoardProps) {
                             id={column.id}
                             title={column.title}
                             color={column.color}
-                            tasks={tasks.filter(t => t.status === column.id)}
+                            tasks={filteredTasks.filter(t => t.status === column.id)}
                             onTaskClick={setSelectedTask}
                             onAddTask={() => handleCreateTask(column.id)}
                         />
