@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { X, DollarSign, Calendar, FileText, Loader2 } from 'lucide-react'
-import { createBrowserClient } from '@supabase/ssr'
+import { createBrowserClient } from '@/lib/supabase'
 
 interface AddPaymentModalProps {
     isOpen: boolean
@@ -23,10 +23,7 @@ export default function AddPaymentModal({ isOpen, onClose, projectId, onPaymentA
         setIsSubmitting(true)
 
         try {
-            const supabase = createBrowserClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-            )
+            const supabase = createBrowserClient()
 
             const { error } = await supabase
                 .from('payments')
