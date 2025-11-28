@@ -12,13 +12,20 @@ interface DashboardContentProps {
         activeProjects: number
         pendingContracts: number
         totalRevenue: number
-        monthlyRevenue: any[]
+        monthlyRevenue: { name: string; total: number }[]
         revenueChange: number
         newProjectsThisWeek: number
         upcomingDeadlinesCount: number
         recentActivity: any[]
-        projectStatusData: any[]
+        projectStatusData: { name: string; value: number; color: string }[]
         paymentStatusData: any[]
+        kpiData: {
+            avgCompletionTime: number
+            paymentCollectionRate: number
+            contractApprovalRate: number
+            outstandingInvoices: number
+        }
+        debug?: any
     }
 }
 
@@ -33,7 +40,14 @@ export function DashboardContent({ data }: DashboardContentProps) {
     }
 
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 font-poppins pb-8">
+        <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
+            {safeData.debug && (
+                <div className="bg-red-50 border border-red-200 p-4 rounded-lg text-xs font-mono overflow-auto max-h-60">
+                    <h3 className="font-bold text-red-800 mb-2">Debug Info (Temporary)</h3>
+                    <pre className="text-red-700">{JSON.stringify(safeData.debug, null, 2)}</pre>
+                </div>
+            )}
+
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
