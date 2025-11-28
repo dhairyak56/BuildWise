@@ -27,6 +27,9 @@ jobs:
       - name: Run ESLint
         run: npm run lint
         continue-on-error: false
+      
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@v3.0.0
 
       - name: Run TypeScript type check
         run: npx tsc --noEmit
@@ -97,3 +100,6 @@ jobs:
           echo "✅ Type checking: Passed"
           echo "✅ Tests: Passed"
           echo "✅ Build: Passed"
+
+
+

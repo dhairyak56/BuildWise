@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import OpenAI from 'openai'
 import { createClient } from '@/lib/supabase-server'
 import { logAction } from '@/lib/logger'
@@ -16,9 +16,12 @@ export async function POST(request: NextRequest) {
 
         // Validate required fields
         if (!projectName || !clientName) {
-            return NextResponse.json(
-                { error: 'Project name and client name are required' },
-                { status: 400 }
+            return new Response(
+                JSON.stringify({ error: 'Project name and client name are required' }),
+                {
+                    status: 400,
+                    headers: { 'Content-Type': 'application/json' }
+                }
             )
         }
 
@@ -73,57 +76,88 @@ REQUIREMENTS:
 
 Generate a complete, professional construction contract now. The contract should be detailed enough to be legally binding while remaining clear and understandable.`
 
-        // Call Perplexity API with improved settings
-        const completion = await perplexity.chat.completions.create({
-            model: 'sonar',
-            messages: [
-                {
-                    role: 'system',
-                    content: 'You are an expert Australian construction contract lawyer with 20+ years of experience. You specialize in creating legally sound, comprehensive construction contracts that comply with Australian Standards (AS 2124, AS 4000, AS 4902) and relevant state legislation. Your contracts are known for being thorough, clear, and protecting both parties\' interests while being fair and balanced.'
-                },
-                {
-                    role: 'user',
-                    content: prompt
+        // Create a streaming response
+        const stream = new ReadableStream({
+            async start(controller) {
+                try {
+                    // Call Perplexity API with streaming enabled
+                    const completion = await perplexity.chat.completions.create({
+                        model: 'sonar',
+                        messages: [
+                            {
+                                role: 'system',
+                                content: 'You are an expert Australian construction contract lawyer with 20+ years of experience. You specialize in creating legally sound, comprehensive construction contracts that comply with Australian Standards (AS 2124, AS 4000, AS 4902) and relevant state legislation. Your contracts are known for being thorough, clear, and protecting both parties\' interests while being fair and balanced.'
+                            },
+                            {
+                                role: 'user',
+                                content: prompt
+                            }
+                        ],
+                        temperature: 0.2,
+                        max_tokens: 6000,
+                        stream: true
+                    })
+
+                    let fullContract = ''
+
+                    // Stream the response
+                    for await (const chunk of completion) {
+                        const content = chunk.choices[0]?.delta?.content || ''
+                        if (content) {
+                            fullContract += content
+                            controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ content })}\n\n`))
+                        }
+                    }
+
+                    // Send completion signal
+                    controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ done: true })}\n\n`))
+
+                    // Log the action
+                    if (projectId) {
+                        const supabase = createClient()
+                        await logAction(supabase, {
+                            action: 'Contract Generated',
+                            projectId,
+                            details: {
+                                projectName,
+                                clientName,
+                                value: contractValue
+                            }
+                        })
+                    }
+
+                    controller.close()
+                } catch (error) {
+                    console.error('Error in stream:', error)
+                    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+                    controller.enqueue(
+                        new TextEncoder().encode(`data: ${JSON.stringify({ error: errorMessage })}\n\n`)
+                    )
+                    controller.close()
                 }
-            ],
-            temperature: 0.2, // Lower temperature for more consistent, reliable legal text
-            max_tokens: 6000 // Increased for more comprehensive contracts
+            }
         })
 
-        const generatedContract = completion.choices[0]?.message?.content
-
-        if (!generatedContract) {
-            throw new Error('No contract generated')
-        }
-
-        // Log the action
-        if (projectId) {
-            const supabase = createClient()
-            await logAction(supabase, {
-                action: 'Contract Generated',
-                projectId,
-                details: {
-                    projectName,
-                    clientName,
-                    value: contractValue
-                }
-            })
-        }
-
-        return NextResponse.json({
-            contract: generatedContract,
-            success: true
+        return new Response(stream, {
+            headers: {
+                'Content-Type': 'text/event-stream',
+                'Cache-Control': 'no-cache',
+                'Connection': 'keep-alive'
+            }
         })
 
     } catch (error) {
         console.error('Error generating contract:', error)
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-        return NextResponse.json(
-            {
+        return new Response(
+            JSON.stringify({
                 error: 'Failed to generate contract',
                 details: errorMessage
-            },
-            { status: 500 }
+            }),
+            {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            }
         )
     }
 }
