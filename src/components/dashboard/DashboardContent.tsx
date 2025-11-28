@@ -110,8 +110,8 @@ export function DashboardContent({ data }: DashboardContentProps) {
             {/* Row 2: Main Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
-                    <div className="h-[400px] rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col overflow-hidden">
-                        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+                    <div className="h-[350px] rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col overflow-hidden">
+                        <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
                             <h3 className="font-semibold text-gray-900">Revenue Overview</h3>
                         </div>
                         <div className="p-4 flex-1">
@@ -120,8 +120,8 @@ export function DashboardContent({ data }: DashboardContentProps) {
                     </div>
                 </div>
                 <div className="lg:col-span-1">
-                    <div className="h-[400px] rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col overflow-hidden">
-                        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+                    <div className="h-[350px] rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col overflow-hidden">
+                        <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
                             <h3 className="font-semibold text-gray-900">Project Status</h3>
                         </div>
                         <div className="p-4 flex-1">
@@ -133,24 +133,24 @@ export function DashboardContent({ data }: DashboardContentProps) {
 
             {/* Row 3: Activity & Tasks */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="h-[400px] rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col overflow-hidden">
-                    <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+                <div className="h-[320px] rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col overflow-hidden">
+                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
                         <h3 className="font-semibold text-gray-900">Recent Activity</h3>
                     </div>
                     <div className="p-0 flex-1 overflow-y-auto">
                         <div className="divide-y divide-gray-100">
                             {safeData.recentActivity.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500 text-sm">No recent activity</div>
+                                <div className="text-center py-12 text-gray-500 text-sm">No recent activity</div>
                             ) : (
                                 safeData.recentActivity.map((item: any) => (
-                                    <div key={item.id} className="flex items-center p-4 hover:bg-gray-50 transition-colors">
+                                    <div key={item.id} className="flex items-center px-4 py-3 hover:bg-gray-50 transition-colors">
                                         <div className={cn(
-                                            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border",
+                                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border",
                                             item.type === 'project' ? "bg-blue-50 border-blue-100" : "bg-purple-50 border-purple-100"
                                         )}>
-                                            {item.type === 'project' ? <FolderIcon className="h-5 w-5 text-[#4A90E2]" /> : <FileText className="h-5 w-5 text-purple-600" />}
+                                            {item.type === 'project' ? <FolderIcon className="h-4 w-4 text-[#4A90E2]" /> : <FileText className="h-4 w-4 text-purple-600" />}
                                         </div>
-                                        <div className="ml-4 space-y-1 min-w-0 flex-1">
+                                        <div className="ml-3 space-y-1 min-w-0 flex-1">
                                             <p className="text-sm font-medium leading-none truncate text-gray-900">{item.name}</p>
                                             <p className="text-xs text-gray-500 truncate">
                                                 {item.type === 'project' ? 'Project Created' : 'Document Uploaded'} • {new Date(item.created_at).toLocaleDateString()}
@@ -163,8 +163,8 @@ export function DashboardContent({ data }: DashboardContentProps) {
                     </div>
                 </div>
 
-                <div className="h-[400px] rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col overflow-hidden">
-                    <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+                <div className="h-[320px] rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col overflow-hidden">
+                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
                         <h3 className="font-semibold text-gray-900">Recent Tasks</h3>
                     </div>
                     <div className="flex-1 overflow-hidden">
