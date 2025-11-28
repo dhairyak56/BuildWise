@@ -23,6 +23,15 @@ interface DashboardContentProps {
 }
 
 export function DashboardContent({ data }: DashboardContentProps) {
+    // Defensive checks to ensure all arrays are defined
+    const safeData = {
+        ...data,
+        monthlyRevenue: data.monthlyRevenue || [],
+        recentActivity: data.recentActivity || [],
+        projectStatusData: data.projectStatusData || [],
+        paymentStatusData: data.paymentStatusData || []
+    }
+
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 font-poppins pb-8">
             {/* Header Section */}
@@ -51,9 +60,9 @@ export function DashboardContent({ data }: DashboardContentProps) {
                         </div>
                     </div>
                     <div className="mt-4 z-10">
-                        <div className="text-3xl font-bold">${data.totalRevenue.toLocaleString()}</div>
+                        <div className="text-3xl font-bold">${safeData.totalRevenue.toLocaleString()}</div>
                         <p className="text-sm mt-1 text-blue-50">
-                            {data.revenueChange >= 0 ? '+' : ''}{data.revenueChange.toFixed(1)}% from last month
+                            {safeData.revenueChange >= 0 ? '+' : ''}{safeData.revenueChange.toFixed(1)}% from last month
                         </p>
                     </div>
                 </div>
@@ -66,8 +75,8 @@ export function DashboardContent({ data }: DashboardContentProps) {
                         </div>
                     </div>
                     <div className="mt-4">
-                        <div className="text-3xl font-bold text-gray-900">{data.activeProjects}</div>
-                        <p className="text-sm mt-1 text-gray-500">+{data.newProjectsThisWeek} new this week</p>
+                        <div className="text-3xl font-bold text-gray-900">{safeData.activeProjects}</div>
+                        <p className="text-sm mt-1 text-gray-500">+{safeData.newProjectsThisWeek} new this week</p>
                     </div>
                 </div>
 
@@ -79,8 +88,8 @@ export function DashboardContent({ data }: DashboardContentProps) {
                         </div>
                     </div>
                     <div className="mt-4">
-                        <div className="text-3xl font-bold text-gray-900">{data.pendingContracts}</div>
-                        <p className="text-sm mt-1 text-gray-500">{data.pendingContracts} require attention</p>
+                        <div className="text-3xl font-bold text-gray-900">{safeData.pendingContracts}</div>
+                        <p className="text-sm mt-1 text-gray-500">{safeData.pendingContracts} require attention</p>
                     </div>
                 </div>
 
@@ -92,7 +101,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
                         </div>
                     </div>
                     <div className="mt-4">
-                        <div className="text-3xl font-bold text-gray-900">{data.upcomingDeadlinesCount}</div>
+                        <div className="text-3xl font-bold text-gray-900">{safeData.upcomingDeadlinesCount}</div>
                         <p className="text-sm mt-1 text-gray-500">Due in next 7 days</p>
                     </div>
                 </div>
@@ -106,7 +115,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
                             <h3 className="font-semibold text-gray-900">Revenue Overview</h3>
                         </div>
                         <div className="p-4 flex-1">
-                            <OverviewCharts data={data.monthlyRevenue} />
+                            <OverviewCharts data={safeData.monthlyRevenue} />
                         </div>
                     </div>
                 </div>
@@ -116,7 +125,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
                             <h3 className="font-semibold text-gray-900">Project Status</h3>
                         </div>
                         <div className="p-4 flex-1">
-                            <ProjectStatusChart data={data.projectStatusData} />
+                            <ProjectStatusChart data={safeData.projectStatusData} />
                         </div>
                     </div>
                 </div>
@@ -130,10 +139,10 @@ export function DashboardContent({ data }: DashboardContentProps) {
                     </div>
                     <div className="p-0 flex-1 overflow-y-auto">
                         <div className="divide-y divide-gray-100">
-                            {data.recentActivity.length === 0 ? (
+                            {safeData.recentActivity.length === 0 ? (
                                 <div className="text-center py-8 text-gray-500 text-sm">No recent activity</div>
                             ) : (
-                                data.recentActivity.map((item: any) => (
+                                safeData.recentActivity.map((item: any) => (
                                     <div key={item.id} className="flex items-center p-4 hover:bg-gray-50 transition-colors">
                                         <div className={cn(
                                             "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border",
