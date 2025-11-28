@@ -7,9 +7,9 @@ const getCachedDashboardData = async (userId: string) => {
     const supabase = createAdminClient()
 
     // Fetch all projects for status distribution and KPIs
-    const { data: allProjects, error: projectsError } = await supabase
+    const { data: allProjects } = await supabase
         .from('projects')
-        .select('status, created_at, updated_at')
+        .select('status, created_at')
         .eq('user_id', userId)
 
     // Calculate project status distribution
@@ -27,16 +27,16 @@ const getCachedDashboardData = async (userId: string) => {
     ].filter(item => item.value > 0)
 
     // Fetch pending contracts count (Draft status)
-    const { count: pendingContracts, error: contractsError } = await supabase
+    const { count: pendingContracts } = await supabase
         .from('contracts')
         .select('project_id, projects!inner(user_id)', { count: 'exact', head: true })
         .eq('status', 'Draft')
         .eq('projects.user_id', userId)
 
     // Fetch all payments for revenue and status breakdown
-    const { data: allPayments, error: paymentsError } = await supabase
+    const { data: allPayments } = await supabase
         .from('payments')
-        .select('amount, status, payment_date, due_date, project_id, projects!inner(user_id)')
+        .select('amount, status, payment_date, project_id, projects!inner(user_id)')
         .eq('projects.user_id', userId)
 
     // Calculate total revenue (Paid only)
@@ -90,7 +90,7 @@ const getCachedDashboardData = async (userId: string) => {
 
     // Fetch recent activity (limit 5)
     // We'll combine latest projects and contracts
-    const { data: recentProjects, error: recentProjectsError } = await supabase
+    const { data: recentProjects } = await supabase
         .from('projects')
         .select('id, name, created_at')
         .eq('user_id', userId)
@@ -138,8 +138,9 @@ const getCachedDashboardData = async (userId: string) => {
     const nextWeek = new Date()
     nextWeek.setDate(nextWeek.getDate() + 7)
     const upcomingDeadlinesCount = allPayments?.filter(p => {
-        if (!p.due_date) return false
-        const dueDate = new Date(p.due_date)
+        // Use payment_date as due_date for now since due_date column is missing
+        if (!p.payment_date) return false
+        const dueDate = new Date(p.payment_date)
         return dueDate > new Date() && dueDate <= nextWeek && p.status !== 'Paid'
     }).length || 0
 
@@ -163,16 +164,6 @@ const getCachedDashboardData = async (userId: string) => {
             paymentCollectionRate,
             contractApprovalRate,
             outstandingInvoices
-        },
-        debug: {
-            userId,
-            projectsError,
-            contractsError,
-            paymentsError,
-            recentProjectsError,
-            projectsCount: allProjects?.length,
-            paymentsCount: allPayments?.length,
-            timestamp: new Date().toISOString()
         }
     }
 }
@@ -205,7 +196,7 @@ async function getDashboardData() {
 
     const getCachedData = unstable_cache(
         async () => getCachedDashboardData(user.id),
-        ['dashboard-v2', user.id],
+        ['dashboard-v3', user.id],
         {
             revalidate: 60, // Cache for 60 seconds
             tags: [`dashboard:${user.id}`]
