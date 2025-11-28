@@ -4,9 +4,9 @@ import { NextRequest, NextResponse } from 'next/server'
 // GET: Fetch all versions for a contract
 export async function GET(
     request: NextRequest,
-    { params }: { params: { contractId: string } }
+    { params }: { params: Promise<{ contractId: string }> }
 ) {
-    const contractId = params.contractId
+    const { contractId } = await params
     const supabase = createClient()
 
     const { data: versions, error } = await supabase
@@ -28,9 +28,9 @@ export async function GET(
 // POST: Create a manual version
 export async function POST(
     request: NextRequest,
-    { params }: { params: { contractId: string } }
+    { params }: { params: Promise<{ contractId: string }> }
 ) {
-    const contractId = params.contractId
+    const { contractId } = await params
     const body = await request.json()
     const { content, summary } = body
 

@@ -13,10 +13,7 @@ interface Task {
     due_date?: string
     status: string
     project_id: string
-    projects: {
-        id: string
-        name: string
-    }
+    project_name: string
 }
 
 export function TasksWidget() {
@@ -29,25 +26,16 @@ export function TasksWidget() {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) return
 
-            // Fetch all tasks from user's projects
+            // Fetch all tasks from user's projects via the view
             const { data, error } = await supabase
-                .from('tasks')
-                .select(`
-                    *,
-                    projects (
-                        id,
-                        name
-                    )
-                `)
+                .from('user_tasks')
+                .select('*')
                 .order('created_at', { ascending: false })
                 .limit(10)
 
             if (error) throw error
 
-            // Filter tasks that belong to user's projects (RLS should handle this, but good to be safe)
-            const userTasks = data?.filter(task => task.projects) || []
-
-            setTasks(userTasks)
+            setTasks(data || [])
         } catch (error) {
             console.error('Error loading tasks:', error)
         } finally {
@@ -70,17 +58,16 @@ export function TasksWidget() {
     }
 
     const getStatusColor = (status: string) => {
-        switch (status) {
+        const normalizedStatus = status.toLowerCase().replace(' ', '_')
+        switch (normalizedStatus) {
+            case 'to_do':
             case 'todo': return 'bg-slate-100 text-slate-600'
             case 'in_progress': return 'bg-blue-50 text-blue-600'
             case 'review': return 'bg-purple-50 text-purple-600'
-            case 'done': return 'bg-green-50 text-green-600'
+            case 'done':
+            case 'completed': return 'bg-green-50 text-green-600'
             default: return 'bg-slate-100 text-slate-600'
         }
-    }
-
-    const formatStatus = (status: string) => {
-        return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
     }
 
     return (
@@ -116,11 +103,11 @@ export function TasksWidget() {
                                     </h4>
                                     <div className="flex items-center gap-2 mt-1">
                                         <span className="text-xs text-slate-500 truncate">
-                                            {task.projects?.name}
+                                            {task.project_name}
                                         </span>
                                         <span className="text-xs text-slate-400">•</span>
                                         <span className={`text-xs px-2 py-0.5 rounded ${getStatusColor(task.status)}`}>
-                                            {formatStatus(task.status)}
+                                            {task.status}
                                         </span>
                                     </div>
                                     {task.due_date && (

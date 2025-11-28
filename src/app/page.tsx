@@ -7,6 +7,8 @@ import { useState } from 'react'
 import { ChevronDown, ChevronUp, Star, Check, ArrowRight, Shield, Clock, FileText, Zap } from 'lucide-react'
 import { LogoCarousel } from '@/components/landing/LogoCarousel'
 import { Logo } from '@/components/ui/Logo'
+import Benefits from '@/components/landing/Benefits'
+import HowItWorks from '@/components/landing/HowItWorks'
 
 // Animation variants
 const fadeIn = {
@@ -32,7 +34,7 @@ export default function Home() {
     }
 
     return (
-        <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden font-poppins bg-[#F4F6F8] text-[#333333]">
+        <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden font-poppins bg-[#F4F6F8] text-[#333333] scroll-smooth">
             {/* Header */}
             <header className="sticky top-0 z-50 w-full border-b border-[#E5E7EB] bg-[#F4F6F8]/80 backdrop-blur-md">
                 <div className="container mx-auto flex items-center justify-between whitespace-nowrap px-4 py-3">
@@ -40,10 +42,11 @@ export default function Home() {
                         <Logo />
                     </div>
                     <nav className="hidden items-center gap-8 md:flex">
-                        <a className="text-sm font-medium text-gray-600 hover:text-[#4A90E2] transition-colors" href="#features">Features</a>
-                        <a className="text-sm font-medium text-gray-600 hover:text-[#4A90E2] transition-colors" href="#pricing">Pricing</a>
-                        <a className="text-sm font-medium text-gray-600 hover:text-[#4A90E2] transition-colors" href="#testimonials">Testimonials</a>
-                        <a className="text-sm font-medium text-gray-600 hover:text-[#4A90E2] transition-colors" href="#faq">FAQ</a>
+                        <a className="text-sm font-medium text-gray-600 hover:text-[#4A90E2] transition-colors cursor-pointer" href="#benefits">Benefits</a>
+                        <a className="text-sm font-medium text-gray-600 hover:text-[#4A90E2] transition-colors cursor-pointer" href="#how-it-works">How It Works</a>
+                        <a className="text-sm font-medium text-gray-600 hover:text-[#4A90E2] transition-colors cursor-pointer" href="#features">Features</a>
+                        <a className="text-sm font-medium text-gray-600 hover:text-[#4A90E2] transition-colors cursor-pointer" href="#pricing">Pricing</a>
+                        <a className="text-sm font-medium text-gray-600 hover:text-[#4A90E2] transition-colors cursor-pointer" href="#testimonials">Testimonials</a>
                     </nav>
                     <div className="flex items-center gap-3">
                         <Link href="/login">
@@ -208,6 +211,16 @@ export default function Home() {
                         </motion.div>
                     </div>
                 </section>
+
+                {/* Benefits Section */}
+                <div id="benefits">
+                    <Benefits />
+                </div>
+
+                {/* How It Works Section */}
+                <div id="how-it-works">
+                    <HowItWorks />
+                </div>
 
                 {/* Features Section */}
                 <section id="features" className="py-24 bg-white">

@@ -11,7 +11,8 @@ import {
     BarChart3,
     HelpCircle,
     FileSignature,
-    DollarSign
+    DollarSign,
+    Calendar
 } from 'lucide-react'
 import { useEffect } from 'react'
 import { createBrowserClient } from '@/lib/supabase'
@@ -87,6 +88,14 @@ export function Sidebar() {
                     >
                         <DollarSign className={`w-5 h-5 ${isActive('/dashboard/payments') ? 'fill-current' : ''}`} />
                         <p className="text-sm font-medium">Payments</p>
+                    </Link>
+
+                    <Link
+                        href="/dashboard/calendar"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left ${isActive('/dashboard/calendar') ? 'bg-[#4A90E2]/10 text-[#4A90E2]' : 'text-gray-600 hover:bg-gray-50'}`}
+                    >
+                        <Calendar className={`w-5 h-5 ${isActive('/dashboard/calendar') ? 'fill-current' : ''}`} />
+                        <p className="text-sm font-medium">Calendar</p>
                     </Link>
 
                     <div className="px-3 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Organization</div>
