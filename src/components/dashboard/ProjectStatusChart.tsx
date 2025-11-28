@@ -7,8 +7,8 @@ interface ProjectStatusChartProps {
 }
 
 export function ProjectStatusChart({ data }: ProjectStatusChartProps) {
-    // Check if data is empty or all values are 0
-    const hasData = data && data.length > 0 && data.some(item => item.value > 0)
+    // Check if data array exists and has items (don't check for values > 0 as that's valid data)
+    const hasData = data && data.length > 0
 
     if (!hasData) {
         return (
